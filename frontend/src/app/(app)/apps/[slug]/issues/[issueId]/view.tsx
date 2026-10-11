@@ -61,11 +61,11 @@ export default function IssuePage() {
           </Link>
         ))}
         {issue.status === "resolved" && issue.last_pass_run_id && <div className="text-xs text-ok">Fixed: a later run no longer found it (run {issue.last_pass_run_id.slice(0, 8)})</div>}
-        <dl className="space-y-1 text-xs text-muted-foreground">
+        <div className="space-y-1 text-xs text-muted-foreground">
           <div>Check that failed <span className="font-mono text-foreground">{issue.check_key}</span></div>
           <div>Journey <span className="font-mono text-foreground">{issue.flow_key}</span></div>
           {(issue.requirement_keys ?? []).length > 0 && <div>Requirements: {(issue.requirement_keys ?? []).join(", ")}</div>}
-        </dl>
+        </div>
       </aside>
     </div>
   );

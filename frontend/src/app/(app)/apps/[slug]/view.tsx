@@ -18,8 +18,8 @@ export default function Overview() {
   const passRate = done.length ? Math.round((done.filter((r) => r.status === "passed").length / done.length) * 100) : null;
   const last = done[0];
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
-      <div className="space-y-6">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="min-w-0 space-y-6">
         <GettingStarted slug={slug} />
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <Metric label="Test runs" value={runs.length} info="Each run walks every journey in a test plan in a real browser." />

@@ -28,7 +28,7 @@ export default function Traceability() {
         <Metric label="Failing" value={count("covered_failing")} tone={count("covered_failing") ? "bad" : undefined} />
         <Metric label="Not tested" info="Requirements that no journey or check exercises yet." value={count("uncovered")} tone={count("uncovered") ? "bad" : undefined} />
       </div>
-      <p className="text-xs text-muted-foreground">Test plan version {data.version_id.slice(0, 8)}{data.latest_run_id && <> · results from run <Link className="text-brand hover:underline" href={`/apps/${slug}/runs/${data.latest_run_id}`}>{data.latest_run_id.slice(0, 8)}</Link></>}</p>
+      <p className="text-xs text-muted-foreground">Test plan version {data.version_id.slice(0, 8)}{data.latest_run_id && <> · results from run <Link className="text-brand underline underline-offset-2" href={`/apps/${slug}/runs/${data.latest_run_id}`}>{data.latest_run_id.slice(0, 8)}</Link></>}</p>
       <div className="space-y-3">
         {reqs.map((r) => {
           const [tone, label] = TONE[r.status] ?? ["neutral", r.status];

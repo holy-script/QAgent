@@ -99,7 +99,7 @@ export default function ReviewPlaybook() {
           <button key={x.id} onClick={() => { setSel(x.id); setDraft(null); }}
             className={cn("w-full rounded-lg border p-3 text-left text-sm transition", x.id === v.id ? "border-brand bg-brand/10" : "border-border hover:bg-foreground/5")}>
             <div className="flex items-center justify-between"><span>Version {x.version_no}</span>{x.id === pb.current_version_id && <Badge tone="ok">in use</Badge>}</div>
-            <div className="mt-0.5 text-xs text-muted-foreground">{ago(x.created_at)} · {x.content_hash.slice(0, 7)}</div>
+            <div className="mt-0.5 text-xs text-foreground/70">{ago(x.created_at)} · {x.content_hash.slice(0, 7)}</div>
           </button>
         ))}
       </aside>

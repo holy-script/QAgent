@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LogOut, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { REQUIRE_LOGIN, auth } from "@/lib/api/auth";
 import { cn } from "@/lib/utils";
 
@@ -16,7 +16,7 @@ export function UserMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger aria-label="Account" className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}><User className="size-4" /></DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel className="truncate font-normal text-muted-foreground">{session.email}</DropdownMenuLabel>
+        <DropdownMenuGroup><DropdownMenuLabel className="truncate font-normal text-muted-foreground">{session.email}</DropdownMenuLabel></DropdownMenuGroup>
         <DropdownMenuItem onClick={async () => { await auth.logout(); qc.clear(); router.replace("/login"); }}><LogOut className="size-4" />Sign out</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

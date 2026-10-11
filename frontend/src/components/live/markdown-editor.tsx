@@ -7,13 +7,12 @@ import { Decoration, EditorView, MatchDecorator, ViewPlugin, ViewUpdate } from "
 import { tags as t } from "@lezer/highlight";
 import CodeMirror from "@uiw/react-codemirror";
 import { useMemo } from "react";
-import { useTheme } from "@/lib/theme";
 
 // Colours come from the theme tokens, so the editor follows light and dark mode without its own palette.
 const highlight = HighlightStyle.define([
   { tag: t.heading1, color: "var(--brand)", fontWeight: "700", fontSize: "1.1em" },
   { tag: t.heading2, color: "var(--brand)", fontWeight: "700" },
-  { tag: t.heading3, color: "var(--primary)", fontWeight: "600" },
+  { tag: t.heading3, color: "var(--primary-text)", fontWeight: "600" },
   { tag: t.heading4, color: "var(--violet)", fontWeight: "600" },
   { tag: [t.strong], fontWeight: "700" },
   { tag: [t.emphasis], fontStyle: "italic" },
@@ -46,7 +45,13 @@ const marks = new MatchDecorator({
 });
 const playbookMarks = ViewPlugin.fromClass(class {
   decorations;
-  constructor(view: EditorView) { this.decorations = marks.createDeco(view); }
+  constructor(view: EditorView) {
+    this.decorations = marks.createDeco(view);
+    // The scrolling area must be reachable with the keyboard (it can overflow).
+    view.scrollDOM.tabIndex = 0;
+    view.scrollDOM.setAttribute("role", "region");
+    view.scrollDOM.setAttribute("aria-label", "Test plan text, scrollable");
+  }
   update(u: ViewUpdate) { this.decorations = marks.updateDeco(u, this.decorations); }
 }, { decorations: (v) => v.decorations });
 
@@ -85,7 +90,6 @@ function problemLinter(problems: Problem[]): Extension {
 export function MarkdownEditor({ value, onChange, problems = [], readOnly = false, minHeight = "22rem", maxHeight = "34rem", label = "Test plan text" }: {
   value: string; onChange?: (v: string) => void; problems?: Problem[]; readOnly?: boolean; minHeight?: string; maxHeight?: string; label?: string;
 }) {
-  const { resolvedTheme } = useTheme();
   const extensions = useMemo(() => [
     markdown(), syntaxHighlighting(highlight), theme, playbookMarks, EditorView.lineWrapping,
     lintGutter(), problemLinter(problems),
@@ -93,6 +97,6 @@ export function MarkdownEditor({ value, onChange, problems = [], readOnly = fals
   ], [problems, label]);
   return (
     <CodeMirror value={value} onChange={onChange} extensions={extensions} readOnly={readOnly} editable={!readOnly}
-      theme={resolvedTheme} minHeight={minHeight} maxHeight={maxHeight} basicSetup={{ foldGutter: false, highlightActiveLine: !readOnly, lineNumbers: true }} />
+      theme="none" minHeight={minHeight} maxHeight={maxHeight} basicSetup={{ foldGutter: false, highlightActiveLine: !readOnly, lineNumbers: true }} />
   );
 }
