@@ -10,7 +10,8 @@ QAgent is an intelligent, high-speed automated QA agent that tests web applicati
 - **Frontend Dashboard**: Next.js App Router with `@xyflow/react` visualizing execution flowcharts in real time.
 
 ## Quickstart
-1. Ensure `backend/.env` contains your `JEV_API_TOKEN` and `BEDROCK_API_KEY`.
+1. Review the full architecture in [DUAL_CODER_PLAN.md](file:///Users/holyscript/Desktop/projects/QAgent/DUAL_CODER_PLAN.md) and current milestones in [PROGRESS.md](file:///Users/holyscript/Desktop/projects/QAgent/PROGRESS.md).
+2. Ensure `backend/.env` contains your `JEV_API_TOKEN` and `BEDROCK_API_KEY`.
 2. Run health preflight:
    ```bash
    make doctor
