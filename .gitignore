@@ -1,0 +1,42 @@
+# Environment & Keys
+.env
+*.env
+backend/.env
+frontend/.env.local
+frontend/.env
+
+# Python / uv
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+dist/
+build/
+*.egg-info/
+
+# Node / Next.js
+node_modules/
+frontend/.next/
+frontend/out/
+
+# Playwright & Browser Artifacts
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# JevFlow Runs & Tapes
+runs/
+*.sqlite
+*.sqlite3
+*.db
+
+# macOS & Editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
