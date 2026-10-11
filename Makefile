@@ -1,4 +1,9 @@
-.PHONY: setup doctor dev test bench clean
+.PHONY: setup doctor dev test bench migrate clean
+
+migrate:
+	@echo "Running database migrations..."
+	cd backend && uv run alembic upgrade head
+
 
 setup:
 	@echo "Setting up Python environments..."
