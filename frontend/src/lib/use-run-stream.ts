@@ -1,0 +1,61 @@
+"use client";
+import { useEffect, useRef, useState } from "react";
+import { API_URL, USE_MOCK, api } from "./api/client";
+import type { Run, RunEvent } from "./api/types";
+import { emptyView, reduce, type RunView } from "./run-state";
+
+export const SPEEDS = [1, 2, 4, 10] as const;
+
+/**
+ * Feeds a RunView from the event log. Mock mode replays the scripted log on a timer (pausable, variable speed);
+ * real mode subscribes to /runs/{id}/events via EventSource (the browser resends Last-Event-ID on reconnect).
+ * Mount it with `key={run.id + replay}`: a new key is a fresh stream, so no reset logic is needed here.
+ * `animate` forces the timed path for runs that already finished (the Replay button).
+ */
+export function useRunStream(run: Run, animate: boolean) {
+  const instant = USE_MOCK && !animate && run.status !== "running" && run.status !== "queued";
+  const [view, setView] = useState<RunView>(() => (instant ? api.mockEvents(run).reduce((v, e) => reduce(v, e.event), emptyView) : emptyView));
+  const total = USE_MOCK ? api.mockEvents(run).length : 0;
+  const [done, setDone] = useState(instant ? total : 0);
+  const [speed, setSpeedState] = useState<number>(4);
+  const [paused, setPaused] = useState(false);
+  const speedRef = useRef(4), pausedRef = useRef(false);
+  const kick = useRef<() => void>(() => {});
+
+  useEffect(() => {
+    if (instant) return;
+    if (!USE_MOCK) {
+      const es = new EventSource(`${API_URL}/runs/${run.id}/events`);
+      es.onmessage = (m) => setView((v) => reduce(v, JSON.parse(m.data) as RunEvent));
+      es.onerror = () => es.readyState === EventSource.CLOSED && es.close();
+      return () => es.close();
+    }
+    const events = api.mockEvents(run);
+    let i = 0, timer: ReturnType<typeof setTimeout> | undefined, dead = false;
+    const step = () => {
+      if (dead || pausedRef.current || i >= events.length) return;
+      const batch = [events[i++]];
+      while (i < events.length && events[i].ts === batch[0].ts) batch.push(events[i++]);
+      setView((v) => batch.reduce((acc, e) => reduce(acc, e.event), v));
+      setDone(i);
+      const last = batch[batch.length - 1].event;
+      if (last.type === "run.finished") api.mockFinish(run.id, { status: last.payload.status, totals: last.payload.totals, finished_at: last.payload.finished_at });
+      if (i < events.length) timer = setTimeout(step, Math.max(16, (events[i].ts - batch[0].ts) / speedRef.current));
+    };
+    kick.current = () => { clearTimeout(timer); step(); };
+    timer = setTimeout(step, 0);
+    return () => { dead = true; clearTimeout(timer); };
+    // run.id, not run: a refetched Run object must not restart the stream.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [run.id, instant]);
+
+  return {
+    view, speed, paused, progress: { i: done, n: total },
+    setSpeed: (s: number) => { speedRef.current = s; setSpeedState(s); },
+    togglePause: () => {
+      pausedRef.current = !pausedRef.current;
+      setPaused(pausedRef.current);
+      if (!pausedRef.current) kick.current();
+    },
+  };
+}

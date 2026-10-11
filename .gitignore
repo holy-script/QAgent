@@ -30,6 +30,7 @@ playwright/.cache/
 
 # JevFlow Runs & Tapes
 runs/
+!frontend/src/**/runs/
 *.sqlite
 *.sqlite3
 *.db

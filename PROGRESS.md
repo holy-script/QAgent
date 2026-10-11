@@ -77,3 +77,20 @@
 ### [ ] Phase 10 — Tests + bench (~15 min)
 - [ ] **10a.** pytest: `JevDecider` (fixture+retry), gate logic, extractor, playbook
 - [ ] **10b.** `make bench` script: p50/p95 Jev latency, cost/step, accuracy at 10/20/40 candidates
+
+---
+
+## Coder 2 — Frontend (`fe` branch)
+Runs on fixtures with no backend; set `NEXT_PUBLIC_API_URL` to switch to the real API. `npm run gen:api` regenerates types from the OpenAPI schema once B0 lands (hand-written stand-ins live in `frontend/src/lib/api/types.ts`).
+
+- [x] **F0** Tailwind tokens, typed API client (`lib/api/`), app shell, TanStack Query
+- [x] **F1** Home, `/apps/new`, app layout (tabs + live-run banner), Overview with run launcher
+- [x] **F2** Playbooks list, upload, review screen (inline parse errors, edit → new version, history, confirm)
+- [x] **F3** Run page: flow rows with screenshot strips, `@xyflow/react` Graph tab, step drawer; pause/speed/replay on the mock SSE stream
+- [x] **F4** Network, Trace, Logs, Findings tabs
+- [x] **F5** Runs history, Flows + flow history, Settings
+- [ ] **F6** Real API switch — client paths are guessed in `lib/api/client.ts`; reconcile with B0/B7 (event envelope, route names)
+- [x] **F7** Compare view (two finished runs, per-metric bars)
+- [ ] **F8** Replay tape editor / normalize diff (P2)
+
+Deep link: `/apps/<slug>/runs/<id>?tab=graph&step=checkout:3`.
