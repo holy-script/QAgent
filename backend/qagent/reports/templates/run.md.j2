@@ -1,0 +1,55 @@
+# Run report {{ c.run.id }}
+
+- Status: {{ c.run.status }} ({{ c.run.mode }}, {{ c.run.trigger }})
+- Duration: {{ (c.summary.duration_ms / 1000) | round(1) }}s, cost ${{ c.summary.cost_usd | round(4) }}
+- Findings: {{ c.summary.total_findings }}; issues: {{ c.summary.issues.new }} new, {{ c.summary.issues.recurring }} recurring, {{ c.summary.issues.regressed }} regressed, {{ c.summary.issues.resolved }} resolved
+- Playbook hash: {{ c.integrity.playbook_hash }}; manifest hash: {{ c.integrity.manifest_hash }}
+
+## Flows
+{% for f in c.summary.flows %}
+- {{ f.flow_key }}: {{ f.status }} ({{ f.step_count }} steps, {{ (f.duration_ms / 1000) | round(1) }}s, {{ f.findings }} findings){% if f.failure_reason %} - {{ f.failure_reason }}{% endif %}
+
+{% endfor %}
+
+## Requirements coverage
+{% for r in c.requirements %}
+- {{ r.key }} {{ r.title }}: {{ r.status }}{% if r.finding_ids %} ({{ r.finding_ids | length }} findings){% endif %}
+
+{% endfor %}
+
+## Findings by category
+{% for cat, items in c.findings_by_category.items() %}
+### {{ cat }}
+{% for f in items %}
+- [{{ f.severity }}] {{ f.title }} ({{ f.flow }}, step {{ f.step_seq }}){% if f.judged_by != "code" %} judged by {{ f.judged_by }}{% endif %}
+
+{% endfor %}
+{% endfor %}
+
+## Performance
+{% for n in c.performance.slowest_api_calls %}
+- {{ n.method }} {{ n.url }}: {{ n.duration_ms }}ms (HTTP {{ n.status }})
+{% endfor %}
+{% for w in c.performance.longest_waits %}
+- Wait in {{ w.flow }} step {{ w.step_seq }}: {{ w.settle_ms }}ms
+{% endfor %}
+
+## Recommendations
+{% if c.recommendations %}
+{% for r in c.recommendations %}
+- [{{ r.category }}, {{ r.confidence }} confidence, effort {{ r.effort }}] {{ r.text }}
+  Why: {{ r.rationale }} (findings: {{ r.evidence_finding_ids | join(", ") }})
+{% endfor %}
+{% else %}
+Recommendations: {{ c.recommendations_status }}.
+{% endif %}
+
+## Test-quality notes
+- Escalations to Claude: {{ c.test_quality.escalations }}
+- Low-confidence decisions: {{ c.test_quality.low_confidence_decisions | length }}
+- Judged findings: {{ c.test_quality.judged_findings }}; checks run: {{ c.test_quality.checks_run }}
+
+## Appendix
+{% for b in c.appendix.bug_reports %}
+- Bug report {{ b.report_id }} for issue {{ b.issue_id }}
+{% endfor %}

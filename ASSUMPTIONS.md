@@ -29,7 +29,7 @@ Synthetic step "Click Pay now" with one correct candidate among N, live APIs.
 
 | Decider | Candidates | p50 ms | p95 ms | $/step | Accuracy |
 |---|---|---|---|---|---|
-| Jev (`jev-latest`) | 10 | 349 | 452 | 0 (output tokens free; input pricing unpublished) | 1.00 |
+| Jev (`jev-1.13.0`) | 10 | 349 | 452 | 0 (output tokens free; input pricing unpublished) | 1.00 |
 | Jev | 20 | 313 | 404 | 0 | 1.00 |
 | Jev | 40 | 354 | 527 | 0 | 1.00 |
 | Claude (Sonnet 4 via Bedrock) | 10 | 2272 | 4485 | 0.0033 | 1.00 |
@@ -37,5 +37,5 @@ Synthetic step "Click Pay now" with one correct candidate among N, live APIs.
 | Claude | 40 | 2330 | 3188 | 0.0048 | 1.00 |
 
 - Jev is ~6-7x faster and latency is flat from 10 to 40 candidates; Claude cost grows with candidate count.
-- The Jev API contract is `POST /v1/systemone` with `state` + named `questions` (a `choice` question here). The model alias is `jev-latest`; `jev-1.13.0` does not exist.
+- The Jev API contract is `POST /v1/systemone` with `state` + named `questions` (a `choice` question here). Models: aliases `jev-latest` / `jev-preview` (from `GET /v1/models`) currently both resolve to the concrete version `jev-1.13.0`, which is also accepted directly; pin the concrete version.
 - Replay matches calls by a hash of (step, intent, url, candidates); a page whose element positions change between runs will miss the tape.

@@ -1,10 +1,12 @@
 import asyncio
+import base64
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import httpx
 
 from qagent.config import settings
+from qagent.decision.fewshot import example_ids, render_examples
 from qagent.domain.schemas import ConfidenceTier, DecisionRequest, DecisionResult
 
 # Sonnet-class list pricing, USD per million tokens.
@@ -40,13 +42,18 @@ class BedrockClient:
     def url(self) -> str:
         return f"https://bedrock-runtime.{self.region}.amazonaws.com/model/{self.model_id}/converse"
 
-    async def converse_tool(self, system: str, user: str, tool: Dict[str, Any], max_tokens: int = 512) -> Dict[str, Any]:
+    async def converse_tool(self, system: str, user: str, tool: Dict[str, Any], max_tokens: int = 512,
+                            images: Optional[List[bytes]] = None) -> Dict[str, Any]:
         """Calls the model with `tool` forced; returns {"input": tool_args, "usage": {...}}."""
         if not self.api_key:
             raise RuntimeError("BEDROCK_API_KEY is not set")
         body = {
             "system": [{"text": system}],
-            "messages": [{"role": "user", "content": [{"text": user}]}],
+            "messages": [{"role": "user", "content": [
+                *({"image": {"format": "jpeg", "source": {"bytes": base64.b64encode(img).decode()}}}
+                  for img in (images or [])),
+                {"text": user},
+            ]}],
             "inferenceConfig": {"maxTokens": max_tokens, "temperature": 0.0},
             "toolConfig": {"tools": [tool], "toolChoice": {"tool": {"name": tool["toolSpec"]["name"]}}},
         }
@@ -86,6 +93,10 @@ class ClaudeDecider:
         )
         system = ("You drive a web browser for QA testing. Choose the one candidate that performs the test step. "
                   "Be honest about confidence: lower it when several candidates fit or none does.")
+        if request.hints:
+            system += "\n\nKnown traps in this app:\n" + "\n".join(f"- {h}" for h in request.hints)
+        if request.examples:
+            system += "\n\nHow to reason about tricky situations:\n" + render_examples(request.examples)
 
         started = time.perf_counter()
         out = await self.client.converse_tool(system, user, CHOOSE_TOOL)
@@ -118,4 +129,5 @@ class ClaudeDecider:
             input_tokens=in_tok,
             output_tokens=out_tok,
             cost_usd=in_tok * INPUT_USD_PER_M / 1e6 + out_tok * OUTPUT_USD_PER_M / 1e6,
+            few_shot_ids=example_ids(request.examples),
         )

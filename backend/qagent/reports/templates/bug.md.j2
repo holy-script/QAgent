@@ -1,0 +1,54 @@
+# {{ c.title }}
+
+- Status: {{ c.status }}
+- Severity: {{ c.severity }}{% if c.judged_by != "code" %} (judged by {{ c.judged_by }}, capped at medium){% endif %}
+
+- Priority: {{ c.priority }}
+- Seen in {{ c.reproducibility.seen_in }} of the last {{ c.reproducibility.of_last }} runs (first seen in run {{ c.reproducibility.first_seen_run_id }}, last seen in run {{ c.reproducibility.last_seen_run_id }})
+
+## Violated requirements
+{% for r in c.violated_requirements %}
+- {{ r.key }}: {{ r.title }} ({{ r.prd_ref }}) - {{ r.acceptance }}
+{% else %}
+- None linked to this check
+{% endfor %}
+
+## Environment
+{% for k, v in c.environment.items() %}
+- {{ k }}: {{ v }}
+{% endfor %}
+
+## Steps to reproduce
+{% for s in c.steps_to_reproduce %}
+{{ s }}
+{% endfor %}
+
+## Expected vs actual
+- Check: {{ c.expected_actual.check_key }}
+- Expected: {{ c.expected_actual.expected }}
+- Actual: {{ c.expected_actual.actual }}
+{% for i in c.expected_actual.inputs %}
+- Input {{ i.name }} = {{ i.value }}{% if i.source %} (from {{ i.source }}{% if i.url %}, {{ i.url }}{% endif %}){% endif %}
+
+{% endfor %}
+
+## Evidence
+{% for n in c.evidence.network_calls %}
+- Network call {{ n.method }} {{ n.url }} returned {{ n.status }} [{{ n.evidence_id }}]
+{% if n.response_excerpt %}
+  Response excerpt: {{ n.response_excerpt }}
+{% endif %}
+{% endfor %}
+{% for e in c.evidence["items"] if e.kind in ["annotated", "screenshot_before", "screenshot_after", "trace", "console"] %}
+- {{ e.kind }}: {{ e.ref_id }} [{{ e.id }}]
+{% endfor %}
+- Run viewer: {{ c.evidence.run_link }}
+
+## Impact
+{{ c.narrative.impact or "Not generated." }}
+
+## Suspected cause (hypothesis)
+{{ c.narrative.suspected_cause or "Not generated." }}
+
+---
+Run {{ c.integrity.run_id }}, playbook version {{ c.integrity.playbook_version_id }}

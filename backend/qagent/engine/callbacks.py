@@ -17,12 +17,20 @@ class SpanCallbackHandler(AsyncCallbackHandler):
     flow -> {observe, decide -> model:<decider>, gate, escalate, act, settle, verify}.
     """
 
+    run_inline = True  # await callbacks in order, so every span event is emitted before the graph returns
+
     def __init__(self, sink: PersistenceSink, trace_id: str, flow_span: Span, flow_key: str):
         self.sink = sink
         self.trace_id = trace_id
         self.flow_span = flow_span
         self.flow_key = flow_key
         self._open: Dict[UUID, Span] = {}
+
+    @property
+    def current_span_id(self) -> str:
+        """Span id of the innermost open node (used as the traceparent parent id)."""
+        node = [sp for sp in self._open.values() if sp.kind == "node"]
+        return (node[-1] if node else self.flow_span).span_id
 
     def _kind(self, name: Optional[str]) -> Optional[str]:
         if name in TRACED_NODES:

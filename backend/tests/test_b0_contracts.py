@@ -20,7 +20,7 @@ async def test_dev_events():
         assert response.status_code == 200
         events = response.json()
         assert len(events) >= 10
-        assert events[0]["type"] == "RUN_STARTED"
+        assert events[0]["type"] == "run.started"
 
 
 @pytest.mark.asyncio

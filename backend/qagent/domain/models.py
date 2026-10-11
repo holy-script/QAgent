@@ -24,6 +24,7 @@ class App(SQLModel, table=True):
     description: Optional[str] = None
     prd_markdown: Optional[str] = None
     default_mode: str = "hybrid"
+    reset_path: Optional[str] = None  # POST here before each flow to reset the target app's state
     gate_overrides: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     redact_keys: List[str] = Field(default_factory=list, sa_column=Column(JSON))
     created_at: datetime = Field(default_factory=utc_now)
@@ -66,6 +67,7 @@ class Run(SQLModel, table=True):
     started_at: Optional[datetime] = None
     finished_at: Optional[datetime] = None
     totals: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    environment: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
 
 
 class FlowRun(SQLModel, table=True):
@@ -74,6 +76,7 @@ class FlowRun(SQLModel, table=True):
     id: str = Field(default_factory=gen_uuid, primary_key=True)
     run_id: str = Field(index=True)
     flow_key: str = Field(index=True)
+    variant_of: Optional[str] = None
     status: str = "pending"
     step_count: int = 0
     duration_ms: float = 0.0
@@ -89,6 +92,7 @@ class Step(SQLModel, table=True):
     intent: str
     action_id: int
     action_label: str
+    target_bbox: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     page_tag: str
     url: str
     status: str = "pending"
@@ -124,6 +128,7 @@ class Decision(SQLModel, table=True):
     input_tokens: int = 0
     output_tokens: int = 0
     input_hash: str = ""
+    few_shot_ids: List[str] = Field(default_factory=list, sa_column=Column(JSON))
     request: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     response: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
 
@@ -133,12 +138,19 @@ class FindingRecord(SQLModel, table=True):
 
     id: str = Field(default_factory=gen_uuid, primary_key=True)
     flow_run_id: str = Field(index=True)
+    run_id: Optional[str] = Field(default=None, index=True)
     step_seq: int
+    check_result_id: Optional[str] = None
+    check_key: str = ""
     severity: str
     kind: str
     title: str
     expected: str
     actual: str
+    requirement_keys: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    fingerprint: str = Field(default="", index=True)
+    issue_id: Optional[str] = Field(default=None, index=True)
+    judged_by: str = "code"
     evidence: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
 
 
@@ -155,6 +167,7 @@ class NetworkCallRecord(SQLModel, table=True):
     req_size: int = 0
     resp_size: int = 0
     is_api: bool = False
+    traceparent: Optional[str] = None
     req_artifact_id: Optional[str] = None
     resp_artifact_id: Optional[str] = None
 
@@ -211,3 +224,105 @@ class EventRecord(SQLModel, table=True):
     type: str
     payload: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     ts: datetime = Field(default_factory=utc_now)
+
+
+class PlaybookItem(SQLModel, table=True):
+    __tablename__ = "playbook_items"
+
+    id: str = Field(default_factory=gen_uuid, primary_key=True)
+    version_id: str = Field(index=True)
+    item_key: str = Field(index=True)  # REQ-1, F-1, UX-2, G-1, EC-1, RX-1, or a flow key
+    category: str
+    title: str = ""
+    body: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    content_hash: str = ""
+
+
+class ItemLink(SQLModel, table=True):
+    __tablename__ = "item_links"
+
+    id: str = Field(default_factory=gen_uuid, primary_key=True)
+    version_id: str = Field(index=True)
+    from_key: str
+    to_key: str = Field(index=True)
+    relation: str  # covers, verifies, checks, applies_to
+
+
+class CheckResult(SQLModel, table=True):
+    __tablename__ = "check_results"
+
+    id: str = Field(default_factory=gen_uuid, primary_key=True)
+    run_id: str = Field(index=True)
+    flow_run_id: str = Field(index=True)
+    step_seq: int
+    check_key: str = Field(index=True)  # F-1, UX-2, expect:add-to-cart:1, EC-3, network:POST /api/pay
+    kind: str  # formula, ux_rule, ux_judged, expectation, network, timing
+    passed: bool
+    expected: str = ""
+    actual: str = ""
+    inputs: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    judged_by: str = "code"  # code, jev, claude
+    confidence: Optional[float] = None
+    created_at: datetime = Field(default_factory=utc_now)
+
+
+class EvidenceLink(SQLModel, table=True):
+    __tablename__ = "evidence_links"
+
+    id: str = Field(default_factory=gen_uuid, primary_key=True)
+    finding_id: str = Field(index=True)
+    kind: str  # screenshot_before, screenshot_after, annotated, wait_frame, dom, network_call, console, span, decision, trace
+    ref_id: str  # object key, call id, step id or span id depending on kind
+    note: str = ""
+
+
+class Issue(SQLModel, table=True):
+    __tablename__ = "issues"
+
+    id: str = Field(default_factory=gen_uuid, primary_key=True)
+    app_id: str = Field(index=True)
+    fingerprint: str = Field(index=True)
+    title: str
+    severity: str
+    status: str = "open"  # open, resolved, regressed
+    kind: str = ""
+    check_key: str = ""
+    flow_key: str = ""
+    requirement_keys: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    first_seen_run_id: Optional[str] = None
+    last_seen_run_id: Optional[str] = None
+    last_pass_run_id: Optional[str] = None
+    occurrences: int = 1
+    created_at: datetime = Field(default_factory=utc_now)
+    updated_at: datetime = Field(default_factory=utc_now)
+
+
+class Report(SQLModel, table=True):
+    __tablename__ = "reports"
+
+    id: str = Field(default_factory=gen_uuid, primary_key=True)
+    app_id: str = Field(index=True)
+    run_id: Optional[str] = Field(default=None, index=True)
+    kind: str  # run, bug
+    issue_id: Optional[str] = Field(default=None, index=True)
+    status: str = "generating"  # generating, ready, failed
+    content: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    markdown_artifact_id: Optional[str] = None
+    html_artifact_id: Optional[str] = None
+    pdf_artifact_id: Optional[str] = None
+    model_version: Optional[str] = None
+    generated_at: Optional[datetime] = None
+
+
+class Recommendation(SQLModel, table=True):
+    __tablename__ = "recommendations"
+
+    id: str = Field(default_factory=gen_uuid, primary_key=True)
+    report_id: str = Field(index=True)
+    category: str  # functional, ux, performance, accessibility, test_coverage
+    text: str
+    rationale: str = ""
+    evidence_finding_ids: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    requirement_keys: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    confidence: str = "medium"  # high, medium, low
+    effort: str = "m"  # s, m, l

@@ -9,7 +9,10 @@ from qagent.domain.events import EventEnvelope
 from qagent.domain.models import EventRecord, Run
 from qagent.runs.manager import RunManager
 
-TERMINAL = {"RUN_FINISHED", "RUN_ERROR"}
+def is_terminal(event_type: str, payload: dict) -> bool:
+    """The stream ends with the run's report (or an error); RUN_FINISHED is followed by report events."""
+    return event_type in ("error", "report.failed") or (
+        event_type == "report.ready" and payload.get("kind") == "run")
 
 
 def _sse(seq: int, type_: str, data: dict) -> dict:
@@ -48,7 +51,7 @@ async def stream_run_events(
         for row in rows:
             last = row.seq
             yield _sse(row.seq, row.type, _record_to_dict(row))
-            if row.type in TERMINAL:
+            if is_terminal(row.type, row.payload or {}):
                 return
 
         if queue is None:
@@ -65,7 +68,7 @@ async def stream_run_events(
                 continue
             last = env.seq
             yield _sse(env.seq, env.type.value, env.model_dump(mode="json"))
-            if env.type.value in TERMINAL:
+            if is_terminal(env.type.value, env.payload):
                 return
     finally:
         if queue is not None:

@@ -6,7 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from qagent.domain.events import EventEnvelope, QAgentEventType
 from qagent.domain.models import (
+    CheckResult,
     Decision,
+    EvidenceLink,
     EventRecord,
     FindingRecord,
     FlowRun,
@@ -86,6 +88,7 @@ class PersistenceSink:
                 session.add(run)
             run.status = "running"
             run.started_at = run.started_at or now
+            run.environment = p.get("environment", {})
 
         elif t == QAgentEventType.RUN_FINISHED:
             run = await session.get(Run, self.run_id)
@@ -93,6 +96,7 @@ class PersistenceSink:
                 run.status = p.get("status", "passed")
                 run.finished_at = now
                 run.totals = p.get("totals", {})
+                run.environment = {**(run.environment or {}), **p.get("environment", {})}
 
         elif t == QAgentEventType.RUN_ERROR:
             run = await session.get(Run, self.run_id)
@@ -102,7 +106,8 @@ class PersistenceSink:
 
         elif t == QAgentEventType.FLOW_STARTED:
             session.add(FlowRun(
-                id=p["flow_run_id"], run_id=self.run_id, flow_key=p["flow_key"], status="running"
+                id=p["flow_run_id"], run_id=self.run_id, flow_key=p["flow_key"],
+                variant_of=p.get("variant_of"), status="running"
             ))
 
         elif t == QAgentEventType.FLOW_FINISHED:
@@ -125,9 +130,9 @@ class PersistenceSink:
                 step_id=p["step_id"], decider=p["decider"], model_version=p.get("model_version", ""),
                 question=p.get("question", ""), choice=p["selected_action_id"],
                 probabilities={str(k): v for k, v in p.get("probabilities", {}).items()},
-                confidence=p["confidence"], branch=p.get("tier", "AUTO"), latency_ms=p.get("latency_ms", 0.0),
+                confidence=p["confidence"], branch=p.get("branch") or p.get("tier", "AUTO"), latency_ms=p.get("latency_ms", 0.0),
                 input_tokens=p.get("input_tokens", 0), output_tokens=p.get("output_tokens", 0),
-                input_hash=p.get("input_hash", ""),
+                input_hash=p.get("input_hash", ""), few_shot_ids=p.get("few_shot_ids", []),
                 request=p.get("request", {}), response=p.get("response", {}),
             ))
 
@@ -136,6 +141,7 @@ class PersistenceSink:
             if step:
                 step.action_id = p.get("action_id") or 0
                 step.action_label = p.get("action_label", "")
+                step.target_bbox = p.get("target_bbox")
                 step.status = "running" if p.get("status") == "success" else "failed"
 
         elif t == QAgentEventType.VERIFICATION_STEP:
@@ -157,14 +163,28 @@ class PersistenceSink:
                 id=p["call_id"], flow_run_id=p["flow_run_id"], step_seq=p["step_seq"], method=p["method"],
                 url=p["url"], status=p["status"], duration_ms=p["duration_ms"], req_size=p.get("req_size", 0),
                 resp_size=p.get("resp_size", 0), is_api=p.get("is_api", False),
+                traceparent=p.get("traceparent"),
+            ))
+
+        elif t == QAgentEventType.CHECK_RESULT:
+            session.add(CheckResult(
+                id=p["check_id"], run_id=self.run_id, flow_run_id=p["flow_run_id"], step_seq=p["step_seq"],
+                check_key=p["check_key"], kind=p["kind"], passed=bool(p["pass"]), expected=p.get("expected", ""),
+                actual=p.get("actual", ""), inputs=p.get("inputs", {}), judged_by=p.get("judged_by", "code"),
+                confidence=p.get("confidence"), created_at=now,
             ))
 
         elif t == QAgentEventType.FINDING_DISCOVERED:
             session.add(FindingRecord(
-                id=p["id"], flow_run_id=p["flow_run_id"], step_seq=p["step_seq"], severity=p["severity"],
-                kind=p["kind"], title=p["title"], expected=p["expected"], actual=p["actual"],
-                evidence=p.get("evidence", {}),
+                id=p["id"], flow_run_id=p["flow_run_id"], run_id=p.get("run_id", self.run_id),
+                step_seq=p["step_seq"], check_result_id=p.get("check_result_id"), check_key=p.get("check_key", ""),
+                severity=p["severity"], kind=p["kind"], title=p["title"], expected=p["expected"], actual=p["actual"],
+                requirement_keys=p.get("requirement_keys", []), fingerprint=p.get("fingerprint", ""),
+                judged_by=p.get("judged_by", "code"), evidence=p.get("evidence", {}),
             ))
+            for link in p.get("evidence_links", []):
+                session.add(EvidenceLink(finding_id=p["id"], kind=link["kind"], ref_id=link["ref_id"],
+                                         note=link.get("note", "")))
 
         elif t == QAgentEventType.LOG_EMITTED:
             session.add(LogEntryRecord(

@@ -35,29 +35,35 @@ class JevDecider:
             # Fallback if no API key present in test environments
             return self._fallback_decision(request)
 
-        # TypeSafe System One API: `state` is the content, `questions` are named; a "choice"
-        # question returns the chosen criteria key, a confidence and per-choice probabilities.
-        payload = {
-            "model": self.model,
-            "state": {
-                "test_step": request.intent,
-                "page_url": request.url,
-                "page_summary": request.page_summary or "",
-                "previous_steps": [
-                    f"{h.get('intent')} -> {h.get('action')}" for h in request.history[-3:]
-                ],
-            },
-            "questions": {
-                "action": {
-                    "type": "choice",
-                    "instructions": "Which page element performs the test step?",
-                    "criteria": {
-                        str(c.id): f"<{c.tag}> {c.label} (action: {c.action_type})"
-                        for c in request.candidates
-                    },
-                }
-            },
+        # TypeSafe System One API: one request carries several named questions over the same state.
+        #   next_action  (choice)  which element performs the step, or STEP_DONE / STUCK
+        #   risky        (noul)    would the step do harm beyond the test
+        #   prev_step_ok (noul)    did the previous step reach its goal (only when there is one)
+        criteria: Dict[str, str] = {
+            str(c.id): f"<{c.tag}> {c.label} (action: {c.action_type})" for c in request.candidates
         }
+        criteria["STEP_DONE"] = "The page already satisfies this step's goal; nothing needs to be clicked"
+        criteria["STUCK"] = "No available element performs this step"
+        questions: Dict[str, Any] = {
+            "next_action": {"type": "choice",
+                            "instructions": "Which page element performs the test step?", "criteria": criteria},
+            "risky": {"type": "noul",
+                      "instructions": "This is a disposable test environment. Would performing the step cause "
+                                      "harm beyond what the test step itself describes?"},
+        }
+        if request.history:
+            questions["prev_step_ok"] = {"type": "noul",
+                                         "instructions": "Did the previous step achieve its goal, judging by "
+                                                         "the current page?"}
+        state: Dict[str, Any] = {
+            "test_step": request.intent,
+            "page_url": request.url,
+            "page_summary": request.page_summary or "",
+            "previous_steps": [f"{h.get('intent')} -> {h.get('status')}" for h in request.history[-3:]],
+        }
+        if request.hints:
+            state["known_trap"] = request.hints[0][:120]  # one line only, never the full gotcha list
+        payload = {"model": self.model, "state": state, "questions": questions}
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
@@ -73,13 +79,23 @@ class JevDecider:
 
         latency_ms = (time.perf_counter() - start_time) * 1000.0
 
-        answer = response_data["answers"]["action"]
+        answers = response_data["answers"]
+        answer = answers["next_action"]
         valid = {c.id for c in request.candidates}
-        choice = int(answer["choice"])
+        raw_choice = str(answer["choice"])
+        outcome, choice = "act", 0
+        if raw_choice == "STEP_DONE":
+            outcome = "done"
+        elif raw_choice == "STUCK":
+            outcome = "stuck"
+        elif raw_choice.isdigit() and int(raw_choice) in valid:
+            choice = int(raw_choice)
+        else:
+            outcome = "stuck"
         confidence = float(answer.get("confidence", 0.0))
-        if choice not in valid:
-            choice, confidence = (request.candidates[0].id if request.candidates else 0), 0.0
-        probs = {int(k): float(v) for k, v in answer.get("probabilities", {}).items() if int(k) in valid}
+        special = {"STEP_DONE": -1, "STUCK": -2}
+        probs = {special.get(k, int(k) if k.isdigit() else -3): float(v)
+                 for k, v in answer.get("probabilities", {}).items()}
         usage = response_data.get("usage", {})
 
         tier = ConfidenceTier.AUTO
@@ -100,6 +116,9 @@ class JevDecider:
             input_tokens=usage.get("input_tokens", 0),
             output_tokens=usage.get("output_tokens", 0),
             cost_usd=0.0,  # TypeSafe does not publish per-token pricing; output tokens are free
+            outcome=outcome,
+            risky=answers.get("risky", {}).get("noul"),
+            prev_step_ok=answers.get("prev_step_ok", {}).get("noul"),
         )
 
     async def _post_with_retry(self, url: str, headers: Dict[str, str], json: Dict[str, Any]) -> Dict[str, Any]:

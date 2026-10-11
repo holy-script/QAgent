@@ -1,3 +1,4 @@
+import asyncio
 import time
 from typing import Any, Dict, List, Optional
 
@@ -9,12 +10,14 @@ from qagent.config import settings
 class NetworkRecorder:
     """Records traffic per request (not per URL, so repeated POSTs are kept distinct)."""
 
-    def __init__(self, page: Page, flow_run_id: str, allowed_hosts: Optional[List[str]] = None):
+    def __init__(self, page: Page, flow_run_id: str, sandbox: Optional[Any] = None):
         self.page = page
         self.flow_run_id = flow_run_id
         self.calls: List[Dict[str, Any]] = []
         self._started: Dict[Request, float] = {}
         self._cursor = 0
+        self._step_cursor = 0
+        self.sandbox = sandbox
         self.inflight = 0
 
         self.page.on("request", self._on_request)
@@ -56,7 +59,26 @@ class NetworkRecorder:
             "resp_body": resp_body,
             "req_size": len(req_body or b""),
             "resp_size": len(resp_body or b""),
+            "traceparent": self._injected_traceparent(response.url),
         })
+
+    def _injected_traceparent(self, url: str) -> Optional[str]:
+        queue = getattr(self.sandbox, "injected", {}).get(url) if self.sandbox else None
+        return queue.pop(0) if queue else None
+
+    def mark_step_start(self) -> None:
+        self._step_cursor = len(self.calls)
+
+    async def wait_for_response(self, path: str, timeout_ms: int = 3000) -> bool:
+        """Gotcha hint: if this step has requested `path`, wait until its response has been recorded."""
+        deadline = time.perf_counter() + timeout_ms / 1000
+        while time.perf_counter() < deadline:
+            if any(path in c["url"] for c in self.calls[self._step_cursor:]):
+                return True
+            if self.inflight == 0:
+                return False  # nothing pending: the step never triggered it
+            await asyncio.sleep(0.05)
+        return False
 
     def drain(self) -> List[Dict[str, Any]]:
         """Calls recorded since the previous drain (i.e. during the current step)."""

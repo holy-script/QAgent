@@ -68,6 +68,8 @@ class DecisionRequest(BaseModel):
     candidates: List[CandidateAction]
     page_summary: Optional[str] = None
     history: List[Dict[str, Any]] = Field(default_factory=list)
+    hints: List[str] = Field(default_factory=list, description="Applicable gotcha notes (one line each)")
+    examples: List[Dict[str, Any]] = Field(default_factory=list, description="Reasoning examples for Claude only")
 
 
 class DecisionResult(BaseModel):
@@ -82,6 +84,10 @@ class DecisionResult(BaseModel):
     input_tokens: int = 0
     output_tokens: int = 0
     cost_usd: float = 0.0
+    few_shot_ids: List[str] = Field(default_factory=list)
+    outcome: str = Field(default="act", description="act | done (step already satisfied) | stuck (no candidate fits)")
+    risky: Optional[float] = Field(default=None, description="P(action is harmful beyond the test step)")
+    prev_step_ok: Optional[float] = Field(default=None, description="P(previous step achieved its goal)")
 
 
 # --- Step Timing DTO ---
@@ -109,6 +115,12 @@ class Finding(BaseModel):
     expected: str
     actual: str
     evidence: Dict[str, Any] = Field(default_factory=dict)
+    check_key: str = ""
+    check_result_id: Optional[str] = None
+    requirement_keys: List[str] = Field(default_factory=list)
+    fingerprint: str = ""
+    judged_by: str = "code"
+    issue_id: Optional[str] = None
 
 
 # --- Step DTO ---
@@ -163,10 +175,11 @@ class RunTotals(BaseModel):
 # --- Request/Response API Schemas ---
 
 class CreateAppRequest(BaseModel):
-    slug: str
-    name: str
+    slug: Optional[str] = Field(default=None, description="Derived from the URL's hostname when omitted")
+    name: Optional[str] = Field(default=None, description="Derived from the URL's hostname when omitted")
     base_url: str
-    allowed_hosts: List[str] = Field(default_factory=lambda: ["localhost", "127.0.0.1"])
+    reset_path: Optional[str] = Field(default=None, description="POST here before each run to reset the app")
+    allowed_hosts: Optional[List[str]] = Field(default=None, description="Defaults to the base URL's hostname")
     description: Optional[str] = None
     prd_markdown: Optional[str] = None
     default_mode: RunMode = RunMode.HYBRID
@@ -182,16 +195,21 @@ class AppResponse(BaseModel):
     prd_markdown: Optional[str] = None
     default_mode: RunMode
     created_at: str
+    reset_path: Optional[str] = None
+    gate_overrides: Dict[str, Any] = Field(default_factory=dict)
+    redact_keys: List[str] = Field(default_factory=list)
 
 
 class CreateRunRequest(BaseModel):
-    app_id: str
+    app_id: str = Field(default="", description="Ignored on POST /apps/{app_id}/runs")
     playbook_id: Optional[str] = None
     playbook_version_id: Optional[str] = None
     mode: RunMode = RunMode.HYBRID
     trigger: str = "manual"
     step_budget: Optional[int] = None
     time_budget_s: Optional[int] = None
+    flow_keys: Optional[List[str]] = Field(default=None, description="Run only these flows (default: all)")
+    include_edge_cases: bool = Field(default=True, description="Also run edge-case variants of the selected flows")
 
 
 class RunResponse(BaseModel):
@@ -293,3 +311,162 @@ class ReplayRequest(BaseModel):
         default_factory=dict,
         description="gate_auto_min, gate_escalate_min, step_budget, time_budget_s, live_fallback",
     )
+
+
+class PlaybookUploadResponse(BaseModel):
+    playbook: PlaybookResponse
+    version: PlaybookVersionResponse
+    created: bool = Field(description="False when the content hash matched the latest version")
+    errors: List[str] = Field(default_factory=list)
+    warnings: List[str] = Field(default_factory=list)
+    coverage: Dict[str, Any] = Field(default_factory=dict)
+
+
+class PlaybookValidationResponse(BaseModel):
+    title: str
+    base_url: str
+    counts: Dict[str, int] = Field(default_factory=dict)
+    errors: List[str] = Field(default_factory=list)
+    warnings: List[str] = Field(default_factory=list)
+    coverage: Dict[str, Any] = Field(default_factory=dict)
+    flows: List[Dict[str, Any]] = Field(default_factory=list)
+
+
+class PlaybookItemResponse(BaseModel):
+    id: str
+    version_id: str
+    item_key: str
+    category: str
+    title: str
+    body: Dict[str, Any] = Field(default_factory=dict)
+
+
+# --- Apps, flows, checks, issues, reports, traceability (B18) ---
+
+class UpdateAppRequest(BaseModel):
+    name: Optional[str] = None
+    base_url: Optional[str] = None
+    allowed_hosts: Optional[List[str]] = None
+    description: Optional[str] = None
+    prd_markdown: Optional[str] = None
+    default_mode: Optional[RunMode] = None
+    gate_overrides: Optional[Dict[str, Any]] = None
+    redact_keys: Optional[List[str]] = None
+    reset_path: Optional[str] = None
+
+
+class AppSummaryResponse(AppResponse):
+    last_run: Optional[RunResponse] = None
+    recent_statuses: List[str] = Field(default_factory=list, description="Newest first, up to 20")
+    pass_rate: Optional[float] = None
+    open_issues: int = 0
+
+
+class CheckResultResponse(BaseModel):
+    id: str
+    run_id: str
+    flow_run_id: str
+    flow_key: Optional[str] = None
+    step_seq: int
+    check_key: str
+    kind: str
+    passed: bool
+    expected: str = ""
+    actual: str = ""
+    inputs: Dict[str, Any] = Field(default_factory=dict)
+    judged_by: str = "code"
+    confidence: Optional[float] = None
+
+
+class FlowResultDot(BaseModel):
+    run_id: str
+    flow_run_id: str
+    status: str
+    duration_ms: float
+    started_at: Optional[str] = None
+
+
+class FlowSummaryResponse(BaseModel):
+    flow_key: str
+    variant_of: Optional[str] = None
+    severity: str = "high"
+    covers: List[str] = Field(default_factory=list)
+    checks: List[str] = Field(default_factory=list)
+    last_results: List[FlowResultDot] = Field(default_factory=list)
+    median_duration_ms: Optional[float] = None
+    flakiness: float = Field(default=0.0, description="Share of consecutive runs whose status changed")
+
+
+class IssueResponse(BaseModel):
+    id: str
+    app_id: str
+    fingerprint: str
+    title: str
+    severity: str
+    status: str
+    kind: str = ""
+    check_key: str = ""
+    flow_key: str = ""
+    requirement_keys: List[str] = Field(default_factory=list)
+    first_seen_run_id: Optional[str] = None
+    last_seen_run_id: Optional[str] = None
+    last_pass_run_id: Optional[str] = None
+    occurrences: int = 1
+    updated_at: Optional[str] = None
+
+
+class IssueOccurrence(BaseModel):
+    run_id: str
+    finding_id: str
+    step_seq: int
+    severity: str
+    started_at: Optional[str] = None
+
+
+class IssueDetailResponse(IssueResponse):
+    occurrence_list: List[IssueOccurrence] = Field(default_factory=list)
+
+
+class ReportResponse(BaseModel):
+    id: str
+    app_id: str
+    run_id: Optional[str] = None
+    kind: str
+    issue_id: Optional[str] = None
+    status: str
+    content: Dict[str, Any] = Field(default_factory=dict)
+    markdown_artifact_id: Optional[str] = None
+    html_artifact_id: Optional[str] = None
+    pdf_artifact_id: Optional[str] = None
+    model_version: Optional[str] = None
+    generated_at: Optional[str] = None
+
+
+class TraceabilityResponse(BaseModel):
+    version_id: str
+    playbook_id: str
+    latest_run_id: Optional[str] = None
+    requirements: List[Dict[str, Any]] = Field(default_factory=list)
+    uncovered: List[str] = Field(default_factory=list)
+
+
+class NetworkCallDetail(NetworkCall):
+    background: bool = False
+    traceparent: Optional[str] = None
+    flow_key: Optional[str] = None
+    req_artifact_key: Optional[str] = None
+    resp_artifact_key: Optional[str] = None
+
+
+class RequirementProposal(BaseModel):
+    key: str
+    title: str
+    prd_ref: str
+    acceptance: str
+    priority: str
+    quote: str
+
+
+class PrdExtractResponse(BaseModel):
+    proposals: List[RequirementProposal] = Field(default_factory=list)
+    markdown: str = Field(default="", description="The proposals as playbook Markdown, ready to paste under ## Requirements")

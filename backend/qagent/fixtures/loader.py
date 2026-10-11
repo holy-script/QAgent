@@ -23,7 +23,7 @@ def _generate_default_fixture_events() -> List[Dict[str, Any]]:
         {
             "run_id": "run-demo-001",
             "seq": 1,
-            "type": "RUN_STARTED",
+            "type": "run.started",
             "payload": {
                 "target_url": "http://localhost:8001",
                 "app_name": "Demo E-Commerce Shop",
@@ -35,7 +35,7 @@ def _generate_default_fixture_events() -> List[Dict[str, Any]]:
         {
             "run_id": "run-demo-001",
             "seq": 2,
-            "type": "FLOW_STARTED",
+            "type": "flow.started",
             "payload": {
                 "flow_key": "add-to-cart",
                 "severity": "high",
@@ -46,7 +46,7 @@ def _generate_default_fixture_events() -> List[Dict[str, Any]]:
         {
             "run_id": "run-demo-001",
             "seq": 3,
-            "type": "STEP_OBSERVED",
+            "type": "step.observed",
             "payload": {
                 "step_seq": 1,
                 "url": "http://localhost:8001/products",
@@ -59,7 +59,7 @@ def _generate_default_fixture_events() -> List[Dict[str, Any]]:
         {
             "run_id": "run-demo-001",
             "seq": 4,
-            "type": "DECISION_MADE",
+            "type": "decision.made",
             "payload": {
                 "step_seq": 1,
                 "decider": "jev",
@@ -76,7 +76,7 @@ def _generate_default_fixture_events() -> List[Dict[str, Any]]:
         {
             "run_id": "run-demo-001",
             "seq": 5,
-            "type": "GATE_TRIGGERED",
+            "type": "gate.triggered",
             "payload": {
                 "step_seq": 1,
                 "tier": "AUTO",
@@ -87,7 +87,7 @@ def _generate_default_fixture_events() -> List[Dict[str, Any]]:
         {
             "run_id": "run-demo-001",
             "seq": 6,
-            "type": "ACTION_EXECUTED",
+            "type": "action.executed",
             "payload": {
                 "step_seq": 1,
                 "action_id": 4,
@@ -99,7 +99,7 @@ def _generate_default_fixture_events() -> List[Dict[str, Any]]:
         {
             "run_id": "run-demo-001",
             "seq": 7,
-            "type": "NETWORK_CALL",
+            "type": "network.call",
             "payload": {
                 "step_seq": 1,
                 "method": "POST",
@@ -113,7 +113,7 @@ def _generate_default_fixture_events() -> List[Dict[str, Any]]:
         {
             "run_id": "run-demo-001",
             "seq": 8,
-            "type": "STEP_OBSERVED",
+            "type": "step.observed",
             "payload": {
                 "step_seq": 2,
                 "url": "http://localhost:8001/products",
@@ -126,7 +126,7 @@ def _generate_default_fixture_events() -> List[Dict[str, Any]]:
         {
             "run_id": "run-demo-001",
             "seq": 9,
-            "type": "DECISION_MADE",
+            "type": "decision.made",
             "payload": {
                 "step_seq": 2,
                 "decider": "jev",
@@ -143,7 +143,7 @@ def _generate_default_fixture_events() -> List[Dict[str, Any]]:
         {
             "run_id": "run-demo-001",
             "seq": 10,
-            "type": "ACTION_EXECUTED",
+            "type": "action.executed",
             "payload": {
                 "step_seq": 2,
                 "action_id": 7,
@@ -155,7 +155,7 @@ def _generate_default_fixture_events() -> List[Dict[str, Any]]:
         {
             "run_id": "run-demo-001",
             "seq": 11,
-            "type": "STEP_OBSERVED",
+            "type": "step.observed",
             "payload": {
                 "step_seq": 3,
                 "url": "http://localhost:8001/cart",
@@ -168,7 +168,7 @@ def _generate_default_fixture_events() -> List[Dict[str, Any]]:
         {
             "run_id": "run-demo-001",
             "seq": 12,
-            "type": "FINDING_DISCOVERED",
+            "type": "finding.created",
             "payload": {
                 "step_seq": 3,
                 "severity": "high",
@@ -186,7 +186,7 @@ def _generate_default_fixture_events() -> List[Dict[str, Any]]:
         {
             "run_id": "run-demo-001",
             "seq": 13,
-            "type": "FLOW_FINISHED",
+            "type": "flow.finished",
             "payload": {
                 "flow_key": "add-to-cart",
                 "status": "passed_with_findings",
@@ -198,7 +198,7 @@ def _generate_default_fixture_events() -> List[Dict[str, Any]]:
         {
             "run_id": "run-demo-001",
             "seq": 14,
-            "type": "RUN_FINISHED",
+            "type": "run.finished",
             "payload": {
                 "run_id": "run-demo-001",
                 "outcome": "COMPLETED",

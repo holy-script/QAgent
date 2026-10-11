@@ -1,4 +1,5 @@
 import mimetypes
+import re
 
 from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.responses import RedirectResponse
@@ -10,6 +11,9 @@ from qagent.domain.models import Artifact, FlowRun, Run
 from qagent.storage.objects import object_store
 
 router = APIRouter(prefix="/artifacts", tags=["Artifacts"])
+
+
+_TEXTUAL = ("json", "html", "text", "xml", "javascript", "markdown", "x-ndjson")
 
 
 async def _serve(key: str) -> Response:
@@ -27,6 +31,7 @@ async def get_flow_artifact(run_id: str, flow_key: str, path: str, session: Asyn
     run = await session.get(Run, run_id)
     if run is None:
         raise HTTPException(status_code=404, detail="Run not found")
+    path = re.sub(r"^(steps/\d+)/screenshot\.jpg$", r"\1/after.jpg", path)  # stable alias used in events/DTOs
     return await _serve(f"apps/{run.app_id}/runs/{run_id}/flows/{flow_key}/{path}")
 
 
@@ -34,8 +39,32 @@ async def get_flow_artifact(run_id: str, flow_key: str, path: str, session: Asyn
 async def get_screenshot(run_id: str, step_seq: int, session: AsyncSession = Depends(get_session)):
     """Shorthand for the first flow's screenshot; use the flow-qualified route when flows run in parallel."""
     row = (await session.execute(
-        select(Artifact).where(Artifact.run_id == run_id, Artifact.step_seq == step_seq, Artifact.kind == "screenshot")
+        select(Artifact).where(Artifact.run_id == run_id, Artifact.step_seq == step_seq, Artifact.kind == "screenshot_after")
     )).scalars().first()
     if row is None:
         raise HTTPException(status_code=404, detail="Artifact not found")
     return await _serve(row.object_key)
+
+
+@router.get("/{artifact_id}/url")
+async def artifact_url(artifact_id: str, session: AsyncSession = Depends(get_session)):
+    """A short-lived presigned URL (images, trace.zip, PDF); with local storage, the proxied content URL."""
+    art = await session.get(Artifact, artifact_id)
+    if art is None:
+        raise HTTPException(status_code=404, detail="Artifact not found")
+    if object_store.is_configured():
+        return {"url": object_store.get_presigned_url(art.object_key, 900), "expires_in": 900,
+                "content_type": art.content_type}
+    return {"url": f"/api/artifacts/{art.id}/content", "expires_in": None, "content_type": art.content_type}
+
+
+@router.get("/{artifact_id}/content")
+async def artifact_content(artifact_id: str, session: AsyncSession = Depends(get_session)):
+    """Proxied bytes (JSON, HTML, text): browsers cannot fetch() presigned URLs without bucket CORS rules."""
+    art = await session.get(Artifact, artifact_id)
+    if art is None:
+        raise HTTPException(status_code=404, detail="Artifact not found")
+    data = object_store.get_bytes(art.object_key)
+    if data is None:
+        raise HTTPException(status_code=404, detail="Artifact file not found")
+    return Response(content=data, media_type=art.content_type)

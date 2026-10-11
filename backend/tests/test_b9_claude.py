@@ -59,7 +59,7 @@ async def test_normalize_playbook_reparses_output():
     md = PLAYBOOK.read_text()
     respx.post(url__regex=r".*/converse").mock(return_value=_tool_reply({"markdown": md, "notes": "none"}))
     out = await normalize_playbook("buy things then pay", _client())
-    assert [f["key"] for f in out["parsed"]["flows"]] == ["add-to-cart", "apply-coupon", "payment"]
+    assert [f["key"] for f in out["parsed"]["flows"]] == ["add-to-cart", "apply-coupon", "payment", "checkout"]
     assert out["warnings"] == []
 
 
@@ -84,7 +84,8 @@ async def test_escalation_replaces_low_confidence_decision(shop, mem_sessions, u
         set_bugs(**{f"bug{n}": False})
     spec = RunSpec(run_id="r-esc", app_id="a", base_url=url, mode=RunMode.HYBRID,
                    flows=[FlowSpec(key="f", steps=["Open /products", "Add item to cart", "Go to /cart"],
-                                   formulas={"n": {"expr": "n == 1", "bindings": {"n": "api:/api/cart.count"}}})])
+                                   checks=["F-9"])],
+                   formulas={"F-9": {"key": "F-9", "rule": "n == 1", "bindings": {"n": "api:/api/cart.count"}}})
     result = await EngineRunner(spec, LowConfidence(), PersistenceSink("r-esc", session_factory=mem_sessions),
                                 uploader=uploader, escalator=Right()).run()
     # Jev alone would have clicked "Home"/nav; escalation clicked Add to Cart, so the cart holds 1 item.

@@ -56,10 +56,11 @@ async def test_jev_decider_with_mock_and_retry(sample_request):
             httpx.Response(429, json={"error": "rate limited"}),
             httpx.Response(200, json={
                 "model": "jev-latest",
-                "answers": {"action": {
-                    "type": "choice", "choice": "2", "confidence": 0.88,
-                    "probabilities": {"2": 0.88, "1": 0.12},
-                }},
+                "answers": {
+                    "next_action": {"type": "choice", "choice": "2", "confidence": 0.88,
+                                    "probabilities": {"2": 0.88, "1": 0.12}},
+                    "risky": {"type": "noul", "noul": 0.05},
+                },
                 "usage": {"input_tokens": 120, "output_tokens": 8},
             })
         ]
@@ -70,9 +71,28 @@ async def test_jev_decider_with_mock_and_retry(sample_request):
 
     assert route.call_count == 2
     body = json.loads(route.calls[-1].request.content)
-    assert body["questions"]["action"]["type"] == "choice"
-    assert set(body["questions"]["action"]["criteria"]) == {"1", "2"}
+    assert body["questions"]["next_action"]["type"] == "choice"
+    assert set(body["questions"]["next_action"]["criteria"]) == {"1", "2", "STEP_DONE", "STUCK"}
+    assert body["questions"]["risky"]["type"] == "noul" and "prev_step_ok" not in body["questions"]
+    assert res.risky == 0.05 and res.outcome == "act"
     assert res.selected_action_id == 2
     assert res.confidence == 0.88
     assert res.tier == ConfidenceTier.AUTO
     assert res.latency_ms > 0
+
+
+@pytest.mark.asyncio
+async def test_replay_reports_divergence_when_page_differs(sample_request):
+    recorder = RecordingDecider(StubDecider())
+    await recorder.decide(sample_request)
+    tape = {h: {**e, "step_seq": e["request"]["step_seq"], "intent": e["request"]["intent"]}
+            for h, e in recorder.export_tape().items()}
+    replayer = ReplayDecider(tape)
+
+    changed = sample_request.model_copy(update={"candidates": sample_request.candidates[:1]})
+    from qagent.decision.tape import hash_request
+    res = await replayer.decide(changed)
+    assert res.decider == "replay" and res.selected_action_id == 2  # the recorded choice is still replayed
+    div = replayer.take_divergence(hash_request(changed))
+    assert div["step_seq"] == 1 and div["expected_hash"] == hash_request(sample_request)
+    assert replayer.take_divergence(hash_request(changed)) is None

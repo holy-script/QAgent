@@ -9,25 +9,38 @@ import httpx
 import pytest
 import pytest_asyncio
 import uvicorn
+from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.pool import StaticPool
 from sqlmodel import SQLModel
 
+from qagent.storage.objects import object_store
+from qagent.storage.upload_queue import UploadQueue
+
 SHOP_DIR = Path(__file__).parents[2] / "demo-shop"
-PLAYBOOK = Path(__file__).parents[2] / "playbooks" / "checkout-flow.md"
+PLAYBOOK = Path(__file__).parents[2] / "playbooks" / "checkout.md"
 
 
-class FakeUploader:
-    """Collects enqueue() calls so engine tests need no object storage."""
+from qagent.checks.ux_judged import Verdict
+
+
+class FakeJudge:
+    """Judges by page text: statements about errors are true only if the page shows no 'Address saved'."""
+
+    async def ask(self, question, page_text, screenshots=None, hints=None, examples=None):
+        ok = "Address saved" not in page_text if "error" in question.lower() else True
+        return Verdict(ok, 0.95 if ok else 0.05, "jev", 0.9, "fake")
+
+
+class RecordingUploadQueue(UploadQueue):
+    """The real upload queue (local object store, in-memory DB) that also records what was enqueued."""
 
     def __init__(self):
+        super().__init__()
         self.items = []
-
-    def start(self):
-        pass
 
     async def enqueue(self, **kwargs):
         self.items.append(kwargs)
+        await super().enqueue(**kwargs)
 
     def keys(self, kind=None):
         return [i["key"] for i in self.items if kind is None or i["kind"] == kind]
@@ -69,16 +82,33 @@ def shop(shop_url):
 
 
 @pytest_asyncio.fixture
-async def mem_sessions():
-    engine = create_async_engine(
-        "sqlite+aiosqlite://", poolclass=StaticPool, connect_args={"check_same_thread": False}
-    )
+async def mem_sessions(tmp_path):
+    """
+    Per-test SQLite file. Transactions start with BEGIN IMMEDIATE so concurrent sessions (the sink, the upload
+    worker, API handlers) queue on the write lock instead of failing on read-to-write upgrades.
+    """
+    engine = create_async_engine(f"sqlite+aiosqlite:///{tmp_path}/test.db", connect_args={"timeout": 30})
+
+    @event.listens_for(engine.sync_engine, "connect")
+    def _no_implicit_begin(dbapi_connection, _):
+        dbapi_connection.isolation_level = None
+
+    @event.listens_for(engine.sync_engine, "begin")
+    def _begin_immediate(conn):
+        conn.exec_driver_sql("BEGIN IMMEDIATE")
+
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
     yield async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     await engine.dispose()
 
 
-@pytest.fixture
-def uploader():
-    return FakeUploader()
+@pytest_asyncio.fixture
+async def uploader(mem_sessions, monkeypatch, tmp_path):
+    monkeypatch.setattr(object_store, "client", None)  # never touch real object storage in tests
+    monkeypatch.setattr(object_store, "local_dir", tmp_path)
+    monkeypatch.setattr("qagent.storage.upload_queue.async_session_factory", mem_sessions)
+    queue = RecordingUploadQueue()
+    queue.start()
+    yield queue
+    await queue.stop()

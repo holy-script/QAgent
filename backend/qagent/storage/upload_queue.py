@@ -37,11 +37,17 @@ class UploadQueue:
             self._running = True
             self._worker_task = asyncio.create_task(self._worker())
 
-    async def stop(self):
-        self._running = False
+    async def drain(self):
+        """Waits until every queued upload has been stored and recorded."""
         await self._queue.join()
+
+    async def stop(self):
+        """Flushes every queued upload, then stops the worker (never abandons items mid-queue)."""
+        await self._queue.join()
+        self._running = False
         if self._worker_task:
             self._worker_task.cancel()
+            self._worker_task = None
 
     async def enqueue(
         self,

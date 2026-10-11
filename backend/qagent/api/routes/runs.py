@@ -10,8 +10,10 @@ from qagent.api.mappers import finding_out, iso, network_out, run_out, step_out
 from qagent.api.sse import stream_run_events
 from qagent.domain import models as m
 from qagent.domain.schemas import (
-    CreateRunRequest, Finding, ReplayRequest, FlowRunResponse, LogEntryResponse, NetworkCall, RunResponse, SpanResponse,
+    CheckResultResponse, CreateRunRequest, Finding, FlowRunResponse, LogEntryResponse, NetworkCall,
+    NetworkCallDetail, ReplayRequest, RunResponse, SpanResponse, StepSummary,
 )
+from qagent.storage import db
 from qagent.runs.manager import RunManager, RunStartError, get_run_manager
 
 router = APIRouter(prefix="/runs", tags=["Runs"])
@@ -71,11 +73,12 @@ async def run_events(
     run_id: str,
     after: int = Query(0, ge=0, description="Resume after this event seq"),
     last_event_id: Optional[str] = Header(default=None),
-    session: AsyncSession = Depends(get_session),
     manager: RunManager = Depends(get_run_manager),
 ):
     """SSE stream of run events. Resumes from `after` or the standard Last-Event-ID header."""
-    await _get_run(session, run_id)
+    # Deliberately not `Depends(get_session)`: that would pin a pooled DB connection for the whole stream.
+    async with db.async_session_factory() as session:
+        await _get_run(session, run_id)
     cursor = after
     if last_event_id and last_event_id.isdigit():
         cursor = max(cursor, int(last_event_id))
@@ -125,7 +128,8 @@ async def run_findings(run_id: str, session: AsyncSession = Depends(get_session)
 
 
 @router.get("/{run_id}/network", response_model=List[NetworkCall])
-async def run_network(run_id: str, only_api: bool = False, flow_key: Optional[str] = None,
+async def run_network(run_id: str, only_api: bool = False, is_api: Optional[bool] = None,
+                      min_status: Optional[int] = None, flow_key: Optional[str] = None,
                       session: AsyncSession = Depends(get_session)):
     await _get_run(session, run_id)
     flows = (await session.execute(select(m.FlowRun).where(m.FlowRun.run_id == run_id))).scalars().all()
@@ -133,8 +137,12 @@ async def run_network(run_id: str, only_api: bool = False, flow_key: Optional[st
     if not keys:
         return []
     stmt = select(m.NetworkCallRecord).where(m.NetworkCallRecord.flow_run_id.in_(list(keys)))
-    if only_api:
+    if only_api or is_api is True:
         stmt = stmt.where(m.NetworkCallRecord.is_api.is_(True))
+    elif is_api is False:
+        stmt = stmt.where(m.NetworkCallRecord.is_api.is_(False))
+    if min_status is not None:
+        stmt = stmt.where(m.NetworkCallRecord.status >= min_status)
     rows = (await session.execute(stmt.order_by(m.NetworkCallRecord.step_seq))).scalars().all()
     return [network_out(c, run_id, keys[c.flow_run_id]) for c in rows]
 
@@ -165,3 +173,41 @@ async def run_logs(run_id: str, level: Optional[str] = None, source: Optional[st
         )
         for r in rows
     ]
+
+
+@router.get("/{run_id}/steps", response_model=List[StepSummary])
+async def run_steps(run_id: str, flow_key: Optional[str] = None, session: AsyncSession = Depends(get_session)):
+    """Flat list of steps (with timings, decision and findings) across the run's flows."""
+    flows = await run_flows(run_id, session)
+    return [st for f in flows if flow_key in (None, f.flow_key) for st in f.steps]
+
+
+@router.get("/{run_id}/checks", response_model=List[CheckResultResponse])
+async def run_checks(run_id: str, flow_key: Optional[str] = None, passed: Optional[bool] = None,
+                     session: AsyncSession = Depends(get_session)):
+    """Every check result with its bound inputs and where each came from."""
+    await _get_run(session, run_id)
+    flows = {f.id: f.flow_key for f in (await session.execute(
+        select(m.FlowRun).where(m.FlowRun.run_id == run_id))).scalars().all()}
+    stmt = select(m.CheckResult).where(m.CheckResult.run_id == run_id)
+    if passed is not None:
+        stmt = stmt.where(m.CheckResult.passed.is_(passed))
+    rows = (await session.execute(stmt.order_by(m.CheckResult.created_at))).scalars().all()
+    return [CheckResultResponse(
+        id=c.id, run_id=c.run_id, flow_run_id=c.flow_run_id, flow_key=flows.get(c.flow_run_id), step_seq=c.step_seq,
+        check_key=c.check_key, kind=c.kind, passed=c.passed, expected=c.expected, actual=c.actual,
+        inputs=c.inputs or {}, judged_by=c.judged_by, confidence=c.confidence)
+        for c in rows if flow_key in (None, flows.get(c.flow_run_id))]
+
+
+app_router = APIRouter(prefix="/apps", tags=["Runs"])
+
+
+@app_router.post("/{app_id}/runs", response_model=RunResponse, status_code=202)
+async def create_app_run(app_id: str, payload: CreateRunRequest, manager: RunManager = Depends(get_run_manager)):
+    """Starts a run for an app: {playbook_id?, flow_keys?, include_edge_cases, mode}."""
+    try:
+        run = await manager.start_run(payload.model_copy(update={"app_id": app_id}))
+    except RunStartError as exc:
+        raise HTTPException(status_code=exc.status, detail=str(exc))
+    return run_out(run)

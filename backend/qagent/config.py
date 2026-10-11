@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     typesafe_api_key: Optional[str] = Field(default=None, alias="TYPESAFE_API_KEY")
     jev_api_token: Optional[str] = Field(default=None, alias="JEV_API_TOKEN")
     typesafe_base_url: str = Field(default="https://api.typesafe.ai", alias="TYPESAFE_BASE_URL")
-    jev_model: str = Field(default="jev-latest", alias="JEV_MODEL")
+    jev_model: str = Field(default="jev-1.13.0", alias="JEV_MODEL")
     jev_max_concurrency: int = Field(default=4, alias="JEV_MAX_CONCURRENCY")
 
     # Claude on Bedrock
@@ -53,6 +53,7 @@ class Settings(BaseSettings):
         default="localhost,127.0.0.1",
         alias="QAGENT_ALLOWED_HOSTS",
     )
+    qagent_inject_traceparent: bool = Field(default=True, alias="QAGENT_INJECT_TRACEPARENT")
     flow_step_budget: int = Field(default=25, alias="FLOW_STEP_BUDGET")
     flow_time_budget_s: int = Field(default=90, alias="FLOW_TIME_BUDGET_S")
     flow_max_parallel: int = Field(default=3, alias="FLOW_MAX_PARALLEL")

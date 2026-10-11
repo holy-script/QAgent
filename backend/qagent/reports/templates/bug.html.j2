@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>{{ c.title }}</title>
+<style>
+body{font:14px/1.45 "IBM Plex Sans",system-ui,sans-serif;color:#1c2733;background:#fafbfb;max-width:860px;margin:32px auto;padding:0 16px}
+h1{font-size:22px}h2{font-size:16px;margin-top:28px;border-bottom:1px solid #c7ced5;padding-bottom:4px}
+code,.mono{font-family:"IBM Plex Mono",monospace;font-size:12px}
+.meta{color:#66717d}.fail{color:#b3261e}img{max-width:100%;border:1px solid #c7ced5;border-radius:4px;margin:6px 0}
+ol{padding-left:20px}
+</style></head><body>
+<h1>{{ c.title }}</h1>
+<p class="meta">Status {{ c.status }} · Severity {{ c.severity }}{% if c.judged_by != "code" %} (judged by {{ c.judged_by }}){% endif %} · Priority {{ c.priority }}<br>
+Seen in {{ c.reproducibility.seen_in }} of the last {{ c.reproducibility.of_last }} runs</p>
+<h2>Violated requirements</h2>
+<ul>{% for r in c.violated_requirements %}<li><span class="mono">{{ r.key }}</span> {{ r.title }} ({{ r.prd_ref }}): {{ r.acceptance }}</li>{% else %}<li>None linked to this check</li>{% endfor %}</ul>
+<h2>Environment</h2>
+<ul>{% for k, v in c.environment.items() %}<li>{{ k }}: <span class="mono">{{ v }}</span></li>{% endfor %}</ul>
+<h2>Steps to reproduce</h2>
+<ol>{% for s in c.steps_to_reproduce %}<li>{{ s }}</li>{% endfor %}</ol>
+<h2>Expected vs actual</h2>
+<p>Check <span class="mono">{{ c.expected_actual.check_key }}</span></p>
+<p>Expected: <span class="mono">{{ c.expected_actual.expected }}</span></p>
+<p class="fail">Actual: <span class="mono">{{ c.expected_actual.actual }}</span></p>
+<ul>{% for i in c.expected_actual.inputs %}<li><span class="mono">{{ i.name }} = {{ i.value }}</span>{% if i.source %} from <span class="mono">{{ i.source }}</span>{% endif %}</li>{% endfor %}</ul>
+<h2>Evidence</h2>
+{% if images.annotated %}<img alt="Annotated screenshot" src="{{ images.annotated }}">{% endif %}
+{% if images.screenshot_before %}<p>Before</p><img alt="Before" src="{{ images.screenshot_before }}">{% endif %}
+{% if images.screenshot_after %}<p>After</p><img alt="After" src="{{ images.screenshot_after }}">{% endif %}
+<ul>{% for n in c.evidence.network_calls %}<li>{{ n.method }} <span class="mono">{{ n.url }}</span> returned {{ n.status }}{% if n.response_excerpt %}<br><span class="mono">{{ n.response_excerpt }}</span>{% endif %}</li>{% endfor %}</ul>
+<h2>Impact</h2><p>{{ c.narrative.impact or "Not generated." }}</p>
+<h2>Suspected cause (hypothesis)</h2><p>{{ c.narrative.suspected_cause or "Not generated." }}</p>
+<p class="meta">Run {{ c.integrity.run_id }} · playbook version {{ c.integrity.playbook_version_id }}</p>
+</body></html>

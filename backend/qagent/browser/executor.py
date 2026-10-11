@@ -24,7 +24,8 @@ class BrowserExecutor:
                 except Exception:
                     await self.page.get_by_text(action.label).first.click(timeout=3000)
             elif action.action_type == "fill":
-                await self.page.fill(action.selector, value or action.value or "test", timeout=3000)
+                await self.page.fill(
+                    action.selector, value if value is not None else (action.value or "test"), timeout=3000)
             elif action.action_type == "navigate":
                 await self.page.goto(action.value or action.label, timeout=5000)
         except Exception as e:

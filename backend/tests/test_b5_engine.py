@@ -48,9 +48,11 @@ async def test_engine_runs_clean_flow_and_persists_rows(shop, mem_sessions, uplo
         assert len((await s.execute(select(StepTiming))).scalars().all()) == 3
         decisions = (await s.execute(select(Decision))).scalars().all()
         assert len(decisions) == 1  # only "Add 2 items" needs a model; navigation is deterministic
-        assert len((await s.execute(select(EventRecord))).scalars().all()) == sink._seq
+        seqs = sorted(e.seq for e in (await s.execute(select(EventRecord))).scalars().all())
+        assert seqs == list(range(1, sink._seq + 1)), f"missing {set(range(1, sink._seq + 1)) - set(seqs)}"
 
-    assert any(k.endswith("steps/2/screenshot.jpg") for k in uploader.keys("screenshot"))
+    assert any(k.endswith("steps/2/after.jpg") for k in uploader.keys("screenshot_after"))
+    assert any(k.endswith("steps/2/before.jpg") for k in uploader.keys("screenshot_before"))
     assert uploader.keys("trace") and uploader.keys("har")
 
 

@@ -90,6 +90,7 @@
           "Apps"
         ],
         "summary": "List Apps",
+        "description": "Apps with last-run summary, pass rate over the last 20 runs, and open issue count.",
         "operationId": "list_apps_apps_get",
         "responses": {
           "200": {
@@ -98,7 +99,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/AppResponse"
+                    "$ref": "#/components/schemas/AppSummaryResponse"
                   },
                   "type": "array",
                   "title": "Response List Apps Apps Get"
@@ -148,21 +149,21 @@
         }
       }
     },
-    "/apps/{slug}": {
+    "/apps/{app_id}": {
       "get": {
         "tags": [
           "Apps"
         ],
         "summary": "Get App",
-        "operationId": "get_app_apps__slug__get",
+        "operationId": "get_app_apps__app_id__get",
         "parameters": [
           {
-            "name": "slug",
+            "name": "app_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Slug"
+              "title": "App Id"
             }
           }
         ],
@@ -172,7 +173,250 @@
             "content": {
               "application/json": {
                 "schema": {
+                  "$ref": "#/components/schemas/AppSummaryResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Apps"
+        ],
+        "summary": "Update App",
+        "operationId": "update_app_apps__app_id__patch",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "App Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAppRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
                   "$ref": "#/components/schemas/AppResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Apps"
+        ],
+        "summary": "Delete App",
+        "operationId": "delete_app_apps__app_id__delete",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "App Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/apps/{app_id}/runs": {
+      "get": {
+        "tags": [
+          "Apps"
+        ],
+        "summary": "List App Runs",
+        "operationId": "list_app_runs_apps__app_id__runs_get",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "App Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RunResponse"
+                  },
+                  "title": "Response List App Runs Apps  App Id  Runs Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Runs"
+        ],
+        "summary": "Create App Run",
+        "description": "Starts a run for an app: {playbook_id?, flow_keys?, include_edge_cases, mode}.",
+        "operationId": "create_app_run_apps__app_id__runs_post",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "App Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRunRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/apps/{app_id}/prd/extract": {
+      "post": {
+        "tags": [
+          "Apps"
+        ],
+        "summary": "Extract Prd Requirements",
+        "description": "Claude proposes REQ- items from the app's PRD; each must be accepted by the user before it is saved.",
+        "operationId": "extract_prd_requirements_apps__app_id__prd_extract_post",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "App Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrdExtractResponse"
                 }
               }
             }
@@ -621,6 +865,38 @@
             }
           },
           {
+            "name": "is_api",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Is Api"
+            }
+          },
+          {
+            "name": "min_status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Min Status"
+            }
+          },
+          {
             "name": "flow_key",
             "in": "query",
             "required": false,
@@ -789,6 +1065,148 @@
         }
       }
     },
+    "/runs/{run_id}/steps": {
+      "get": {
+        "tags": [
+          "Runs"
+        ],
+        "summary": "Run Steps",
+        "description": "Flat list of steps (with timings, decision and findings) across the run's flows.",
+        "operationId": "run_steps_runs__run_id__steps_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "flow_key",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Flow Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StepSummary"
+                  },
+                  "title": "Response Run Steps Runs  Run Id  Steps Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{run_id}/checks": {
+      "get": {
+        "tags": [
+          "Runs"
+        ],
+        "summary": "Run Checks",
+        "description": "Every check result with its bound inputs and where each came from.",
+        "operationId": "run_checks_runs__run_id__checks_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "flow_key",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Flow Key"
+            }
+          },
+          {
+            "name": "passed",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Passed"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CheckResultResponse"
+                  },
+                  "title": "Response Run Checks Runs  Run Id  Checks Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/playbooks": {
       "get": {
         "tags": [
@@ -846,7 +1264,6 @@
           "Playbooks"
         ],
         "summary": "Upload Playbook",
-        "description": "Parses and stores a Markdown playbook. Re-uploading under the same name adds a new\nversion unless the content hash is unchanged.",
         "operationId": "upload_playbook_playbooks_post",
         "requestBody": {
           "required": true,
@@ -864,7 +1281,146 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PlaybookResponse"
+                  "$ref": "#/components/schemas/PlaybookUploadResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/apps/{app_id}/playbooks": {
+      "get": {
+        "tags": [
+          "Playbooks"
+        ],
+        "summary": "List App Playbooks",
+        "operationId": "list_app_playbooks_apps__app_id__playbooks_get",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "App Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlaybookResponse"
+                  },
+                  "title": "Response List App Playbooks Apps  App Id  Playbooks Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Playbooks"
+        ],
+        "summary": "Upload App Playbook",
+        "description": "Parses, validates and stores a Markdown playbook; unchanged content does not create a new version.",
+        "operationId": "upload_app_playbook_apps__app_id__playbooks_post",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "App Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlaybookRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaybookUploadResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/playbooks/validate": {
+      "post": {
+        "tags": [
+          "Playbooks"
+        ],
+        "summary": "Validate Playbook Markdown",
+        "description": "Parses and validates Markdown without saving it (drives the editor's inline errors and coverage panel).",
+        "operationId": "validate_playbook_markdown_playbooks_validate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NormalizeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaybookValidationResponse"
                 }
               }
             }
@@ -1012,13 +1568,75 @@
         }
       }
     },
-    "/playbooks/versions/{version_id}/markdown": {
+    "/playbook-versions/{version_id}/items": {
+      "get": {
+        "tags": [
+          "Playbooks"
+        ],
+        "summary": "List Items",
+        "operationId": "list_items_playbook_versions__version_id__items_get",
+        "parameters": [
+          {
+            "name": "version_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Version Id"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlaybookItemResponse"
+                  },
+                  "title": "Response List Items Playbook Versions  Version Id  Items Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/playbook-versions/{version_id}/markdown": {
       "get": {
         "tags": [
           "Playbooks"
         ],
         "summary": "Get Version Markdown",
-        "operationId": "get_version_markdown_playbooks_versions__version_id__markdown_get",
+        "operationId": "get_version_markdown_playbook_versions__version_id__markdown_get",
         "parameters": [
           {
             "name": "version_id",
@@ -1067,6 +1685,551 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/findings/{finding_id}/evidence": {
+      "get": {
+        "tags": [
+          "Observability"
+        ],
+        "summary": "Finding Evidence",
+        "description": "The evidence graph for one finding: screenshots, network calls, decisions, spans, trace, check inputs.",
+        "operationId": "finding_evidence_findings__finding_id__evidence_get",
+        "parameters": [
+          {
+            "name": "finding_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Finding Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/network/{call_id}": {
+      "get": {
+        "tags": [
+          "Observability"
+        ],
+        "summary": "Network Call",
+        "operationId": "network_call_network__call_id__get",
+        "parameters": [
+          {
+            "name": "call_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Call Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NetworkCallDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/apps/{app_id}/flows": {
+      "get": {
+        "tags": [
+          "Observability"
+        ],
+        "summary": "App Flows",
+        "description": "Current flows and edge-case variants with their last 10 results, median duration and flakiness.",
+        "operationId": "app_flows_apps__app_id__flows_get",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "App Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FlowSummaryResponse"
+                  },
+                  "title": "Response App Flows Apps  App Id  Flows Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/apps/{app_id}/flows/{flow_key}/history": {
+      "get": {
+        "tags": [
+          "Observability"
+        ],
+        "summary": "Flow History",
+        "operationId": "flow_history_apps__app_id__flows__flow_key__history_get",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "App Id"
+            }
+          },
+          {
+            "name": "flow_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Flow Key"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/apps/{app_id}/issues": {
+      "get": {
+        "tags": [
+          "Issues"
+        ],
+        "summary": "List Issues",
+        "operationId": "list_issues_apps__app_id__issues_get",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "App Id"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Severity"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IssueResponse"
+                  },
+                  "title": "Response List Issues Apps  App Id  Issues Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/issues/{issue_id}": {
+      "get": {
+        "tags": [
+          "Issues"
+        ],
+        "summary": "Get Issue",
+        "operationId": "get_issue_issues__issue_id__get",
+        "parameters": [
+          {
+            "name": "issue_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Issue Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssueDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/issues/{issue_id}/report": {
+      "get": {
+        "tags": [
+          "Issues"
+        ],
+        "summary": "Issue Report",
+        "description": "The latest bug report for the issue.",
+        "operationId": "issue_report_issues__issue_id__report_get",
+        "parameters": [
+          {
+            "name": "issue_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Issue Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{run_id}/report": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Run Report",
+        "operationId": "run_report_runs__run_id__report_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Regenerate Report",
+        "description": "Rebuilds the run report and its bug reports from stored facts (narrative is regenerated too).",
+        "operationId": "regenerate_report_runs__run_id__report_post",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reports/{report_id}/export": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Export Report",
+        "description": "Markdown or HTML as stored; PDF is the HTML printed by Playwright (generated on first request).",
+        "operationId": "export_report_reports__report_id__export_get",
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Report Id"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "md",
+              "title": "Format"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/apps/{app_id}/traceability": {
+      "get": {
+        "tags": [
+          "Traceability"
+        ],
+        "summary": "Traceability",
+        "description": "Requirements -> the flows, formulas, UX rules and edge cases that cover them -> their latest check results\n-> findings -> issues. Built from the stored item links and the most recent run of the version.",
+        "operationId": "traceability_apps__app_id__traceability_get",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "App Id"
+            }
+          },
+          {
+            "name": "version_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Version Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TraceabilityResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -1183,6 +2346,88 @@
         }
       }
     },
+    "/artifacts/{artifact_id}/url": {
+      "get": {
+        "tags": [
+          "Artifacts"
+        ],
+        "summary": "Artifact Url",
+        "description": "A short-lived presigned URL (images, trace.zip, PDF); with local storage, the proxied content URL.",
+        "operationId": "artifact_url_artifacts__artifact_id__url_get",
+        "parameters": [
+          {
+            "name": "artifact_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Artifact Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/artifacts/{artifact_id}/content": {
+      "get": {
+        "tags": [
+          "Artifacts"
+        ],
+        "summary": "Artifact Content",
+        "description": "Proxied bytes (JSON, HTML, text): browsers cannot fetch() presigned URLs without bucket CORS rules.",
+        "operationId": "artifact_content_artifacts__artifact_id__content_get",
+        "parameters": [
+          {
+            "name": "artifact_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Artifact Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/": {
       "get": {
         "summary": "Root",
@@ -1255,6 +2500,29 @@
           "created_at": {
             "type": "string",
             "title": "Created At"
+          },
+          "reset_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reset Path"
+          },
+          "gate_overrides": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Gate Overrides"
+          },
+          "redact_keys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Redact Keys"
           }
         },
         "type": "object",
@@ -1269,17 +2537,12 @@
         ],
         "title": "AppResponse"
       },
-      "ConfidenceTier": {
-        "type": "string",
-        "enum": [
-          "AUTO",
-          "ESCALATE",
-          "STOP"
-        ],
-        "title": "ConfidenceTier"
-      },
-      "CreateAppRequest": {
+      "AppSummaryResponse": {
         "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
           "slug": {
             "type": "string",
             "title": "Slug"
@@ -1322,14 +2585,262 @@
             "title": "Prd Markdown"
           },
           "default_mode": {
+            "$ref": "#/components/schemas/RunMode"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "reset_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reset Path"
+          },
+          "gate_overrides": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Gate Overrides"
+          },
+          "redact_keys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Redact Keys"
+          },
+          "last_run": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RunResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recent_statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Recent Statuses",
+            "description": "Newest first, up to 20"
+          },
+          "pass_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pass Rate"
+          },
+          "open_issues": {
+            "type": "integer",
+            "title": "Open Issues",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "base_url",
+          "allowed_hosts",
+          "default_mode",
+          "created_at"
+        ],
+        "title": "AppSummaryResponse"
+      },
+      "CheckResultResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "flow_run_id": {
+            "type": "string",
+            "title": "Flow Run Id"
+          },
+          "flow_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flow Key"
+          },
+          "step_seq": {
+            "type": "integer",
+            "title": "Step Seq"
+          },
+          "check_key": {
+            "type": "string",
+            "title": "Check Key"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "passed": {
+            "type": "boolean",
+            "title": "Passed"
+          },
+          "expected": {
+            "type": "string",
+            "title": "Expected",
+            "default": ""
+          },
+          "actual": {
+            "type": "string",
+            "title": "Actual",
+            "default": ""
+          },
+          "inputs": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Inputs"
+          },
+          "judged_by": {
+            "type": "string",
+            "title": "Judged By",
+            "default": "code"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "run_id",
+          "flow_run_id",
+          "step_seq",
+          "check_key",
+          "kind",
+          "passed"
+        ],
+        "title": "CheckResultResponse"
+      },
+      "ConfidenceTier": {
+        "type": "string",
+        "enum": [
+          "AUTO",
+          "ESCALATE",
+          "STOP"
+        ],
+        "title": "ConfidenceTier"
+      },
+      "CreateAppRequest": {
+        "properties": {
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug",
+            "description": "Derived from the URL's hostname when omitted"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "Derived from the URL's hostname when omitted"
+          },
+          "base_url": {
+            "type": "string",
+            "title": "Base Url"
+          },
+          "reset_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reset Path",
+            "description": "POST here before each run to reset the app"
+          },
+          "allowed_hosts": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Allowed Hosts",
+            "description": "Defaults to the base URL's hostname"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "prd_markdown": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prd Markdown"
+          },
+          "default_mode": {
             "$ref": "#/components/schemas/RunMode",
             "default": "hybrid"
           }
         },
         "type": "object",
         "required": [
-          "slug",
-          "name",
           "base_url"
         ],
         "title": "CreateAppRequest"
@@ -1367,7 +2878,9 @@
         "properties": {
           "app_id": {
             "type": "string",
-            "title": "App Id"
+            "title": "App Id",
+            "description": "Ignored on POST /apps/{app_id}/runs",
+            "default": ""
           },
           "playbook_id": {
             "anyOf": [
@@ -1421,12 +2934,30 @@
               }
             ],
             "title": "Time Budget S"
+          },
+          "flow_keys": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flow Keys",
+            "description": "Run only these flows (default: all)"
+          },
+          "include_edge_cases": {
+            "type": "boolean",
+            "title": "Include Edge Cases",
+            "description": "Also run edge-case variants of the selected flows",
+            "default": true
           }
         },
         "type": "object",
-        "required": [
-          "app_id"
-        ],
         "title": "CreateRunRequest"
       },
       "DecisionResult": {
@@ -1488,6 +3019,43 @@
             "type": "number",
             "title": "Cost Usd",
             "default": 0.0
+          },
+          "few_shot_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Few Shot Ids"
+          },
+          "outcome": {
+            "type": "string",
+            "title": "Outcome",
+            "description": "act | done (step already satisfied) | stuck (no candidate fits)",
+            "default": "act"
+          },
+          "risky": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Risky",
+            "description": "P(action is harmful beyond the test step)"
+          },
+          "prev_step_ok": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prev Step Ok",
+            "description": "P(previous step achieved its goal)"
           }
         },
         "type": "object",
@@ -1536,6 +3104,50 @@
             "additionalProperties": true,
             "type": "object",
             "title": "Evidence"
+          },
+          "check_key": {
+            "type": "string",
+            "title": "Check Key",
+            "default": ""
+          },
+          "check_result_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Check Result Id"
+          },
+          "requirement_keys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Requirement Keys"
+          },
+          "fingerprint": {
+            "type": "string",
+            "title": "Fingerprint",
+            "default": ""
+          },
+          "judged_by": {
+            "type": "string",
+            "title": "Judged By",
+            "default": "code"
+          },
+          "issue_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issue Id"
           }
         },
         "type": "object",
@@ -1571,6 +3183,45 @@
           "info"
         ],
         "title": "FindingSeverity"
+      },
+      "FlowResultDot": {
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "flow_run_id": {
+            "type": "string",
+            "title": "Flow Run Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "duration_ms": {
+            "type": "number",
+            "title": "Duration Ms"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "run_id",
+          "flow_run_id",
+          "status",
+          "duration_ms"
+        ],
+        "title": "FlowResultDot"
       },
       "FlowRunResponse": {
         "properties": {
@@ -1628,6 +3279,73 @@
         ],
         "title": "FlowRunResponse"
       },
+      "FlowSummaryResponse": {
+        "properties": {
+          "flow_key": {
+            "type": "string",
+            "title": "Flow Key"
+          },
+          "variant_of": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variant Of"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity",
+            "default": "high"
+          },
+          "covers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Covers"
+          },
+          "checks": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Checks"
+          },
+          "last_results": {
+            "items": {
+              "$ref": "#/components/schemas/FlowResultDot"
+            },
+            "type": "array",
+            "title": "Last Results"
+          },
+          "median_duration_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Median Duration Ms"
+          },
+          "flakiness": {
+            "type": "number",
+            "title": "Flakiness",
+            "description": "Share of consecutive runs whose status changed",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "flow_key"
+        ],
+        "title": "FlowSummaryResponse"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -1678,6 +3396,270 @@
           "active_model"
         ],
         "title": "HealthResponse"
+      },
+      "IssueDetailResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "app_id": {
+            "type": "string",
+            "title": "App Id"
+          },
+          "fingerprint": {
+            "type": "string",
+            "title": "Fingerprint"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind",
+            "default": ""
+          },
+          "check_key": {
+            "type": "string",
+            "title": "Check Key",
+            "default": ""
+          },
+          "flow_key": {
+            "type": "string",
+            "title": "Flow Key",
+            "default": ""
+          },
+          "requirement_keys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Requirement Keys"
+          },
+          "first_seen_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Seen Run Id"
+          },
+          "last_seen_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Seen Run Id"
+          },
+          "last_pass_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Pass Run Id"
+          },
+          "occurrences": {
+            "type": "integer",
+            "title": "Occurrences",
+            "default": 1
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "occurrence_list": {
+            "items": {
+              "$ref": "#/components/schemas/IssueOccurrence"
+            },
+            "type": "array",
+            "title": "Occurrence List"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "app_id",
+          "fingerprint",
+          "title",
+          "severity",
+          "status"
+        ],
+        "title": "IssueDetailResponse"
+      },
+      "IssueOccurrence": {
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "finding_id": {
+            "type": "string",
+            "title": "Finding Id"
+          },
+          "step_seq": {
+            "type": "integer",
+            "title": "Step Seq"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "run_id",
+          "finding_id",
+          "step_seq",
+          "severity"
+        ],
+        "title": "IssueOccurrence"
+      },
+      "IssueResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "app_id": {
+            "type": "string",
+            "title": "App Id"
+          },
+          "fingerprint": {
+            "type": "string",
+            "title": "Fingerprint"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind",
+            "default": ""
+          },
+          "check_key": {
+            "type": "string",
+            "title": "Check Key",
+            "default": ""
+          },
+          "flow_key": {
+            "type": "string",
+            "title": "Flow Key",
+            "default": ""
+          },
+          "requirement_keys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Requirement Keys"
+          },
+          "first_seen_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Seen Run Id"
+          },
+          "last_seen_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Seen Run Id"
+          },
+          "last_pass_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Pass Run Id"
+          },
+          "occurrences": {
+            "type": "integer",
+            "title": "Occurrences",
+            "default": 1
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "app_id",
+          "fingerprint",
+          "title",
+          "severity",
+          "status"
+        ],
+        "title": "IssueResponse"
       },
       "LogEntryResponse": {
         "properties": {
@@ -1824,6 +3806,135 @@
         ],
         "title": "NetworkCall"
       },
+      "NetworkCallDetail": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "flow_run_id": {
+            "type": "string",
+            "title": "Flow Run Id"
+          },
+          "step_seq": {
+            "type": "integer",
+            "title": "Step Seq"
+          },
+          "method": {
+            "type": "string",
+            "title": "Method"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status"
+          },
+          "duration_ms": {
+            "type": "number",
+            "title": "Duration Ms"
+          },
+          "req_size": {
+            "type": "integer",
+            "title": "Req Size",
+            "default": 0
+          },
+          "resp_size": {
+            "type": "integer",
+            "title": "Resp Size",
+            "default": 0
+          },
+          "is_api": {
+            "type": "boolean",
+            "title": "Is Api",
+            "default": false
+          },
+          "req_body_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Req Body Url"
+          },
+          "resp_body_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resp Body Url"
+          },
+          "background": {
+            "type": "boolean",
+            "title": "Background",
+            "default": false
+          },
+          "traceparent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Traceparent"
+          },
+          "flow_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flow Key"
+          },
+          "req_artifact_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Req Artifact Key"
+          },
+          "resp_artifact_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resp Artifact Key"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "flow_run_id",
+          "step_seq",
+          "method",
+          "url",
+          "status",
+          "duration_ms"
+        ],
+        "title": "NetworkCallDetail"
+      },
       "NormalizeRequest": {
         "properties": {
           "raw_text": {
@@ -1876,6 +3987,44 @@
         ],
         "title": "NormalizeResponse"
       },
+      "PlaybookItemResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "version_id": {
+            "type": "string",
+            "title": "Version Id"
+          },
+          "item_key": {
+            "type": "string",
+            "title": "Item Key"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "body": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Body"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "version_id",
+          "item_key",
+          "category",
+          "title"
+        ],
+        "title": "PlaybookItemResponse"
+      },
       "PlaybookResponse": {
         "properties": {
           "id": {
@@ -1923,6 +4072,99 @@
         ],
         "title": "PlaybookResponse"
       },
+      "PlaybookUploadResponse": {
+        "properties": {
+          "playbook": {
+            "$ref": "#/components/schemas/PlaybookResponse"
+          },
+          "version": {
+            "$ref": "#/components/schemas/PlaybookVersionResponse"
+          },
+          "created": {
+            "type": "boolean",
+            "title": "Created",
+            "description": "False when the content hash matched the latest version"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "coverage": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Coverage"
+          }
+        },
+        "type": "object",
+        "required": [
+          "playbook",
+          "version",
+          "created"
+        ],
+        "title": "PlaybookUploadResponse"
+      },
+      "PlaybookValidationResponse": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "base_url": {
+            "type": "string",
+            "title": "Base Url"
+          },
+          "counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Counts"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "coverage": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Coverage"
+          },
+          "flows": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Flows"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "base_url"
+        ],
+        "title": "PlaybookValidationResponse"
+      },
       "PlaybookVersionResponse": {
         "properties": {
           "id": {
@@ -1963,6 +4205,25 @@
         ],
         "title": "PlaybookVersionResponse"
       },
+      "PrdExtractResponse": {
+        "properties": {
+          "proposals": {
+            "items": {
+              "$ref": "#/components/schemas/RequirementProposal"
+            },
+            "type": "array",
+            "title": "Proposals"
+          },
+          "markdown": {
+            "type": "string",
+            "title": "Markdown",
+            "description": "The proposals as playbook Markdown, ready to paste under ## Requirements",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "PrdExtractResponse"
+      },
       "ReplayRequest": {
         "properties": {
           "overrides": {
@@ -1974,6 +4235,154 @@
         },
         "type": "object",
         "title": "ReplayRequest"
+      },
+      "ReportResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "app_id": {
+            "type": "string",
+            "title": "App Id"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "issue_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issue Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "content": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Content"
+          },
+          "markdown_artifact_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Markdown Artifact Id"
+          },
+          "html_artifact_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Html Artifact Id"
+          },
+          "pdf_artifact_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pdf Artifact Id"
+          },
+          "model_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Version"
+          },
+          "generated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "app_id",
+          "kind",
+          "status"
+        ],
+        "title": "ReportResponse"
+      },
+      "RequirementProposal": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "prd_ref": {
+            "type": "string",
+            "title": "Prd Ref"
+          },
+          "acceptance": {
+            "type": "string",
+            "title": "Acceptance"
+          },
+          "priority": {
+            "type": "string",
+            "title": "Priority"
+          },
+          "quote": {
+            "type": "string",
+            "title": "Quote"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "title",
+          "prd_ref",
+          "acceptance",
+          "priority",
+          "quote"
+        ],
+        "title": "RequirementProposal"
       },
       "RunMode": {
         "type": "string",
@@ -2303,6 +4712,161 @@
         },
         "type": "object",
         "title": "StepTimings"
+      },
+      "TraceabilityResponse": {
+        "properties": {
+          "version_id": {
+            "type": "string",
+            "title": "Version Id"
+          },
+          "playbook_id": {
+            "type": "string",
+            "title": "Playbook Id"
+          },
+          "latest_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Run Id"
+          },
+          "requirements": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Requirements"
+          },
+          "uncovered": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Uncovered"
+          }
+        },
+        "type": "object",
+        "required": [
+          "version_id",
+          "playbook_id"
+        ],
+        "title": "TraceabilityResponse"
+      },
+      "UpdateAppRequest": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "base_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Url"
+          },
+          "allowed_hosts": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Allowed Hosts"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "prd_markdown": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prd Markdown"
+          },
+          "default_mode": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RunMode"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "gate_overrides": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gate Overrides"
+          },
+          "redact_keys": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Redact Keys"
+          },
+          "reset_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reset Path"
+          }
+        },
+        "type": "object",
+        "title": "UpdateAppRequest"
       },
       "ValidationError": {
         "properties": {

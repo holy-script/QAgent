@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Run report {{ c.run.id }}</title>
+<style>
+body{font:14px/1.45 "IBM Plex Sans",system-ui,sans-serif;color:#1c2733;background:#fafbfb;max-width:900px;margin:32px auto;padding:0 16px}
+h1{font-size:22px}h2{font-size:16px;margin-top:28px;border-bottom:1px solid #c7ced5;padding-bottom:4px}
+table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid #c7ced5;padding:4px 8px;text-align:left}
+.mono{font-family:"IBM Plex Mono",monospace;font-size:12px}.meta{color:#66717d}
+</style></head><body>
+<h1>Run report</h1>
+<p class="meta">Run <span class="mono">{{ c.run.id }}</span> · {{ c.run.status }} · {{ c.run.mode }}</p>
+<p>{{ c.summary.total_findings }} findings. Issues: {{ c.summary.issues.new }} new, {{ c.summary.issues.recurring }} recurring, {{ c.summary.issues.regressed }} regressed, {{ c.summary.issues.resolved }} resolved.</p>
+<h2>Flows</h2>
+<table><tr><th>Flow</th><th>Status</th><th>Steps</th><th>Findings</th></tr>
+{% for f in c.summary.flows %}<tr><td class="mono">{{ f.flow_key }}</td><td>{{ f.status }}</td><td>{{ f.step_count }}</td><td>{{ f.findings }}</td></tr>{% endfor %}</table>
+<h2>Requirements coverage</h2>
+<table><tr><th>Requirement</th><th>Status</th><th>Covered by</th></tr>
+{% for r in c.requirements %}<tr><td><span class="mono">{{ r.key }}</span> {{ r.title }}</td><td>{{ r.status }}</td><td class="mono">{{ r.covered_by | join(", ") }}</td></tr>{% endfor %}</table>
+<h2>Findings</h2>
+{% for cat, items in c.findings_by_category.items() %}<h3>{{ cat }}</h3><ul>{% for f in items %}<li>[{{ f.severity }}] {{ f.title }} <span class="meta">({{ f.flow }}, step {{ f.step_seq }}{% if f.judged_by != "code" %}, judged by {{ f.judged_by }}{% endif %})</span></li>{% endfor %}</ul>{% endfor %}
+<h2>Performance</h2>
+<ul>{% for n in c.performance.slowest_api_calls %}<li>{{ n.method }} <span class="mono">{{ n.url }}</span>: {{ n.duration_ms }}ms</li>{% endfor %}
+{% for w in c.performance.longest_waits %}<li>Wait in {{ w.flow }} step {{ w.step_seq }}: {{ w.settle_ms }}ms</li>{% endfor %}</ul>
+<h2>Recommendations</h2>
+{% if c.recommendations %}<ul>{% for r in c.recommendations %}<li><strong>{{ r.category }}</strong> ({{ r.confidence }} confidence, effort {{ r.effort }}): {{ r.text }}<br><span class="meta">{{ r.rationale }}</span></li>{% endfor %}</ul>
+{% else %}<p>Recommendations: {{ c.recommendations_status }}.</p>{% endif %}
+<h2>Test-quality notes</h2>
+<ul><li>Escalations to Claude: {{ c.test_quality.escalations }}</li><li>Low-confidence decisions: {{ c.test_quality.low_confidence_decisions | length }}</li><li>Judged findings: {{ c.test_quality.judged_findings }}</li></ul>
+<p class="meta">Playbook hash <span class="mono">{{ c.integrity.playbook_hash }}</span> · manifest hash <span class="mono">{{ c.integrity.manifest_hash }}</span></p>
+</body></html>

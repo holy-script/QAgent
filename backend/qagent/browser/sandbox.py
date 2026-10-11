@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 from urllib.parse import urlparse
 
 from playwright.async_api import Browser, BrowserContext, Page, Playwright, async_playwright
@@ -28,6 +28,9 @@ class BrowserSandbox:
         self.page: Optional[Page] = None
         self.console_logs: List[Dict[str, Any]] = []
         self.blocked_requests: List[str] = []
+        # W3C traceparent injection: set a provider to add the header to every allowed request.
+        self.traceparent_provider: Optional[Callable[[], str]] = None
+        self.injected: Dict[str, List[str]] = {}
 
     @property
     def trace_path(self) -> Optional[Path]:
@@ -60,7 +63,12 @@ class BrowserSandbox:
 
     async def _guard(self, route) -> None:
         if self._host_allowed(route.request.url):
-            await route.continue_()
+            if self.traceparent_provider:
+                tp = self.traceparent_provider()
+                self.injected.setdefault(route.request.url, []).append(tp)
+                await route.continue_(headers={**route.request.headers, "traceparent": tp})
+            else:
+                await route.continue_()
         else:
             self.blocked_requests.append(route.request.url)
             await route.abort("blockedbyclient")

@@ -12,7 +12,8 @@ def app_out(a: m.App) -> s.AppResponse:
     return s.AppResponse(
         id=a.id, slug=a.slug, name=a.name, base_url=a.base_url, allowed_hosts=a.allowed_hosts or [],
         description=a.description, prd_markdown=a.prd_markdown, default_mode=s.RunMode(a.default_mode),
-        created_at=iso(a.created_at) or "",
+        created_at=iso(a.created_at) or "", reset_path=a.reset_path,
+        gate_overrides=a.gate_overrides or {}, redact_keys=a.redact_keys or [],
     )
 
 
@@ -32,6 +33,8 @@ def finding_out(f: m.FindingRecord) -> s.Finding:
     return s.Finding(
         id=f.id, flow_run_id=f.flow_run_id, step_seq=f.step_seq, severity=f.severity, kind=f.kind,
         title=f.title, expected=f.expected, actual=f.actual, evidence=f.evidence or {},
+        check_key=f.check_key, check_result_id=f.check_result_id, requirement_keys=f.requirement_keys or [],
+        fingerprint=f.fingerprint, judged_by=f.judged_by, issue_id=f.issue_id,
     )
 
 

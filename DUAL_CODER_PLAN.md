@@ -37,7 +37,7 @@ NEON_S3_BUCKET="qagent-artifacts"   # the dev project currently uses an existing
 # --- Jev (TypeSafe AI) ---
 TYPESAFE_API_KEY=""
 TYPESAFE_BASE_URL="https://api.typesafe.ai"
-JEV_MODEL="jev-latest"            # GET /v1/models lists the valid names (jev-latest, jev-preview). "jev-1.13.0" does not exist.
+JEV_MODEL="jev-1.13.0"            # pin the concrete version; GET /v1/models lists aliases (jev-latest, jev-preview) that currently resolve to it
 JEV_MAX_CONCURRENCY="4"
 
 # --- Claude on Bedrock ---
@@ -861,7 +861,7 @@ Bugs are toggled with `DEMO_BUGS=1,2,3,4,5` or at runtime with `POST /__bugs {"1
 
 - **Postgres**: connect with `psycopg` using both the pooled and the direct URL, and run `select version()`.
 - **Object storage**: `HeadBucket`, then `CreateBucket` if missing; put, get, and delete a test object; generate a presigned URL and fetch it with `curl`.
-- **Jev**: `GET /v1/models` with the API key lists the valid model names (use `jev-latest` or `jev-preview`). Send one real `POST /v1/systemone` with a `choice` question and confirm the response shape. Record the model version the API reports.
+- **Jev**: `GET /v1/models` lists the aliases (`jev-latest`, `jev-preview`). Send one real `POST /v1/systemone` with a `choice` question with the pinned `JEV_MODEL` and confirm the response shape. Record the concrete model version the API reports (aliases resolve to it).
 - **Bedrock**: send one Converse call with forced tool use against the configured model or inference profile, in the configured region. Confirm the tool input comes back as JSON.
 - **Browser**: launch Chromium (or installed Chrome) headless, load the demo shop, take a screenshot.
 - Write the results and the pinned model versions to `ASSUMPTIONS.md`.
@@ -875,7 +875,7 @@ Bugs are toggled with `DEMO_BUGS=1,2,3,4,5` or at runtime with `POST /__bugs {"1
 | **B0** | P0 | Domain schemas, event models, fixture routes, `/dev/sse-replay`, OpenAPI export | ✅ | Coder 2 can generate types and replay a recorded run |
 | **B1** | P0 | Neon engines, Alembic migrations, `objects.py`, upload queue | ✅ | `make migrate` passes; upload tests pass |
 | **B2** | P0 | Decision layer: `JevDecider` (retry 429/529, semaphore, model-version capture), `Stub`, `Recording`, `Replay` | ✅ (Jev rewritten against the real System One API) | Unit tests pass against a recorded tape |
-| **B3** | P0 | Playbook parser (`markdown-it-py`), formula validation (`simpleeval`), sample playbook | 🟡 formulas with bindings and `kind`; seven-category format below | Parser and formula tests pass |
+| **B3** | P0 | Playbook parser (`markdown-it-py` tokens), formula validation (`simpleeval`), sample playbook | ✅ (superseded by B12) | Parser and formula tests pass |
 | **B4** | P0 | Browser: sandbox (trace, HAR, console, host allow-list), extractor (≤40), executor, network recorder, wait frames | ✅ | Extractor and sandbox tests pass |
 | **B5** | P0 | Engine as a real **LangGraph** `StateGraph` + langchain-core runnables + callback spans + Postgres checkpointer; gating, budgets, structlog, persistence sink | ✅ | `qagent.cli run` writes rows, spans, checkpoints and artifacts |
 | **B6** | P0 | Verification: DOM, network 5xx, formula, timing and settle checks | ✅ | Bugs 1, 3, 4 and 5 produce findings |
@@ -884,16 +884,16 @@ Bugs are toggled with `DEMO_BUGS=1,2,3,4,5` or at runtime with `POST /__bugs {"1
 | **B9** | P1 | `ClaudeDecider` (forced tool use), escalation in the graph, baseline mode, `/playbooks/normalize` | ✅ | Baseline and hybrid runs complete |
 | **B10** | P1 | `make bench`: p50/p95 latency, cost per step, candidate scaling (10, 20, 40) | ✅ | Figures recorded in `ASSUMPTIONS.md` |
 | **B11** | P2 | Replay endpoint with overrides | ✅ (Neon "pin for demo" branch not done) | Replay reproduces findings from the tape |
-| **B12** | P0 | **Seven-category playbook format** (section 5): parser, `schema.py`, validation rules, `playbook_items` and `item_links` tables, coverage warnings | ⬜ | Sample `checkout.md` parses into all categories; validation errors block confirm |
-| **B13** | P0 | **Checks package** (`checks/`): formulas with tolerance and `verifies`, rule-based UX rules (`consistent_value`, `format`, `max_wait`, `no_console_errors`), expectations, `check_results` rows with bound inputs | ⬜ | Every check writes a row with its inputs and sources |
-| **B14** | P0 | **Edge-case variants** (`add-to-cart#EC-1`) and gotcha machine hints (`wait_for`, `ignore_console`) | ⬜ | Variants run with their own test data and history |
-| **B15** | P0 | **Findings → issues** dedupe: fingerprints, `issues` table, open/resolved/regressed | ⬜ | A second run attaches to the same issue; fixing a bug resolves it |
-| **B16** | P0 | **Evidence graph**: `evidence_links`, before/after/annotated screenshots, step attribution of network calls, `manifest.json` with sha256 | ⬜ | `GET /findings/{id}/evidence` returns every linked artifact |
-| **B17** | P0 | **Report engine**: bug reports (code-built facts), run report, steps-to-reproduce, grounded recommendations (`grounding.py`), MD/HTML export, `report.*` events | ⬜ | Report generates after a run; ungrounded recommendations are dropped |
-| **B18** | P0 | **Traceability + routes**: `/traceability`, `/issues`, `/reports`, `/apps/{id}/runs`, artifact `/url` and `/content`, flows history | ⬜ | Frontend can render matrix, issues and reports |
-| **B19** | P1 | Jev batched questions (`next_action`, `prev_step_ok`, `risky`, judged UX `noul`) and noul confidence gating; `plan` node with Claude planner; reasoning-example selection and tape recording | ⬜ | Hybrid run uses one Jev call per step with batched questions |
-| **B20** | P1 | PDF export, `traceparent` injection, axe-core a11y, PRD extraction, `make doctor` preflight | ⬜ | Preflight passes; PDF opens |
-| **B21** | P1 | Event-name migration to the dotted names in section 12 (coordinate with Coder 2) | ⬜ | Frontend consumes new names |
+| **B12** | P0 | **Seven-category playbook format** (section 5): `parser.py`, `schema.py`, `validate.py`, `coverage.py`, `versioning.py`, `playbook_items` and `item_links` tables, `/playbooks/validate`, errors block upload | ✅ | `playbooks/checkout.md` parses into all categories; validation errors return 422 |
+| **B13** | P0 | **Checks package** (`checks/`): formulas with tolerance and `verifies`; UX rules `consistent_value`, `format`, `max_wait`, `no_console_errors`, `a11y`, `judged`; judged expectations (Jev then Claude); network and timing checks; a `check_results` row per check with bound inputs and sources | ✅ | Every check writes a row; API bindings cite the recorded call |
+| **B14** | P0 | **Edge-case variants** (`add-to-cart#EC-1`) and gotcha machine hints (`wait_for`, `ignore_console`) | ✅ | Variants run with their own test data and history |
+| **B15** | P0 | **Findings → issues** dedupe: fingerprints, `issues` table, open/resolved/regressed | ✅ | Second run recurs; fixing bugs resolves; reintroducing regresses |
+| **B16** | P0 | **Evidence graph**: `evidence_links`, before/after/annotated screenshots (Pillow), step attribution of network calls, `manifest.json` with sha256 | ✅ | `GET /findings/{id}/evidence` returns every linked artifact |
+| **B17** | P0 | **Report engine**: bug reports (code-built facts), run report, steps-to-reproduce, grounded recommendations (`grounding.py`), MD/HTML/PDF export, `report.*` events | ✅ | Report generates after a run; ungrounded recommendations are dropped |
+| **B18** | P0 | **Traceability + routes**: `/traceability`, `/issues`, `/reports`, app-scoped runs and flows, checks, steps, evidence, artifact `/url` and `/content` | ✅ | Frontend can render matrix, issues and reports |
+| **B19** | P1 | Jev batched questions (`next_action` with `STEP_DONE`/`STUCK`, `risky`, `prev_step_ok`), noul confidence for judging, reasoning-example selection and tape ids, gotcha hints | 🟡 all built except the Claude **planner** (the `plan` node only validates) | Hybrid run uses one Jev call per step with batched questions |
+| **B20** | P1 | PDF export, `traceparent` injection, axe-core a11y, PRD extraction, `make doctor` preflight | ✅ | Preflight passes; PDF opens |
+| **B21** | P1 | Event-name migration to the dotted names in section 12 (coordinate with Coder 2) | ✅ backend (`divergence` added; `artifact.uploaded` not emitted) | Frontend consumes new names |
 
 ### Coder 2: frontend (`fe` branch)
 
@@ -947,35 +947,53 @@ gitGraph
 
 ## 16. Implementation status (as built on the `be` branch)
 
-What exists today, and where it differs from the target in sections 5–12.
+What exists today, and where it differs from the target in sections 5–12. **55 backend tests pass**; a live hybrid run
+(real Jev, Claude, Neon Postgres and object storage) produced 8 findings, 8 issues, 8 bug reports and a run report.
 
-**Built and tested (37 backend tests)**
+**Built and tested**
 
-- Demo shop with all five bugs, per-session carts, `/__reset` and `/__bugs`.
-- LangGraph engine: `plan → begin_step → observe → decide → gate → (escalate → gate) → act → settle → verify → finish`, parallel flows (`FLOW_MAX_PARALLEL`), step/time budgets, cancel, host allow-list, Postgres checkpointer in the `langgraph` schema, spans for flow, node and model runs via a LangChain callback handler.
-- Deciders: Jev (System One API, `choice` question), Claude (Bedrock Converse, forced tool use), Stub, Recording and Replay. Hybrid escalates medium and low confidence steps to Claude. Navigation steps (`Open /path`) make no model call.
-- Checks today: formula (with bindings `api:`/`ui:`/`const:` and `kind: dom`), network 5xx, timing and unsettled-spinner findings.
-- API: apps, playbook upload with content-hash versioning, runs, SSE with `?after=` and `Last-Event-ID` resume, flows, findings, network, spans, logs, artifacts (presigned redirect, or local-disk fallback), replay, `/playbooks/normalize`, health. All routes also answer under an `/api` prefix, which is what screenshot and artifact URLs in events use.
-- Persistence: sink projects events into runs, flow runs, steps, step timings, decisions, findings, network calls, logs and spans; serialized so sequence numbers stay ordered.
-- Replay from the decision tape (matching by a hash of step, intent, URL and candidates), `make bench`, and measured figures in `ASSUMPTIONS.md`.
+- **Demo shop** with five bugs, per-session carts, `/__reset`, `/__bugs`, `/__traces` (logs `traceparent`).
+- **Engine**: LangGraph `plan → begin_step → observe → decide → gate → (escalate → gate) → act → settle → verify → finish`,
+  parallel flows, budgets, cancel, host allow-list, Postgres checkpointer (`langgraph` schema), node and model spans via a
+  LangChain callback handler, edge-case variants, W3C `traceparent` injection, gotcha hints (`wait_for`, `ignore_console`).
+- **Playbooks**: seven categories with stable IDs, links, validation (errors block, warnings don't), coverage,
+  content-hash versioning, items and links persisted per version, `/playbooks/validate`, Claude normalize and PRD extraction
+  (proposals are kept only if their quote appears in the PRD).
+- **Checks**: formulas (with tolerance), `consistent_value`, `format`, `max_wait`, `no_console_errors`, `a11y` (bundled axe-core),
+  judged rules and expectations (Jev `noul`, escalating to Claude with screenshots), network 5xx/4xx, slow calls, settle and step timing.
+  Every check writes a `check_results` row whose inputs record each bound value, its source, and the network call it came from.
+- **Findings and issues**: requirement keys, severity raised to the requirement's priority (judged findings capped at medium),
+  fingerprints, issues with open / resolved / regressed.
+- **Evidence**: before, after and annotated screenshots, wait frames, DOM, network call bodies, decisions, spans, trace.zip,
+  `manifest.json` with sha256 per artifact; the manifest hash is cited in reports.
+- **Reports**: bug report per issue (steps to reproduce built from recorded steps, expected vs actual with inputs, evidence,
+  reproducibility, Claude impact and suspected cause that must cite real evidence IDs) and a run report (flows, requirement
+  coverage, findings by category, performance, recommendations grounded by `grounding.py`, test-quality notes); Markdown, HTML
+  (screenshots embedded) and PDF export; `report.generating` / `report.ready` events end the SSE stream.
+- **API** (41 paths): apps (with summary, PATCH, DELETE, derived names), app-scoped runs and flows, playbooks, runs, SSE with
+  `?after=` and `Last-Event-ID`, steps, checks, findings, evidence, network (filters and detail), spans, logs, issues, reports,
+  traceability, artifacts (by path and by id: `/url` and proxied `/content`), replay. All routes also answer under `/api`.
+- **Decision layer**: Jev (System One API, batched questions), Claude (Bedrock Converse, forced tool use, images), Stub,
+  Recording and Replay (divergence reported when the page differs from the tape).
+- **Tooling**: `make doctor` preflight (Postgres pooled and direct, object storage with presign, Jev, Bedrock, browser), `make bench`.
 
-**Differences from the target**
+**Known gaps and differences from the target**
 
 | Area | Today | Target |
 |---|---|---|
-| Playbook format | Legacy single-category format (`## Flow:`, `### Steps`, `### Formulas` with inline bindings) | Seven categories with stable IDs and links (B12) |
-| Findings | One `findings` row per failed check, no fingerprint or issue | `check_results`, fingerprints, issues, evidence links (B13, B15, B16) |
-| Jev usage | One `choice` question per step | Batched `next_action`, `prev_step_ok`, `risky` and judged `noul` questions (B19) |
-| Planner | `plan` node only validates the flow | Claude planner with reasoning examples (B19) |
-| Screenshots | One post-step screenshot | Before, after and annotated (B16) |
-| Event names | Frozen B0 names (`STEP_OBSERVED`, …) | Dotted names (B21) |
-| Route paths | `/runs`, `/apps/{slug}`, `/playbooks` (flat) | App-scoped paths in section 11 (B18) |
-| Reports, issues, traceability, PDF, traceparent, axe | Not built | B15–B20 |
-| Neon "pin for demo" branch | Not done | B11 follow-up |
+| Planner | `plan` node only validates the flow; steps run as written | Claude planner with reasoning examples |
+| Judged check replay | Jev/Claude judge and report calls are not written to the tape, so a replay re-asks them | Recorded on the tape |
+| Determinism | Fixed viewport; target reset once per run (`reset_path`), not before every flow (flows share the demo shop's payment counter) | Frozen clock, animations disabled, reset per flow |
+| Uploads | `artifacts_complete` is set when a step is verified, not when its uploads finish; no `artifact.uploaded` event | Set by the upload worker, with the event |
+| Retention, upload retry | Not built (a failed upload is swallowed) | Backoff retries, per-app retention (P2) |
+| Redaction | App `redact_keys` are masked in stored request and response bodies; headers are never stored | Same |
+| API paths | Both flat (`/runs`, `/playbooks`) and app-scoped paths exist | App-scoped only |
+| Neon branch pin | Not done | "Pin for demo" (P2) |
+| Existing Neon data | Events written before the dotted-name migration keep the old uppercase names | n/a |
 
 **Environment notes**
 
-- Jev model names are `jev-latest` and `jev-preview`; `jev-1.13.0` is rejected.
-- The dev project's object storage bucket is `captures`; `qagent-artifacts` does not exist there yet (preflight should create it).
+- Jev accepts the concrete version `jev-1.13.0` and the aliases `jev-latest` / `jev-preview`, which currently resolve to it. The earlier 400 errors came from a wrong request shape, not the model name.
+- The dev project's object storage bucket is `captures`; `qagent-artifacts` does not exist there (preflight creates a missing bucket).
 - The Playwright Chromium download can time out on restricted networks; the sandbox then falls back to installed Google Chrome.
-- Tests and CLI runs write to the Neon database configured in `.env`; engine and API tests use in-memory SQLite.
+- Tests and CLI runs write to the Neon database configured in `.env`; engine and API tests use a per-test SQLite file.

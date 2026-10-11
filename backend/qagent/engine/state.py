@@ -24,6 +24,8 @@ class FlowState(TypedDict, total=False):
     tier: str                      # AUTO | ESCALATE | STOP
     escalated: bool
     acted: bool
+    step_done: bool                # the decider reported the step is already satisfied
+    target_bbox: Optional[Dict[str, float]]
     settled: bool
     step_status: str               # passed | failed | blocked
     timings: Dict[str, float]
