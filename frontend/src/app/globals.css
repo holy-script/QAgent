@@ -1,26 +1,47 @@
 @import "tailwindcss";
 
+/* Design tokens (TRACKS.md F1): deep slate surfaces, cyan/violet/emerald accents. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #090d16;
+  --foreground: #e6eaf2;
+  --surface: #0f1523;
+  --surface-2: #151c2e;
+  --border: rgb(255 255 255 / 0.1);
+  --muted: #8b95a9;
+  --accent: #06b6d4;
+  --violet: #8b5cf6;
+  --ok: #10b981;
+  --warn: #f59e0b;
+  --bad: #f43f5e;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--border);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-violet: var(--violet);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+html { color-scheme: dark; }
+body { background: var(--background); color: var(--foreground); font-family: var(--font-sans), system-ui, sans-serif; }
+::selection { background: rgb(6 182 212 / 0.35); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+@keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgb(6 182 212 / 0.55); } 100% { box-shadow: 0 0 0 12px rgb(6 182 212 / 0); } }
+.pulse-ring { animation: pulse-ring 1.4s ease-out infinite; }
+@keyframes slide-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.slide-in { animation: slide-in 0.25s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .pulse-ring, .slide-in { animation: none; } }
+
+/* React Flow dark skin */
+.react-flow { --xy-background-color: transparent; --xy-edge-stroke: #475569; --xy-controls-button-background-color: var(--surface-2); --xy-controls-button-color: var(--foreground); --xy-controls-button-border-color: var(--border); }
+.react-flow__attribution { display: none; }
