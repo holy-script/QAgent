@@ -1,8 +1,11 @@
 "use client";
 import { X } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Badge, Card, SeverityBadge, StatusPill, cn, fmtBytes, fmtMs } from "@/components/ui";
-import type { Step, StepTimings } from "@/lib/api/types";
+import { USE_MOCK } from "@/lib/api/client";
+import { assetUrl, useStepArtifacts } from "@/lib/api/live";
+import type { Candidate, Step, StepTimings } from "@/lib/api/types";
 import type { RunView } from "@/lib/run-state";
 
 /* eslint-disable @next/next/no-img-element */
@@ -11,7 +14,25 @@ const PHASES: [keyof StepTimings, string, string][] = [
   ["gate_ms", "gate", "bg-warn"], ["act_ms", "act", "bg-accent"], ["settle_ms", "settle", "bg-emerald-400"], ["verify_ms", "verify", "bg-ok"],
 ];
 
-export function StepDrawer({ step, view, onClose }: { step: Step; view: RunView; onClose: () => void }) {
+/** Candidates the decider saw, from the stored candidates.json (backend shape -> overlay rects). */
+async function loadCandidates(url: string): Promise<Candidate[]> {
+  const res = await fetch(assetUrl(url));
+  if (!res.ok) return [];
+  const raw = (await res.json()) as { id: number; tag: string; label: string; bounding_box?: { x: number; y: number; width: number; height: number } | null }[];
+  return raw.filter((c) => c.bounding_box).map((c) => ({ id: c.id, role: c.tag, label: c.label, rect: [c.bounding_box!.x, c.bounding_box!.y, c.bounding_box!.width, c.bounding_box!.height] }));
+}
+
+export function StepDrawer({ step, view, onClose, runId }: { step: Step; view: RunView; onClose: () => void; runId: string }) {
+  const live = !USE_MOCK;
+  const { data: arts } = useStepArtifacts(runId, step.flow_key, step.seq, live && step.status !== "running");
+  const [side, setSide] = useState<"after" | "before">("after");
+  const candUrl = arts?.find((a) => a.kind === "candidates")?.url;
+  const { data: liveCandidates } = useQuery({ queryKey: ["candidates", candUrl], enabled: !!candUrl, queryFn: () => loadCandidates(candUrl!) });
+  const candidates = step.candidates.length ? step.candidates : (liveCandidates ?? []);
+  const beforeUrl = arts?.find((a) => a.kind === "screenshot_before")?.url;
+  const waitUrls = step.wait_frames.length ? step.wait_frames : (arts?.filter((a) => a.kind === "wait_frame").map((a) => assetUrl(a.url)) ?? []);
+  const shown = side === "before" && beforeUrl ? assetUrl(beforeUrl) : step.screenshot;
+
   useEffect(() => {
     const h = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", h);
@@ -35,10 +56,18 @@ export function StepDrawer({ step, view, onClose }: { step: Step; view: RunView;
           <button onClick={onClose} aria-label="Close" className="rounded-md p-1 text-muted hover:bg-white/10"><X className="size-5" /></button>
         </div>
 
-        {step.screenshot && (
+        {live && beforeUrl && (
+          <div className="flex gap-1" role="group" aria-label="Screenshot">
+            {(["before", "after"] as const).map((k) => (
+              <button key={k} onClick={() => setSide(k)} aria-pressed={side === k}
+                className={cn("rounded-md border px-2.5 py-1 text-xs capitalize", side === k ? "border-accent bg-accent/10 text-accent" : "border-line text-muted hover:bg-white/5")}>{k}</button>
+            ))}
+          </div>
+        )}
+        {shown && (
           <div className="relative overflow-hidden rounded-lg border border-line bg-black/30">
-            <img src={step.screenshot} alt="Step screenshot" className="w-full" />
-            {step.candidates.map((c) => {
+            <img src={shown} alt="Step screenshot" className="w-full" />
+            {candidates.map((c) => {
               const [x, y, w, h] = c.rect;
               const chosen = c.id === step.action_id;
               return <div key={c.id} title={`#${c.id} ${c.role}: ${c.label}`} className={cn("absolute border", chosen ? "border-2 border-accent bg-accent/15" : "border-violet/60")}
@@ -48,9 +77,9 @@ export function StepDrawer({ step, view, onClose }: { step: Step; view: RunView;
             })}
           </div>
         )}
-        {step.wait_frames.length > 0 && (
-          <Section title={`Wait frames (${step.wait_frames.length})`}>
-            <div className="flex gap-2">{step.wait_frames.map((w, i) => <img key={i} src={w} alt={`Wait frame ${i + 1}`} className="h-24 rounded border border-line" />)}</div>
+        {waitUrls.length > 0 && (
+          <Section title={`Wait frames (${waitUrls.length})`}>
+            <div className="flex gap-2 overflow-x-auto">{waitUrls.map((w, i) => <img key={i} src={w} alt={`Wait frame ${i + 1}`} className="h-24 rounded border border-line" />)}</div>
           </Section>
         )}
 
@@ -69,7 +98,7 @@ export function StepDrawer({ step, view, onClose }: { step: Step; view: RunView;
                   </div>
                   <div className="text-muted">{d.question}</div>
                   {top.map(([id, p]) => {
-                    const c = step.candidates.find((x) => String(x.id) === id);
+                    const c = candidates.find((x) => String(x.id) === id);
                     return (
                       <div key={id} className="flex items-center gap-2 text-xs">
                         <span className="w-28 truncate">{c ? `${id} · ${c.label}` : id}</span>

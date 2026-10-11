@@ -5,6 +5,9 @@ import { useState } from "react";
 import { Badge, Button, Card, ErrorState, Loading, SeverityBadge, StatusPill, ago, cn, inputCls } from "@/components/ui";
 import { useConfirmPlaybook, usePlaybook, useSavePlaybook } from "@/lib/api/hooks";
 import type { PlaybookVersion } from "@/lib/api/types";
+import { PlaybookEditor } from "@/components/live/playbook-editor";
+import { USE_MOCK } from "@/lib/api/client";
+import type { Validation } from "@/lib/api/live";
 
 export default function ReviewPlaybook() {
   const { slug, id } = useParams<{ slug: string; id: string }>();
@@ -13,6 +16,7 @@ export default function ReviewPlaybook() {
   const confirm = useConfirmPlaybook(slug);
   const [sel, setSel] = useState<string>();
   const [draft, setDraft] = useState<string | null>(null);
+  const [validation, setValidation] = useState<Validation>();
   if (isPending) return <Loading />;
   if (error) return <ErrorState error={error} retry={refetch} />;
 
@@ -31,7 +35,7 @@ export default function ReviewPlaybook() {
             {draft === null ? <Button onClick={() => setDraft(v.raw_markdown)}>Edit</Button> : (
               <>
                 <Button onClick={() => setDraft(null)}>Discard</Button>
-                <Button variant="primary" disabled={save.isPending || draft === v.raw_markdown}
+                <Button variant="primary" disabled={save.isPending || draft === v.raw_markdown || (validation?.errors?.length ?? 0) > 0}
                   onClick={() => save.mutate({ markdown: draft, playbookId: pb.id }, { onSuccess: () => { setDraft(null); setSel(undefined); } })}>
                   Save as v{pb.versions.length + 1}
                 </Button>
@@ -58,9 +62,11 @@ export default function ReviewPlaybook() {
         )}
 
         <div className="grid gap-4 xl:grid-cols-2">
-          <Card className="overflow-hidden">
+          <Card className={cn("overflow-hidden", draft !== null && !USE_MOCK && "xl:col-span-2")}>
             <div className="border-b border-line px-4 py-2 text-xs uppercase tracking-wide text-muted">{draft === null ? "Markdown" : "Editing"}</div>
-            {draft !== null ? (
+            {draft !== null && !USE_MOCK ? (
+              <div className="p-3"><PlaybookEditor value={draft} onChange={setDraft} slug={slug} onValidation={setValidation} /></div>
+            ) : draft !== null ? (
               <textarea aria-label="Edit Markdown" className={cn(inputCls, "h-[32rem] rounded-none border-0 font-mono text-xs")} value={draft} onChange={(e) => setDraft(e.target.value)} spellCheck={false} />
             ) : (
               <pre className="max-h-[32rem] overflow-auto py-2 font-mono text-xs leading-5">

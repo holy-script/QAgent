@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "gen:api": "openapi-typescript ${NEXT_PUBLIC_API_URL:-http://localhost:8000}/openapi.json -o src/lib/api/schema.d.ts"
+    "gen:api": "openapi-typescript ${NEXT_PUBLIC_API_URL:-../backend/openapi.json} -o src/lib/api/schema.d.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.104.1",

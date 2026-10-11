@@ -7,7 +7,7 @@ import { toApp, toFlowHistory, toPlaybook, toRun } from "./adapter";
 export const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "";
 export const USE_MOCK = !API_URL;
 
-async function http<T>(path: string, init?: RequestInit): Promise<T> {
+export async function http<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(API_URL + path, { ...init, headers: { "Content-Type": "application/json", ...init?.headers } });
   if (!res.ok) throw new ApiError(res.status, detailOf(await res.text().catch(() => "")) || res.statusText);
   return res.json();

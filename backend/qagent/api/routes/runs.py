@@ -211,3 +211,29 @@ async def create_app_run(app_id: str, payload: CreateRunRequest, manager: RunMan
     except RunStartError as exc:
         raise HTTPException(status_code=exc.status, detail=str(exc))
     return run_out(run)
+
+
+@router.get("/{run_id}/artifacts")
+async def run_artifacts(run_id: str, flow_key: Optional[str] = None, step_seq: Optional[int] = None,
+                        kind: Optional[str] = None, session: AsyncSession = Depends(get_session)):
+    """Artifacts of a run (optionally one step): id, kind, key and a stable URL, e.g. to list a step's wait frames."""
+    from urllib.parse import quote
+    run = await _get_run(session, run_id)
+    flows = {f.id: f.flow_key for f in (await session.execute(
+        select(m.FlowRun).where(m.FlowRun.run_id == run_id))).scalars().all()}
+    stmt = select(m.Artifact).where(m.Artifact.run_id == run_id)
+    if step_seq is not None:
+        stmt = stmt.where(m.Artifact.step_seq == step_seq)
+    if kind:
+        stmt = stmt.where(m.Artifact.kind == kind)
+    out = []
+    for a in (await session.execute(stmt.order_by(m.Artifact.object_key))).scalars().all():
+        fk = flows.get(a.flow_run_id or "")
+        if flow_key and fk != flow_key:
+            continue
+        marker = f"/flows/{fk}/" if fk else ""
+        rel = a.object_key.split(marker, 1)[1] if marker and marker in a.object_key else None
+        out.append({"id": a.id, "kind": a.kind, "flow_key": fk, "step_seq": a.step_seq, "content_type": a.content_type,
+                    "size_bytes": a.size_bytes, "object_key": a.object_key,
+                    "url": f"/api/artifacts/{run_id}/flows/{quote(fk, safe='')}/{rel}" if rel else f"/api/artifacts/{a.id}/content"})
+    return out

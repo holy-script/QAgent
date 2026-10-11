@@ -17,8 +17,15 @@ router = APIRouter(prefix="/artifacts", tags=["Artifacts"])
 _TEXTUAL = ("json", "html", "text", "xml", "javascript", "markdown", "x-ndjson")
 
 
+def _is_textual(key: str) -> bool:
+    mime = mimetypes.guess_type(key)[0] or ""
+    return any(t in mime for t in _TEXTUAL) or key.endswith((".jsonl", ".md"))
+
+
 async def _serve(key: str) -> Response:
-    if object_store.is_configured():
+    # Images, trace.zip and PDFs redirect to a presigned URL; JSON/HTML/text are proxied because the browser
+    # cannot fetch() a cross-origin presigned URL without bucket CORS rules.
+    if object_store.is_configured() and not _is_textual(key):
         return RedirectResponse(object_store.get_presigned_url(key), status_code=307)
     data = object_store.get_bytes(key)
     if data is None:

@@ -1,5 +1,5 @@
 "use client";
-import { ChevronLeft, Pause, Play, RotateCcw, Square } from "lucide-react";
+import { ChevronLeft, FileText, History, Pause, Play, RotateCcw, Square } from "lucide-react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -11,7 +11,8 @@ import { NetworkTab } from "@/components/run/network-tab";
 import { StepDrawer } from "@/components/run/step-drawer";
 import { TraceTab } from "@/components/run/trace-tab";
 import { Badge, Button, ErrorState, Loading, Metric, StateTabs, StatusPill, fmtMs, fmtUsd } from "@/components/ui";
-import { api } from "@/lib/api/client";
+import { ReplayPanel } from "@/components/live/replay-panel";
+import { api, USE_MOCK } from "@/lib/api/client";
 import { useRun } from "@/lib/api/hooks";
 import type { Run } from "@/lib/api/types";
 import { SPEEDS, useRunStream } from "@/lib/use-run-stream";
@@ -30,6 +31,7 @@ export default function RunPage() {
 
 function RunBody({ slug, run, replay, onReplay }: { slug: string; run: Run; replay: boolean; onReplay: () => void }) {
   const { view, speed, setSpeed, paused, togglePause, progress } = useRunStream(run, replay);
+  const [tapePanel, setTapePanel] = useState(false);
   // Deep links: ?tab=graph&step=checkout:3
   const q = useSearchParams();
   const [tab, setTab] = useState<Tab>((q.get("tab") as Tab) || "flows");
@@ -71,9 +73,13 @@ function RunBody({ slug, run, replay, onReplay }: { slug: string; run: Run; repl
               <Button variant="danger" onClick={() => api.stopRun(live.id)}><Square className="size-4" />Stop</Button>
             </>
           )}
-          {!running && <Button onClick={onReplay}><RotateCcw className="size-4" />Replay</Button>}
+          {!running && !USE_MOCK && <Link href={`/apps/${slug}/runs/${live.id}/report`} className="inline-flex items-center gap-2 rounded-lg border border-accent/40 bg-accent/10 px-3.5 py-2 text-sm font-medium text-accent hover:bg-accent/15"><FileText className="size-4" />View report</Link>}
+          {!running && !USE_MOCK && <Button onClick={() => setTapePanel((v) => !v)} aria-expanded={tapePanel}><History className="size-4" />Re-run from tape</Button>}
+          {!running && <Button onClick={onReplay}><RotateCcw className="size-4" />Replay view</Button>}
         </div>
       </div>
+
+      {tapePanel && !USE_MOCK && <ReplayPanel slug={slug} runId={live.id} onClose={() => setTapePanel(false)} />}
 
       {running && progress.n > 0 && (
         <div className="h-1 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-accent transition-all" style={{ width: `${(progress.i / progress.n) * 100}%` }} /></div>
@@ -102,9 +108,9 @@ function RunBody({ slug, run, replay, onReplay }: { slug: string; run: Run; repl
       {tab === "network" && <NetworkTab view={view} onOpen={open} />}
       {tab === "trace" && <TraceTab view={view} />}
       {tab === "logs" && <LogsTab view={view} live={running} onOpen={open} />}
-      {tab === "findings" && <FindingsTab view={view} onOpen={open} />}
+      {tab === "findings" && <FindingsTab view={view} onOpen={open} slug={slug} />}
 
-      {selStep && <StepDrawer step={selStep} view={view} onClose={() => setSel(null)} />}
+      {selStep && <StepDrawer step={selStep} view={view} runId={run.id} onClose={() => setSel(null)} />}
     </div>
   );
 }

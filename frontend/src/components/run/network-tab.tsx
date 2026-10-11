@@ -1,6 +1,8 @@
 "use client";
 import { Fragment, useState } from "react";
 import { Badge, Empty, cn, fmtBytes, fmtMs } from "@/components/ui";
+import { CallBodies } from "@/components/live/call-bodies";
+import { USE_MOCK } from "@/lib/api/client";
 import type { RunView } from "@/lib/run-state";
 
 export function NetworkTab({ view, onOpen }: { view: RunView; onOpen: (flow: string, seq: number) => void }) {
@@ -29,9 +31,11 @@ export function NetworkTab({ view, onOpen }: { view: RunView; onOpen: (flow: str
                   </tr>
                   {open === c.id && (
                     <tr><td colSpan={6} className="bg-black/30 px-4 py-3">
-                      <div className="grid gap-3 md:grid-cols-2">
-                        <Body title="Request" body={c.request_body} /><Body title="Response" body={c.response_body} />
-                      </div>
+                      {USE_MOCK ? (
+                        <div className="grid gap-3 md:grid-cols-2">
+                          <Body title="Request" body={c.request_body} /><Body title="Response" body={c.response_body} />
+                        </div>
+                      ) : <CallBodies callId={c.id} />}
                     </td></tr>
                   )}
                 </Fragment>

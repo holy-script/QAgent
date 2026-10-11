@@ -24,7 +24,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <span className="grid size-7 place-items-center rounded-lg bg-gradient-to-br from-accent to-violet text-slate-950"><Activity className="size-4" /></span>
               QAgent
             </Link>
-            <span className="ml-auto text-xs text-muted">{USE_MOCK ? "Fixture data · no backend" : "Live API"}</span>
+            <span className="ml-auto flex items-center gap-3 text-xs text-muted"><kbd className="rounded border border-line px-1.5 py-0.5">Ctrl K</kbd>{USE_MOCK ? "Fixture data · no backend" : "Live API"}</span>
           </div>
         </header>
         <Providers>

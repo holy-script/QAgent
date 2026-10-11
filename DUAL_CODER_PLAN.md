@@ -980,17 +980,20 @@ What exists today, and where it differs from the target in sections 5–12. **55
 **Integration (branch `integration`: `be` + `fe`)**
 
 - The frontend runs against the real API when `NEXT_PUBLIC_API_URL` is set (`make dev`); without it, on in-browser fixtures (`make dev-mock`).
-- `frontend/src/lib/api/adapter.ts` maps backend DTOs and dotted SSE events to the UI's types. Driving the UI with a browser
-  confirmed: app list, playbooks, starting a run, live run page, revisiting a finished run, with no console errors from the integration.
-- Not yet shown in the UI: candidate overlays, wait frames, network bodies, issues, reports, traceability, evidence, per-category playbook editor.
+- `frontend/src/lib/api/adapter.ts` maps backend DTOs and dotted SSE events to the original UI types; new pages use types generated from `backend/openapi.json`.
+- `scripts/e2e_pages.py` drives 23 checks in a real browser (issues, bug report, copy as issue, evidence, network bodies, step drawer, report, traceability, overview, playbook editor, validation blocking, command palette, re-run from tape, PRD extraction, normalize); all pass with no page errors or failed API calls.
 
-**Frontend task status (Coder 2's branch, merged here)**
+**Frontend task status**
 
 | Code | Status |
 |---|---|
-| F0, F1, F2, F3, F4, F5, F7 | Built on fixtures with a mock SSE replay (pre-dates the seven-category playbooks, issues, reports and evidence) |
-| F6 | 🟡 Started: list/create/run/watch flows work against the real API; the gaps above remain |
-| F8, F9 | Not started |
+| F0-F5, F7 | ✅ Built by Coder 2 on fixtures with a mock SSE replay |
+| F6 | ✅ Real API end to end: list/create/run/watch, step drawer with before/after, candidates and wait frames, network bodies, evidence |
+| New pages for B12-B18 | ✅ Issues and issue page (bug report, Copy as issue, exports), run report, traceability matrix, evidence panel, Overview coverage and open issues |
+| Playbook editor (section 13) | ✅ Category tabs, add forms, live validation, coverage panel, raw view, PRD extraction, normalize diff. Existing items are removed and re-added (no inline edit) |
+| F8 | 🟡 Command palette done; Compare still on the original data shape |
+| F9 | 🟡 Re-run from tape with overrides done; the tape editor is not built |
+| Design direction (section 13) | ⬜ The UI keeps Coder 2's dark theme; Steel/Plex palette and the tape timeline are not built |
 
 **Known gaps and differences from the target**
 

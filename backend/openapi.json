@@ -1207,6 +1207,95 @@
         }
       }
     },
+    "/runs/{run_id}/artifacts": {
+      "get": {
+        "tags": [
+          "Runs"
+        ],
+        "summary": "Run Artifacts",
+        "description": "Artifacts of a run (optionally one step): id, kind, key and a stable URL, e.g. to list a step's wait frames.",
+        "operationId": "run_artifacts_runs__run_id__artifacts_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "flow_key",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Flow Key"
+            }
+          },
+          {
+            "name": "step_seq",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Step Seq"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/playbooks": {
       "get": {
         "tags": [
@@ -1438,6 +1527,103 @@
         }
       }
     },
+    "/playbooks/{playbook_id}/versions": {
+      "post": {
+        "tags": [
+          "Playbooks"
+        ],
+        "summary": "Add Playbook Version",
+        "description": "Confirms edited Markdown as a new version of an existing playbook (same content creates nothing).",
+        "operationId": "add_playbook_version_playbooks__playbook_id__versions_post",
+        "parameters": [
+          {
+            "name": "playbook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Playbook Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlaybookRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaybookUploadResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Playbooks"
+        ],
+        "summary": "List Versions",
+        "operationId": "list_versions_playbooks__playbook_id__versions_get",
+        "parameters": [
+          {
+            "name": "playbook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Playbook Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlaybookVersionResponse"
+                  },
+                  "title": "Response List Versions Playbooks  Playbook Id  Versions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/playbooks/normalize": {
       "post": {
         "tags": [
@@ -1505,52 +1691,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PlaybookResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/playbooks/{playbook_id}/versions": {
-      "get": {
-        "tags": [
-          "Playbooks"
-        ],
-        "summary": "List Versions",
-        "operationId": "list_versions_playbooks__playbook_id__versions_get",
-        "parameters": [
-          {
-            "name": "playbook_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Playbook Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PlaybookVersionResponse"
-                  },
-                  "title": "Response List Versions Playbooks  Playbook Id  Versions Get"
                 }
               }
             }
@@ -2849,7 +2989,9 @@
         "properties": {
           "app_id": {
             "type": "string",
-            "title": "App Id"
+            "title": "App Id",
+            "description": "Ignored on app-scoped and version routes",
+            "default": ""
           },
           "name": {
             "anyOf": [
@@ -2869,7 +3011,6 @@
         },
         "type": "object",
         "required": [
-          "app_id",
           "raw_markdown"
         ],
         "title": "CreatePlaybookRequest"
@@ -4156,6 +4297,25 @@
             },
             "type": "array",
             "title": "Flows"
+          },
+          "items": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "Every parsed item: key, category, title, body"
+          },
+          "links": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Links"
           }
         },
         "type": "object",

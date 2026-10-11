@@ -7,6 +7,7 @@ import { Suspense, type ReactNode } from "react";
 import { ErrorState, Loading, Tabs } from "@/components/ui";
 import { api } from "@/lib/api/client";
 import { useApp } from "@/lib/api/hooks";
+import { useIssues } from "@/lib/api/live";
 
 // useParams() is request-time data; with cacheComponents it must sit under a Suspense boundary.
 export default function AppLayout({ children }: { children: ReactNode }) {
@@ -19,6 +20,7 @@ function AppShell({ children }: { children: ReactNode }) {
   // Poll only while something is running; the banner is the app-wide "a run is live" signal.
   const { data: runs } = useQuery({ queryKey: ["runs", slug], queryFn: () => api.listRuns(slug), refetchInterval: (q) => (q.state.data?.some((r) => r.status === "running") ? 2000 : false) });
   const live = runs?.find((r) => r.status === "running");
+  const { data: openIssues } = useIssues(slug, "open");
 
   if (isPending) return <Loading />;
   if (error) return <ErrorState error={error} retry={refetch} />;
@@ -41,6 +43,8 @@ function AppShell({ children }: { children: ReactNode }) {
         { href: `${base}/playbooks`, label: "Playbooks" },
         { href: `${base}/runs`, label: "Runs", count: runs?.length },
         { href: `${base}/flows`, label: "Flows" },
+        { href: `${base}/issues`, label: "Issues", count: openIssues?.length },
+        { href: `${base}/traceability`, label: "Traceability" },
         { href: `${base}/compare`, label: "Compare" },
         { href: `${base}/settings`, label: "Settings" },
       ]} />

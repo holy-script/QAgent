@@ -59,7 +59,7 @@ async def validate_playbook_markdown(payload: NormalizeRequest):
     return PlaybookValidationResponse(
         title=parsed["title"], base_url=parsed["base_url"],
         counts={k: len(parsed[k]) for k in CATEGORY_KEYS}, errors=parsed["errors"], warnings=parsed["warnings"],
-        coverage=parsed["coverage"], flows=parsed["flows"],
+        coverage=parsed["coverage"], flows=parsed["flows"], items=parsed["items"], links=parsed["links"],
     )
 
 

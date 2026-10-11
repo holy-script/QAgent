@@ -330,6 +330,8 @@ class PlaybookValidationResponse(BaseModel):
     warnings: List[str] = Field(default_factory=list)
     coverage: Dict[str, Any] = Field(default_factory=dict)
     flows: List[Dict[str, Any]] = Field(default_factory=list)
+    items: List[Dict[str, Any]] = Field(default_factory=list, description="Every parsed item: key, category, title, body")
+    links: List[Dict[str, str]] = Field(default_factory=list)
 
 
 class PlaybookItemResponse(BaseModel):

@@ -24,7 +24,9 @@ export function RunLauncher({ slug }: { slug: string }) {
   return (
     <Card className="space-y-4 p-5">
       <div className="font-medium">Start a run</div>
-      {!pb ? (
+      {!pbs ? (
+        <p className="text-sm text-muted">Loading playbooks…</p>
+      ) : !pb ? (
         <p className="text-sm text-muted">Confirm a playbook first. Draft playbooks can&apos;t be run.</p>
       ) : (
         <>

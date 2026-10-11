@@ -9,7 +9,7 @@ task live in [DUAL_CODER_PLAN.md](DUAL_CODER_PLAN.md) section 15 (status per tas
 |---|---|
 | Backend B0-B21 | Done and tested (55 tests). Live run with real Jev, Claude, Neon Postgres and object storage: 8 findings, 8 issues, bug and run reports |
 | Frontend F0-F5, F7 | Done on fixtures with a mock SSE replay (Coder 2) |
-| Integration (F6) | **Started on `integration`**: the UI talks to the real API through `frontend/src/lib/api/adapter.ts`. Verified by driving the UI with a browser: app list, app page, playbooks, starting a run, live run page (flows, screenshots, graph, findings, network, logs), revisiting a finished run |
+| Integration F6 and the remaining frontend tasks | **Done on `integration`**: every backend feature has a page. `scripts/e2e_pages.py` drives 23 checks in a real browser against the live stack (all pass, no page errors, no failed API calls); `next build`, `tsc` and `eslint` are clean |
 
 ## How to run everything
 
@@ -18,6 +18,7 @@ make setup        # once: uv sync, npm install, Playwright browsers
 make dev          # demo shop :8001, API :8000, frontend :3000 (frontend gets NEXT_PUBLIC_API_URL)
 make dev-mock     # frontend only, on in-browser fixtures
 make e2e          # drive the running stack through the UI, screenshots in /tmp/e2e
+                  # (also: cd backend && uv run python ../scripts/e2e_pages.py for the 23 page checks)
 make doctor       # preflight: Postgres, object storage, Jev, Bedrock, browser
 make test         # 55 backend tests
 ```
@@ -39,19 +40,29 @@ make test         # 55 backend tests
     redirecting to a storage URL that answers 404; uploads now run 4 at a time off the event loop.
   - New apps get their slug from the name (not the hostname).
 
+## Frontend work done on `integration` (this round)
+
+- **Step drawer**: before/after toggle, candidate overlays from `candidates.json`, wait frames, all from the new `GET /runs/{id}/artifacts`.
+- **Network tab**: request and response bodies on demand (JSON is proxied by the API; presigned URLs cannot be fetched cross-origin).
+- **Evidence panel** from any finding: annotated/before/after screenshots, check inputs with the source of each value and a link to the recorded call, wait frames, decisions, integrity line.
+- **Issues**: list with status filter, issue page with the full bug report, occurrence list, Copy as issue, MD/HTML/PDF export. Issue count in the tab bar; open issues and requirement coverage on the Overview.
+- **Run report** page (summary, flows, requirement coverage, findings by category, performance, grounded recommendations, test-quality notes, exports, regenerate) and a **View report** button on the run page.
+- **Traceability** matrix: requirement, priority, status, covering items with their latest result, linked issues.
+- **Playbook editor**: one tab per category with counts, add forms per category, existing items with remove, live validation (errors block Save), coverage panel, raw Markdown view in sync, **Extract from the PRD** (proposals with verbatim quotes, accepted one by one), **Normalize with Claude** with a line diff to review. PRD field added to Settings.
+- **Re-run from tape** with gate overrides and live fallback; **command palette** (Ctrl/Cmd+K) for pages, runs and issues.
+- Types for the new pages come from the generated schema (`npm run gen:api` reads `backend/openapi.json`).
+- Backend additions: `GET /runs/{id}/artifacts`, textual artifacts proxied instead of redirected, items and links in `POST /playbooks/validate`.
+
+## Known gaps
+
+- The visual design still follows the dark theme Coder 2 built, not the Steel/Plex "instrument" direction in the plan; the "tape" timeline is not built (the flow strips and graph stand in for it).
+- New pages show a "Needs the live API" notice in fixture mode; only the original pages have mock data.
+- The playbook editor's add forms cover the common fields of each category (no inline editing of an existing item: remove and re-add, or use the raw view).
+- Compare view still uses the original fixtures-era data shape.
+
 ## Next steps
 
-1. **Review the merge** and decide how `integration` lands: merge `be` + `fe` into `main`, or keep `integration` as the shared branch for F6.
-2. **Close the F6 gaps** (backend data exists, UI does not show it yet):
-   - candidate overlays and wait-frame strips on steps (`steps/{n}/candidates.json`, `wait/{n}.jpg`)
-   - request/response bodies in the Network tab (`/network/{id}` and `/api/artifacts/.../response.json`)
-   - decision `question`/`reasoning`, escalation reasons
-3. **Pages for the new backend features** (F5, F7-F9 in the plan): issues list and issue page with the bug report, run report page
-   with exports, traceability matrix, evidence drawer from a finding, playbook editor per category with live validation
-   (`POST /playbooks/validate`), PRD extraction and normalize diff, replay with overrides.
-4. **Types from the schema**: generate `frontend/src/lib/api/schema.d.ts` from `backend/openapi.json` (`npm run gen:api`) and
-   retire the hand-written types where they overlap.
-5. **Backend gaps** (plan section 16): Claude planner, judged calls on the tape, per-flow reset and deterministic browser,
-   upload retries and `artifact.uploaded`, Neon branch pin.
-6. **Demo readiness**: rotate the shared Neon credentials, create the `qagent-artifacts` bucket (or keep `captures`), disable
-   scale-to-zero, rehearse hybrid vs baseline (`make bench` numbers are in ASSUMPTIONS.md).
+1. **Review and land the branch**: merge `integration` into `main` (or push it for Coder 2 to continue from).
+2. **Frontend polish** (Coder 2): decide on the design direction, build the tape timeline, mock data for the new pages, inline item editing, Compare on real runs.
+3. **Backend gaps** (plan section 16): Claude planner, judged calls on the tape, per-flow reset and deterministic browser, upload retries and `artifact.uploaded`, Neon branch pin.
+4. **Demo readiness**: rotate the shared Neon credentials, create the `qagent-artifacts` bucket (or keep `captures`), disable scale-to-zero, rehearse hybrid vs baseline (`make bench` numbers are in ASSUMPTIONS.md).
