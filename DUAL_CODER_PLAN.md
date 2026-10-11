@@ -1003,7 +1003,7 @@ What exists today, and where it differs from the target in sections 5–12. **55
 | Judged check replay | Done: judge, planner and report calls are `model_calls`, served back on replay, with cost | Recorded on the tape |
 | Determinism | Done: fixed clock, animations off, per-flow reset through the flow's own browser session | Frozen clock, animations disabled, reset per flow |
 | Uploads | Done: `artifacts_complete` is set by the upload worker, with the `artifact.uploaded` event | Set by the upload worker, with the event |
-| Retention, upload retry | Upload retry done; per-app retention not built | Backoff retries, per-app retention (P2) |
+| Retention, upload retry | Upload retry and per-app retention done | Backoff retries, per-app retention (P2) |
 | Redaction | App `redact_keys` are masked in stored request and response bodies; headers are never stored | Same |
 | API paths | Done: create/list are app-scoped; lookups by id stay flat | App-scoped only |
 | Neon branch pin | Not done | "Pin for demo" (P2) |

@@ -15,6 +15,7 @@ def app_out(a: m.App) -> s.AppResponse:
         description=a.description, prd_markdown=a.prd_markdown, default_mode=s.RunMode(a.default_mode),
         created_at=iso(a.created_at) or "", reset_path=a.reset_path,
         gate_overrides=a.gate_overrides or {}, redact_keys=a.redact_keys or [],
+        retention_days=a.retention_days, retention_keep_last=a.retention_keep_last,
     )
 
 

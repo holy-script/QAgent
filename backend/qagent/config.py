@@ -75,6 +75,7 @@ class Settings(BaseSettings):
     auth_secret: str = Field(default="qagent-dev-secret-change-me", alias="AUTH_SECRET")
     auth_ttl_hours: int = Field(default=12, alias="AUTH_TTL_HOURS")
     auth_cookie_secure: bool = Field(default=False, alias="AUTH_COOKIE_SECURE")
+    auth_cookie_samesite: str = Field(default="lax", alias="AUTH_COOKIE_SAMESITE")  # "none" (with secure) when the web app is on another site
     cors_origins: str = Field(default="http://localhost:3000,http://127.0.0.1:3000", alias="CORS_ORIGINS")
 
     # Demo & Local Dev

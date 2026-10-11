@@ -3,7 +3,7 @@ import { SelectField } from "@/components/ui";
 import { ConfirmDelete } from "@/components/confirm-delete";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { Button, Card, ErrorState, Field, Loading, inputCls } from "@/components/ui";
@@ -16,7 +16,7 @@ export default function Settings() {
   const { data: app, error, isPending, refetch } = useApp(slug);
   if (isPending) return <Loading />;
   if (error) return <ErrorState error={error} retry={refetch} />;
-  return <Form key={app.id} app={app} />;
+  return <div className="mx-auto max-w-2xl space-y-6"><Form key={app.id} app={app} /><Retention key={`r${app.id}`} app={app} /></div>;
 }
 
 const list = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
@@ -38,7 +38,7 @@ function Form({ app }: { app: App }) {
   const invalid = !f.name.trim() || bad(f.auto) || bad(f.esc) || (f.auto !== "" && f.esc !== "" && Number(f.esc) >= Number(f.auto));
 
   return (
-    <Card className="mx-auto max-w-2xl p-6">
+    <Card className="p-6">
       <form className="space-y-5" onSubmit={(e) => {
         e.preventDefault();
         save.mutate({ name: f.name.trim(), base_url: f.base_url, description: f.description, prd_markdown: f.prd, default_mode: f.default_mode, allowed_hosts: list(f.hosts), redact_keys: list(f.redact), gate_overrides: { auto_min: num(f.auto), escalate_min: num(f.esc) } });
@@ -91,5 +91,53 @@ function DangerZone({ app }: { app: App }) {
         <p className="text-muted-foreground">If a test run is in progress, stop it first.</p>
       </ConfirmDelete>
     </div>
+  );
+}
+
+/** Each app decides how long its own finished runs are kept. Nothing is deleted until a number is set. */
+function Retention({ app }: { app: App }) {
+  const qc = useQueryClient();
+  const [days, setDays] = useState(app.retention_days?.toString() ?? "");
+  const [keep, setKeep] = useState(app.retention_keep_last.toString());
+  const [confirm, setConfirm] = useState(false);
+  const status = useQuery({ queryKey: ["retention", app.slug], queryFn: () => api.retention(app.slug) });
+  const refresh = () => { qc.invalidateQueries({ queryKey: ["retention", app.slug] }); qc.invalidateQueries({ queryKey: ["runs", app.slug] }); qc.invalidateQueries({ queryKey: ["app", app.slug] }); };
+  const save = useMutation({
+    mutationFn: () => api.updateApp(app.slug, { retention_days: days === "" ? null : Number(days), retention_keep_last: Number(keep) }),
+    onSuccess: (a) => { qc.setQueryData(["app", app.slug], a); refresh(); toast.success("Clean-up policy saved"); },
+  });
+  const clean = useMutation({
+    mutationFn: () => api.cleanRetention(app.slug),
+    onSuccess: (r) => { setConfirm(false); refresh(); toast.success(`Deleted ${r.runs_deleted} ${r.runs_deleted === 1 ? "run" : "runs"}`); },
+  });
+  const badDays = days !== "" && !(Number.isInteger(Number(days)) && Number(days) >= 1);
+  const badKeep = !(Number.isInteger(Number(keep)) && Number(keep) >= 0);
+  const st = status.data;
+  return (
+    <Card className="space-y-4 p-6">
+      <div>
+        <h2 className="font-medium">Keeping old runs</h2>
+        <p className="text-sm text-muted-foreground">Old test runs take up space (screenshots, recordings, reports). This policy applies to {app.name} only and runs automatically every hour. Leave the days blank to keep everything.</p>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <Field label="Delete runs older than (days)" hint="Blank keeps runs for ever."><input className={inputCls} value={days} onChange={(e) => setDays(e.target.value)} inputMode="numeric" placeholder="Keep for ever" aria-label="Delete runs older than (days)" /></Field>
+        <Field label="Always keep the newest" hint="Number of runs, whatever their age."><input className={inputCls} value={keep} onChange={(e) => setKeep(e.target.value)} inputMode="numeric" aria-label="Always keep the newest runs" /></Field>
+      </div>
+      {(badDays || badKeep) && <p className="text-xs text-bad">Days must be a whole number of 1 or more, and the number of runs to keep 0 or more.</p>}
+      {save.error && <p role="alert" className="text-sm text-bad">{save.error.message}</p>}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground" aria-live="polite">
+          {!st ? "Checking…" : !st.retention_days ? `${st.total_runs} runs stored; none will be deleted.` : `${st.would_delete} of ${st.total_runs} runs would be deleted right now.`}
+        </p>
+        <div className="flex gap-2">
+          <Button variant="danger" disabled={!st || !st.would_delete} onClick={() => setConfirm(true)}>Clean up now…</Button>
+          <Button variant="primary" disabled={badDays || badKeep || save.isPending} onClick={() => save.mutate()}>{save.isPending ? "Saving…" : "Save policy"}</Button>
+        </div>
+      </div>
+      <ConfirmDelete open={confirm} onOpenChange={setConfirm} title={`Delete ${st?.would_delete ?? 0} old runs?`} actionLabel="Delete old runs" pending={clean.isPending} error={clean.error?.message} onConfirm={() => clean.mutate()}>
+        <p>Runs older than {st?.retention_days} days (except the newest {st?.retention_keep_last}) are removed with their screenshots, proof and reports. Bugs that only those runs found disappear too.</p>
+        <p className="text-muted-foreground">Save the policy first if you changed the numbers above.</p>
+      </ConfirmDelete>
+    </Card>
   );
 }

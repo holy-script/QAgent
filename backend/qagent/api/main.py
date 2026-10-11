@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import APIRouter, Depends, FastAPI
@@ -10,6 +11,7 @@ from qagent.api.seed import seed_demo
 from qagent.engine.tracing import logger
 from qagent.runs.manager import get_run_manager, recover_orphaned_runs
 from qagent.storage import db
+from qagent.storage.retention import retention_loop
 from qagent.storage.upload_queue import upload_queue
 
 
@@ -29,7 +31,9 @@ async def lifespan(app: FastAPI):
     except Exception as exc:
         logger.error("startup.recovery_failed", error=type(exc).__name__)
     upload_queue.start()
+    cleaner = asyncio.create_task(retention_loop(db.async_session_factory, lambda: set(get_run_manager().active)))
     yield
+    cleaner.cancel()
     await get_run_manager().shutdown()
     await upload_queue.stop()
 

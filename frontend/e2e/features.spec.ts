@@ -89,3 +89,17 @@ test("planning is an opt-in choice when starting a run, and hidden for practice 
   await page.getByRole("radio", { name: /Practice/ }).click();
   await expect(plan).toHaveCount(0);
 });
+
+test("each app sets its own clean-up policy and old runs can be removed", async ({ page }) => {
+  await page.goto(APP);
+  await page.getByRole("navigation", { name: "Sections" }).getByRole("link", { name: "Settings" }).click();
+  await expect(page.getByText("0 runs would be deleted").or(page.getByText(/runs stored; none will be deleted/))).toBeVisible();
+  await expect(page.getByRole("button", { name: /Clean up now/ })).toBeDisabled();
+  await page.getByLabel("Delete runs older than (days)").fill("0");
+  await expect(page.getByText(/Days must be a whole number/)).toBeVisible();
+  await page.getByLabel("Delete runs older than (days)").fill("1");
+  await page.getByLabel("Always keep the newest runs").fill("1");
+  await page.getByRole("button", { name: "Save policy" }).click();
+  await expect(page.getByText("0 of 3 runs would be deleted right now.")).toBeVisible(); // the demo runs are all newer than a day
+  await expect(page.getByRole("button", { name: /Clean up now/ })).toBeDisabled();
+});

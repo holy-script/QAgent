@@ -1,4 +1,4 @@
-import type { App, AppInput, FlowHistory, Mode, Playbook, PlaybookVersion, Run, SseEnvelope } from "./types";
+import type { App, AppInput, FlowHistory, Mode, Playbook, PlaybookVersion, RetentionStatus, Run, SseEnvelope } from "./types";
 import { buildRunEvents, makeRun, seedApps, seedPlaybooks, seedRuns, versionFrom } from "./fixtures";
 import { validateMarkdown } from "../playbook-validate";
 import { toApp, toFlowHistory, toPlaybook, toRun } from "./adapter";
@@ -18,6 +18,13 @@ export async function http<T>(path: string, init?: RequestInit): Promise<T> {
   }
   if (!res.ok) throw new ApiError(res.status, detailOf(await res.text().catch(() => "")) || res.statusText);
   return res.json();
+}
+/** Same rule as the backend: finished runs older than the policy, except the newest `keep_last`. */
+export function expiredMock(a: App, runs: Run[]): Run[] {
+  if (!a.retention_days) return [];
+  const cutoff = Date.now() - a.retention_days * 86_400_000;
+  const protectedIds = new Set([...runs].sort((x, y) => +new Date(y.started_at) - +new Date(x.started_at)).slice(0, a.retention_keep_last).map((r) => r.id));
+  return runs.filter((r) => !protectedIds.has(r.id) && !["running", "queued"].includes(r.status) && +new Date(r.started_at) < cutoff);
 }
 export class ApiError extends Error {
   constructor(public status: number, message: string) { super(message); }
@@ -73,7 +80,7 @@ export const api = {
     while (db.apps.some((a) => a.slug === slug)) slug += "-" + uid().slice(0, 2);
     const app: App = {
       id: "app-" + uid(), slug, allowed_hosts: [new URL(input.base_url).hostname], prd_markdown: "", default_mode: "hybrid",
-      gate_overrides: {}, redact_keys: ["authorization", "cookie"], created_at: new Date().toISOString(), ...input,
+      gate_overrides: {}, redact_keys: ["authorization", "cookie"], retention_days: null, retention_keep_last: 10, created_at: new Date().toISOString(), ...input,
     };
     db.apps.push(app);
     return delay(app);
@@ -200,6 +207,22 @@ export const api = {
     if (!USE_MOCK) { await http(`/runs/${id}`, { method: "DELETE" }); return; }
     db.runs = db.runs.filter((r) => r.id !== id);
     db.live.delete(id);
+  },
+
+  /** How many runs the app's clean-up policy would remove right now. */
+  async retention(slug: string): Promise<RetentionStatus> {
+    if (!USE_MOCK) return http<RetentionStatus>(`/apps/${slug}/retention`);
+    const a = db.apps.find((x) => x.slug === slug)!;
+    const runs = db.runs.filter((r) => r.app_id === a.id);
+    return delay({ retention_days: a.retention_days, retention_keep_last: a.retention_keep_last, total_runs: runs.length, would_delete: expiredMock(a, runs).length, oldest_started_at: runs.map((r) => r.started_at).sort()[0] ?? null });
+  },
+  async cleanRetention(slug: string): Promise<{ runs_deleted: number; files_removed: number }> {
+    if (!USE_MOCK) return http(`/apps/${slug}/retention/clean`, { method: "POST" });
+    const a = db.apps.find((x) => x.slug === slug)!;
+    const gone = new Set(expiredMock(a, db.runs.filter((r) => r.app_id === a.id)).map((r) => r.id));
+    db.runs = db.runs.filter((r) => !gone.has(r.id));
+    gone.forEach((id) => db.live.delete(id));
+    return delay({ runs_deleted: gone.size, files_removed: gone.size * 12 });
   },
 
   async stopRun(id: string): Promise<void> {

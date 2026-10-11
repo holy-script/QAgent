@@ -8,7 +8,7 @@ import type {
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type B = any;
 
-export const toApp = (a: B): App => ({ ...a, description: a.description ?? "", prd_markdown: a.prd_markdown ?? "" });
+export const toApp = (a: B): App => ({ ...a, description: a.description ?? "", prd_markdown: a.prd_markdown ?? "", retention_days: a.retention_days ?? null, retention_keep_last: a.retention_keep_last ?? 10 });
 
 export const toTotals = (t: B = {}): RunTotals => ({
   steps: t.total_steps ?? 0, flows: t.flows ?? 0, findings: t.findings_count ?? 0, jev_decisions: t.jev_decisions ?? 0,

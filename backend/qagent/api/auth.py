@@ -84,7 +84,7 @@ async def login(payload: LoginRequest, request: Request, response: Response):
         _failures[key].append(time.time())
         raise HTTPException(status_code=401, detail="Email or password is not correct")
     _failures.pop(key, None)
-    response.set_cookie(COOKIE, make_token(settings.auth_email), httponly=True, samesite="lax",
+    response.set_cookie(COOKIE, make_token(settings.auth_email), httponly=True, samesite=settings.auth_cookie_samesite,
                         secure=settings.auth_cookie_secure, max_age=settings.auth_ttl_hours * 3600, path="/")
     return SessionResponse(email=settings.auth_email)
 

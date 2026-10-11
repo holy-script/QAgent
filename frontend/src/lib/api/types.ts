@@ -17,6 +17,10 @@ export interface App {
   default_mode: Mode;
   gate_overrides: { auto_min?: number; escalate_min?: number };
   redact_keys: string[];
+  /** Finished runs older than this many days are cleaned up; null keeps them for ever. */
+  retention_days: number | null;
+  /** The newest runs that are always kept, whatever their age. */
+  retention_keep_last: number;
   created_at: string;
 }
 export type AppInput = Pick<App, "name" | "base_url" | "description"> & Partial<App>;
@@ -209,3 +213,5 @@ export interface SseEnvelope {
   ts: number; // ms offset from run start (fixtures) — used to pace replay
   event: RunEvent;
 }
+
+export interface RetentionStatus { retention_days: number | null; retention_keep_last: number; total_runs: number; would_delete: number; oldest_started_at: string | null }

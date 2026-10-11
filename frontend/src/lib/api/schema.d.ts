@@ -159,6 +159,46 @@ export interface paths {
         patch: operations["update_app_apps__app_id__patch"];
         trace?: never;
     };
+    "/apps/{app_id}/retention": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retention Status
+         * @description The app's clean-up policy and how many runs it would remove right now.
+         */
+        get: operations["retention_status_apps__app_id__retention_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/apps/{app_id}/retention/clean": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Retention Clean
+         * @description Applies the app's policy now. Does nothing when the app keeps runs for ever.
+         */
+        post: operations["retention_clean_apps__app_id__retention_clean_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/apps/{app_id}/runs": {
         parameters: {
             query?: never;
@@ -894,6 +934,13 @@ export interface components {
             };
             /** Redact Keys */
             redact_keys?: string[];
+            /** Retention Days */
+            retention_days?: number | null;
+            /**
+             * Retention Keep Last
+             * @default 10
+             */
+            retention_keep_last: number;
         };
         /** AppSummaryResponse */
         AppSummaryResponse: {
@@ -922,6 +969,13 @@ export interface components {
             };
             /** Redact Keys */
             redact_keys?: string[];
+            /** Retention Days */
+            retention_days?: number | null;
+            /**
+             * Retention Keep Last
+             * @default 10
+             */
+            retention_keep_last: number;
             last_run?: components["schemas"]["RunResponse"] | null;
             /**
              * Recent Statuses
@@ -1665,6 +1719,41 @@ export interface components {
             /** Quote */
             quote: string;
         };
+        /** RetentionResult */
+        RetentionResult: {
+            /**
+             * Runs Deleted
+             * @default 0
+             */
+            runs_deleted: number;
+            /**
+             * Files Removed
+             * @default 0
+             */
+            files_removed: number;
+        };
+        /** RetentionStatus */
+        RetentionStatus: {
+            /** Retention Days */
+            retention_days?: number | null;
+            /**
+             * Retention Keep Last
+             * @default 10
+             */
+            retention_keep_last: number;
+            /**
+             * Total Runs
+             * @default 0
+             */
+            total_runs: number;
+            /**
+             * Would Delete
+             * @default 0
+             */
+            would_delete: number;
+            /** Oldest Started At */
+            oldest_started_at?: string | null;
+        };
         /**
          * RunMode
          * @enum {string}
@@ -1966,6 +2055,13 @@ export interface components {
             redact_keys?: string[] | null;
             /** Reset Path */
             reset_path?: string | null;
+            /**
+             * Retention Days
+             * @description null keeps runs for ever
+             */
+            retention_days?: number | null;
+            /** Retention Keep Last */
+            retention_keep_last?: number | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -2271,6 +2367,68 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AppResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    retention_status_apps__app_id__retention_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                app_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetentionStatus"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    retention_clean_apps__app_id__retention_clean_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                app_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetentionResult"];
                 };
             };
             /** @description Validation Error */

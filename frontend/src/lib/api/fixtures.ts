@@ -22,6 +22,8 @@ export const seedApps = (): App[] => [
     default_mode: "hybrid",
     gate_overrides: {},
     redact_keys: ["authorization", "cookie"],
+    retention_days: null,
+    retention_keep_last: 10,
     created_at: iso(60 * 24 * 3),
   },
 ];

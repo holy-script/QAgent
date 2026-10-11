@@ -54,3 +54,15 @@ describe("same-origin deployment", () => {
     vi.unstubAllEnvs();
   });
 });
+
+describe("clean-up policy (demo mode mirrors the backend rule)", () => {
+  it("removes old finished runs, but never the newest N or runs in progress", async () => {
+    const { expiredMock } = await import("../api/client");
+    const day = 86_400_000;
+    const mk = (id: string, ageDays: number, status = "passed") => ({ id, status, started_at: new Date(Date.now() - ageDays * day).toISOString() });
+    const runs = [mk("a", 40), mk("b", 35), mk("c", 30), mk("d", 2), mk("e", 1), mk("live", 90, "running")] as never[];
+    const app = { retention_days: 7, retention_keep_last: 2 } as never;
+    expect(expiredMock(app, runs).map((r: { id: string }) => r.id)).toEqual(["a", "b", "c"]);
+    expect(expiredMock({ retention_days: null, retention_keep_last: 2 } as never, runs)).toEqual([]);
+  });
+});

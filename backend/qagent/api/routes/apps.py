@@ -9,14 +9,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from qagent.api.deps import get_session
-from qagent.api.mappers import app_out, run_out
+from qagent.api.mappers import app_out, iso, run_out
 from qagent.config import settings
 from qagent.runs.manager import RunManager, get_run_manager
 from qagent.storage.objects import object_store
 from qagent.storage.purge import purge_app
+from qagent.storage.retention import apply_retention, expired_runs
 from qagent.domain import models as m
 from qagent.domain.schemas import (
-    PrdExtractResponse, AppResponse, AppSummaryResponse, CreateAppRequest, RunResponse, UpdateAppRequest,
+    PrdExtractResponse, AppResponse, AppSummaryResponse, CreateAppRequest, RetentionResult, RetentionStatus, RunResponse,
+    UpdateAppRequest,
 )
 
 router = APIRouter(prefix="/apps", tags=["Apps"])
@@ -101,6 +103,26 @@ async def delete_app(app_id: str, session: AsyncSession = Depends(get_session),
     await session.commit()
     removed_files = await asyncio.to_thread(object_store.delete_prefix, f"apps/{app.id}/")
     return {"deleted": counts, "files_removed": removed_files}
+
+
+@router.get("/{app_id}/retention", response_model=RetentionStatus)
+async def retention_status(app_id: str, session: AsyncSession = Depends(get_session),
+                           manager: RunManager = Depends(get_run_manager)):
+    """The app's clean-up policy and how many runs it would remove right now."""
+    app = await _find(session, app_id)
+    runs = (await session.execute(select(m.Run).where(m.Run.app_id == app.id))).scalars().all()
+    starts = [r.started_at for r in runs if r.started_at]
+    return RetentionStatus(
+        retention_days=app.retention_days, retention_keep_last=app.retention_keep_last, total_runs=len(runs),
+        would_delete=len(await expired_runs(session, app, manager.active)),
+        oldest_started_at=iso(min(starts)) if starts else None)
+
+
+@router.post("/{app_id}/retention/clean", response_model=RetentionResult)
+async def retention_clean(app_id: str, session: AsyncSession = Depends(get_session),
+                          manager: RunManager = Depends(get_run_manager)):
+    """Applies the app's policy now. Does nothing when the app keeps runs for ever."""
+    return RetentionResult(**await apply_retention(session, await _find(session, app_id), manager.active))
 
 
 @router.get("/{app_id}/runs", response_model=List[RunResponse])

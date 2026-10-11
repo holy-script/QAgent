@@ -205,6 +205,8 @@ class AppResponse(BaseModel):
     reset_path: Optional[str] = None
     gate_overrides: Dict[str, Any] = Field(default_factory=dict)
     redact_keys: List[str] = Field(default_factory=list)
+    retention_days: Optional[int] = None
+    retention_keep_last: int = 10
 
 
 class CreateRunRequest(BaseModel):
@@ -382,6 +384,21 @@ class UpdateAppRequest(BaseModel):
     gate_overrides: Optional[Dict[str, Any]] = None
     redact_keys: Optional[List[str]] = None
     reset_path: Optional[str] = None
+    retention_days: Optional[int] = Field(default=None, ge=1, le=3650, description="null keeps runs for ever")
+    retention_keep_last: Optional[int] = Field(default=None, ge=0, le=1000)
+
+
+class RetentionStatus(BaseModel):
+    retention_days: Optional[int] = None
+    retention_keep_last: int = 10
+    total_runs: int = 0
+    would_delete: int = 0
+    oldest_started_at: Optional[str] = None
+
+
+class RetentionResult(BaseModel):
+    runs_deleted: int = 0
+    files_removed: int = 0
 
 
 class AppSummaryResponse(AppResponse):

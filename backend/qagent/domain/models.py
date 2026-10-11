@@ -27,6 +27,8 @@ class App(SQLModel, table=True):
     reset_path: Optional[str] = None  # POST here before each flow to reset the target app's state
     gate_overrides: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     redact_keys: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    retention_days: Optional[int] = None  # finished runs older than this are cleaned up; None keeps them for ever
+    retention_keep_last: int = 10         # ...but the newest N runs are always kept
     created_at: datetime = Field(default_factory=utc_now)
 
 

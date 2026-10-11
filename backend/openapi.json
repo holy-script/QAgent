@@ -378,6 +378,92 @@
         }
       }
     },
+    "/apps/{app_id}/retention": {
+      "get": {
+        "tags": [
+          "Apps"
+        ],
+        "summary": "Retention Status",
+        "description": "The app's clean-up policy and how many runs it would remove right now.",
+        "operationId": "retention_status_apps__app_id__retention_get",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "App Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetentionStatus"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/apps/{app_id}/retention/clean": {
+      "post": {
+        "tags": [
+          "Apps"
+        ],
+        "summary": "Retention Clean",
+        "description": "Applies the app's policy now. Does nothing when the app keeps runs for ever.",
+        "operationId": "retention_clean_apps__app_id__retention_clean_post",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "App Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetentionResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/apps/{app_id}/runs": {
       "get": {
         "tags": [
@@ -2635,6 +2721,22 @@
             },
             "type": "array",
             "title": "Redact Keys"
+          },
+          "retention_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retention Days"
+          },
+          "retention_keep_last": {
+            "type": "integer",
+            "title": "Retention Keep Last",
+            "default": 10
           }
         },
         "type": "object",
@@ -2725,6 +2827,22 @@
             },
             "type": "array",
             "title": "Redact Keys"
+          },
+          "retention_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retention Days"
+          },
+          "retention_keep_last": {
+            "type": "integer",
+            "title": "Retention Keep Last",
+            "default": 10
           },
           "last_run": {
             "anyOf": [
@@ -4540,6 +4658,65 @@
         ],
         "title": "RequirementProposal"
       },
+      "RetentionResult": {
+        "properties": {
+          "runs_deleted": {
+            "type": "integer",
+            "title": "Runs Deleted",
+            "default": 0
+          },
+          "files_removed": {
+            "type": "integer",
+            "title": "Files Removed",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "RetentionResult"
+      },
+      "RetentionStatus": {
+        "properties": {
+          "retention_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retention Days"
+          },
+          "retention_keep_last": {
+            "type": "integer",
+            "title": "Retention Keep Last",
+            "default": 10
+          },
+          "total_runs": {
+            "type": "integer",
+            "title": "Total Runs",
+            "default": 0
+          },
+          "would_delete": {
+            "type": "integer",
+            "title": "Would Delete",
+            "default": 0
+          },
+          "oldest_started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Oldest Started At"
+          }
+        },
+        "type": "object",
+        "title": "RetentionStatus"
+      },
       "RunMode": {
         "type": "string",
         "enum": [
@@ -5170,6 +5347,33 @@
               }
             ],
             "title": "Reset Path"
+          },
+          "retention_days": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 3650.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retention Days",
+            "description": "null keeps runs for ever"
+          },
+          "retention_keep_last": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 1000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retention Keep Last"
           }
         },
         "type": "object",
