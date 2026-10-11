@@ -28,7 +28,7 @@ export function useRunStream(run: Run, animate: boolean) {
     if (!USE_MOCK) {
       // The backend sends named SSE events, so each type needs its own listener (onmessage never fires).
       // The browser resends Last-Event-ID on reconnect; we close for good once the run's report is ready.
-      const es = new EventSource(`${API_URL}/runs/${run.id}/events`);
+      const es = new EventSource(`${API_URL}/runs/${run.id}/events`, { withCredentials: true });
       const tr = new EventTranslator(run, API_URL);
       for (const type of EVENT_TYPES) {
         es.addEventListener(type, (m) => {

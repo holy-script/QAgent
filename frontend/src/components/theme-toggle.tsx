@@ -1,6 +1,6 @@
 "use client";
 import { Check, Laptop, Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/lib/theme";
 import { useSyncExternalStore } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { buttonVariants } from "@/components/ui/button";

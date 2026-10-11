@@ -16,7 +16,7 @@ const PHASES: [keyof StepTimings, string, string][] = [
 
 /** Candidates the decider saw, from the stored candidates.json (backend shape -> overlay rects). */
 async function loadCandidates(url: string): Promise<Candidate[]> {
-  const res = await fetch(assetUrl(url));
+  const res = await fetch(assetUrl(url), { credentials: "include" });
   if (!res.ok) return [];
   const raw = (await res.json()) as { id: number; tag: string; label: string; bounding_box?: { x: number; y: number; width: number; height: number } | null }[];
   return raw.filter((c) => c.bounding_box).map((c) => ({ id: c.id, role: c.tag, label: c.label, rect: [c.bounding_box!.x, c.bounding_box!.y, c.bounding_box!.width, c.bounding_box!.height] }));

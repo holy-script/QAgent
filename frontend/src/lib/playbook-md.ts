@@ -149,3 +149,32 @@ export function diffLines(a: string, b: string): { type: "same" | "add" | "del";
   while (j < y.length) out.push({ type: "add", text: y[j++] });
   return out;
 }
+
+/** Replaces one item's block in place (same position in the file). */
+export function replaceItem(md: string, key: string, block: string): string {
+  const ls = md.split("\n");
+  const start = ls.findIndex((l) => new RegExp(`^###\\s+(${escapeRe(key)}\\s*:|Flow:\\s*${escapeRe(key)}\\s*$)`, "i").test(l));
+  if (start < 0) return md;
+  let end = ls.length;
+  for (let i = start + 1; i < ls.length; i++) if (/^###?\s/.test(ls[i]) && !/^####/.test(ls[i])) { end = i; break; }
+  const tail = ls.slice(end);
+  return [...ls.slice(0, start), ...block.replace(/\s+$/, "").split("\n"), ...(tail.length ? ["", ...tail] : [])].join("\n");
+}
+
+const join = (v: unknown) => (Array.isArray(v) ? v.join(", ") : v ? String(v) : "");
+const pairs = (v: unknown, sep: string) => (v && typeof v === "object" ? Object.entries(v as Record<string, unknown>).map(([k, x]) => `${k}${sep}${x}`) : []);
+
+/** The form values that would regenerate an existing parsed item (the reverse of itemMarkdown). */
+export function itemToValues(cat: Category, item: { key: string; title: string; body: Record<string, unknown> }): Record<string, string> {
+  const b = item.body;
+  const str = (k: string) => (b[k] == null ? "" : String(b[k]));
+  switch (cat) {
+    case "requirement": return { title: item.title, prd_ref: str("prd_ref"), acceptance: str("acceptance"), priority: str("priority") || "high" };
+    case "flow": return { title: item.key, severity: str("severity") || "high", covers: join(b.covers), checks: join(b.checks), steps: ((b.steps as string[]) ?? []).join("\n"), expect: ((b.expect as string[]) ?? []).join("\n"), test_data: pairs(b.test_data, ": ").join("\n") };
+    case "formula": return { title: item.title, rule: str("rule"), bindings: pairs(b.bindings, "=").join("\n"), tolerance: str("tolerance"), verifies: join(b.verifies) };
+    case "ux_rule": return { title: item.title, check: str("check"), targets: join(b.targets), pattern: str("pattern"), max_ms: str("max_ms"), question: str("question"), severity: str("severity") || "medium" };
+    case "gotcha": return { title: item.title, note: str("note"), wait_for: str("wait_for"), ignore_console: str("ignore_console") };
+    case "edge_case": return { title: item.title, applies_to: str("applies_to"), expect: str("expect"), covers: join(b.covers), checks: join(b.checks), test_data: pairs(b.test_data, "=").join(", ") };
+    case "reasoning_example": return { title: item.title, context: str("context"), strategy: ((b.strategy as string[]) ?? []).join("\n"), scope: join(b.scope) };
+  }
+}

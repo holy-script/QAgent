@@ -8,7 +8,7 @@ type Detail = components["schemas"]["NetworkCallDetail"];
 
 async function fetchBody(path: string | null | undefined): Promise<unknown> {
   if (!path) return undefined;
-  const res = await fetch(assetUrl(path));
+  const res = await fetch(assetUrl(path), { credentials: "include" });
   if (!res.ok) return undefined;
   const text = await res.text();
   try { return JSON.parse(text); } catch { return text; }

@@ -3,7 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import { Activity } from "lucide-react";
 import { Providers } from "@/components/providers";
+import { THEME_SCRIPT } from "@/lib/theme";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { UserMenu } from "@/components/user-menu";
 import { USE_MOCK } from "@/lib/api/client";
 import "./globals.css";
 
@@ -18,6 +20,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+      <head><script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} /></head>
       <body className="flex min-h-full flex-col">
         <Providers>
           <header className="sticky top-0 z-30 border-b bg-background/85 backdrop-blur">
@@ -31,6 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 <kbd className="hidden rounded-md border bg-card px-1.5 py-0.5 font-sans sm:inline">Ctrl K to search</kbd>
                 <span className="hidden sm:inline">{USE_MOCK ? "Demo data" : "Connected"}</span>
                 <ThemeToggle />
+                <UserMenu />
               </span>
             </div>
           </header>

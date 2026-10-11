@@ -8,7 +8,12 @@ export const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? ""
 export const USE_MOCK = !API_URL;
 
 export async function http<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(API_URL + path, { ...init, headers: { "Content-Type": "application/json", ...init?.headers } });
+  const res = await fetch(API_URL + path, { ...init, credentials: "include", headers: { "Content-Type": "application/json", ...init?.headers } });
+  if (res.status === 401 && typeof window !== "undefined" && !path.startsWith("/auth/") && !window.location.pathname.startsWith("/login")) {
+    // The session ended (or never started): go to the sign-in page and come back afterwards.
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- a full reload clears cached data after sign-out
+    window.location.href = `/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+  }
   if (!res.ok) throw new ApiError(res.status, detailOf(await res.text().catch(() => "")) || res.statusText);
   return res.json();
 }
@@ -170,6 +175,21 @@ export const api = {
       }
     }
     return delay([...by.values()]);
+  },
+
+  /** Deletes the app with its test plans, runs, bugs, reports and stored files. */
+  async deleteApp(slug: string): Promise<void> {
+    if (!USE_MOCK) { await http(`/apps/${slug}`, { method: "DELETE" }); return; }
+    const app = await api.getApp(slug);
+    db.apps = db.apps.filter((a) => a.id !== app.id);
+    db.playbooks = db.playbooks.filter((p) => p.app_id !== app.id);
+    db.runs = db.runs.filter((r) => r.app_id !== app.id);
+  },
+
+  async deleteRun(id: string): Promise<void> {
+    if (!USE_MOCK) { await http(`/runs/${id}`, { method: "DELETE" }); return; }
+    db.runs = db.runs.filter((r) => r.id !== id);
+    db.live.delete(id);
   },
 
   async stopRun(id: string): Promise<void> {

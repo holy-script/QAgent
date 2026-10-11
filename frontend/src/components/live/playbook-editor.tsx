@@ -1,11 +1,12 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { AlertCircle, AlertTriangle, CheckCircle2, Plus, Sparkles, Trash2, Wand2 } from "lucide-react";
+import { AlertCircle, AlertTriangle, CheckCircle2, Pencil, Plus, Sparkles, Trash2, Wand2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Badge, Button, Card, Field, cn, inputCls } from "@/components/ui";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useExtractPrd, useNormalize, useValidate, type Validation } from "@/lib/api/live";
-import { CATEGORIES, FORMS, diffLines, insertItem, itemMarkdown, nextKey, removeItem, type Category, type FieldSpec } from "@/lib/playbook-md";
+import { MarkdownEditor, type Problem } from "@/components/live/markdown-editor";
+import { CATEGORIES, FORMS, diffLines, insertItem, itemMarkdown, itemToValues, nextKey, removeItem, replaceItem, type Category, type FieldSpec } from "@/lib/playbook-md";
 
 function useDebounced<T>(value: T, ms: number): T {
   const [v, setV] = useState(value);
@@ -25,8 +26,10 @@ export function PlaybookEditor({ value, onChange, slug, onValidation }: { value:
 
   const items = useMemo(() => (v?.items ?? []) as { key: string; category: string; title: string; body: Record<string, any> }[], [v]);
   const counts = useMemo(() => Object.fromEntries(CATEGORIES.map((c) => [c.id, items.filter((i) => i.category === c.id).length])), [items]);
-  const errors = v?.errors ?? [];
-  const warnings = v?.warnings ?? [];
+  const errors = useMemo(() => v?.errors ?? [], [v]);
+  const warnings = useMemo(() => v?.warnings ?? [], [v]);
+  const problems = useMemo<Problem[]>(() => [...errors.map((message) => ({ message, level: "error" as const })), ...warnings.map((message) => ({ message, level: "warning" as const }))], [errors, warnings]);
+  const [editing, setEditing] = useState<string | null>(null);
   const uncovered = ((v?.coverage as any)?.uncovered ?? []) as string[];
   const flowKeys = items.filter((i) => i.category === "flow").map((i) => i.key);
   const [normalize, setNormalize] = useState<string | null>(null);
@@ -57,7 +60,7 @@ export function PlaybookEditor({ value, onChange, slug, onValidation }: { value:
       )}
 
       {view === "raw" ? (
-        <textarea aria-label="Test plan text" className={cn(inputCls, "h-[34rem] font-mono text-xs")} value={value} onChange={(e) => onChange(e.target.value)} spellCheck={false} />
+        <MarkdownEditor value={value} onChange={onChange} problems={problems} minHeight="30rem" maxHeight="40rem" />
       ) : (
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_14rem]">
           <div className="min-w-0 space-y-4">
@@ -71,13 +74,19 @@ export function PlaybookEditor({ value, onChange, slug, onValidation }: { value:
             </div>
             <p className="text-sm text-muted-foreground">{CATEGORIES.find((c) => c.id === cat)!.hint}</p>
             {cat === "requirement" && <PrdExtract slug={slug} items={items} value={value} onChange={onChange} />}
-            <AddCard key={cat} cat={cat} items={items} flowKeys={flowKeys} onAdd={(md) => onChange(insertItem(value, CATEGORIES.find((c) => c.id === cat)!.heading, md))} />
+            {editing && items.find((i) => i.key === editing) ? (
+              <AddCard key={`edit-${editing}`} cat={cat} items={items} flowKeys={flowKeys} editKey={editing} initial={itemToValues(cat, items.find((i) => i.key === editing)!)}
+                onCancel={() => setEditing(null)} onAdd={(md) => { onChange(replaceItem(value, editing, md)); setEditing(null); }} />
+            ) : (
+              <AddCard key={cat} cat={cat} items={items} flowKeys={flowKeys} onAdd={(md) => onChange(insertItem(value, CATEGORIES.find((c) => c.id === cat)!.heading, md))} />
+            )}
             <div className="space-y-2">
               <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Already in this test plan</h3>
               {items.filter((i) => i.category === cat).map((i) => (
                 <Card key={i.key} className="space-y-1 p-3 text-sm">
                   <div className="flex items-center gap-2"><Badge tone="accent">{i.key}</Badge><span className="font-medium">{i.title}</span>
-                    <button className="ml-auto text-muted-foreground hover:text-bad" aria-label={`Remove ${i.key}`} onClick={() => onChange(removeItem(value, i.key))}><Trash2 className="size-4" /></button></div>
+                    <button className="ml-auto text-muted-foreground hover:text-foreground" aria-label={`Edit ${i.key}`} onClick={() => { setCat(cat); setEditing(i.key); }}><Pencil className="size-4" /></button>
+                    <button className="text-muted-foreground hover:text-bad" aria-label={`Remove ${i.key}`} onClick={() => onChange(removeItem(value, i.key))}><Trash2 className="size-4" /></button></div>
                   <Summary item={i} />
                 </Card>
               ))}
@@ -117,16 +126,16 @@ function Summary({ item }: { item: { category: string; body: Record<string, any>
   return <dl className="grid grid-cols-[7rem_1fr] gap-x-3 gap-y-0.5 text-xs">{bits.map(([k, val]) => <><dt key={k} className="text-muted-foreground">{k}</dt><dd key={k + "v"} className="break-words font-mono">{val}</dd></>)}</dl>;
 }
 
-function AddCard({ cat, items, flowKeys, onAdd }: { cat: Category; items: { key: string }[]; flowKeys: string[]; onAdd: (md: string) => void }) {
+function AddCard({ cat, items, flowKeys, onAdd, initial, editKey, onCancel }: { cat: Category; items: { key: string }[]; flowKeys: string[]; onAdd: (md: string) => void; initial?: Record<string, string>; editKey?: string; onCancel?: () => void }) {
   const spec: FieldSpec[] = FORMS[cat].map((f) => (f.name === "applies_to" ? { ...f, options: flowKeys } : f));
   const init = () => Object.fromEntries(spec.map((f) => [f.name, f.kind === "select" ? (f.options?.[f.name === "severity" || f.name === "priority" ? 2 : 0] ?? "") : ""]));
-  const [v, setV] = useState<Record<string, string>>(init);
+  const [v, setV] = useState<Record<string, string>>(() => ({ ...init(), ...(initial ?? {}) }));
   const prefix = CATEGORIES.find((c) => c.id === cat)!.prefix;
   const missing = spec.filter((f) => f.required && (!f.show || f.show(v)) && !v[f.name]?.trim());
   const set = (name: string, val: string) => setV((p) => ({ ...p, [name]: val }));
   return (
     <Card className="space-y-3 p-4">
-      <div className="font-medium">Add {CATEGORIES.find((c) => c.id === cat)!.label.toLowerCase().replace(/s$/, "")}</div>
+      <div className="font-medium">{editKey ? `Edit ${editKey}` : `Add ${CATEGORIES.find((c) => c.id === cat)!.label.toLowerCase().replace(/s$/, "")}`}</div>
       <div className="grid gap-3 md:grid-cols-2">
         {spec.filter((f) => !f.show || f.show(v)).map((f) => (
           <div key={f.name} className={cn(["area", "lines", "scope"].includes(f.kind) && "md:col-span-2")}>
@@ -146,10 +155,11 @@ function AddCard({ cat, items, flowKeys, onAdd }: { cat: Category; items: { key:
           </div>
         ))}
       </div>
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        {editKey && <Button onClick={onCancel}>Cancel</Button>}
         <Button variant="primary" disabled={missing.length > 0} title={missing.length ? `Needs: ${missing.map((m) => m.label).join(", ")}` : undefined}
-          onClick={() => { onAdd(itemMarkdown(cat, nextKey(items.map((i) => i.key), prefix), v)); setV(init()); }}>
-          <Plus className="size-4" />Add to test plan
+          onClick={() => { onAdd(itemMarkdown(cat, editKey ?? nextKey(items.map((i) => i.key), prefix), v)); if (!editKey) setV(init()); }}>
+          {editKey ? <CheckCircle2 className="size-4" /> : <Plus className="size-4" />}{editKey ? "Save changes" : "Add to test plan"}
         </Button>
       </div>
     </Card>
