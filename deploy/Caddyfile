@@ -1,0 +1,16 @@
+# One address serves everything: /api goes to the backend, the rest to the web app.
+# SITE_ADDRESS is a domain (Caddy gets an HTTPS certificate by itself) or :80 for plain HTTP.
+{$SITE_ADDRESS::80} {
+	encode zstd gzip
+
+	handle /api/* {
+		# flush_interval -1: live run events (SSE) must not be buffered
+		reverse_proxy backend:8000 {
+			flush_interval -1
+		}
+	}
+
+	handle {
+		reverse_proxy frontend:3000
+	}
+}

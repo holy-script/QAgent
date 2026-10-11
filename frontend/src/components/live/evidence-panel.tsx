@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { Badge, Card, ErrorState, Loading, SeverityBadge, cn, fmtMs } from "@/components/ui";
 import { CallBodies } from "@/components/live/call-bodies";
-import { API_URL } from "@/lib/api/client";
+import { API_ORIGIN } from "@/lib/api/client";
 import { useEvidence } from "@/lib/api/live";
 
 const IMG_KINDS = ["annotated", "screenshot_after", "screenshot_before"] as const;
@@ -59,13 +59,13 @@ export function EvidencePanel({ findingId, slug, onClose }: { findingId: string;
                   ))}
                   <span className="ml-auto self-center text-xs text-muted-foreground">at step {f.step_seq}</span>
                 </div>
-                <img src={(current as { src?: string }).src ?? `${API_URL}/api/artifacts/${current.artifact_id}/content`} alt={`${LABEL[current.kind]} screenshot`} className="w-full rounded-lg border border-border" />
+                <img src={(current as { src?: string }).src ?? `${API_ORIGIN}/api/artifacts/${current.artifact_id}/content`} alt={`${LABEL[current.kind]} screenshot`} className="w-full rounded-lg border border-border" />
               </section>
             )}
             {waits.length > 0 && (
               <section className="space-y-2">
                 <h4 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">While waiting ({waits.length} snapshots)</h4>
-                <div className="flex gap-2 overflow-x-auto">{waits.map((w, i) => <img key={w.id} src={`${API_URL}/api/artifacts/${w.artifact_id}/content`} alt={`Wait frame ${i + 1}`} className="h-24 rounded border border-border" />)}</div>
+                <div className="flex gap-2 overflow-x-auto">{waits.map((w, i) => <img key={w.id} src={`${API_ORIGIN}/api/artifacts/${w.artifact_id}/content`} alt={`Wait frame ${i + 1}`} className="h-24 rounded border border-border" />)}</div>
               </section>
             )}
 

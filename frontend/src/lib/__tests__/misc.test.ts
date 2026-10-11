@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { lineForMessage } from "@/components/live/markdown-editor";
 import { SAMPLE_PLAYBOOK } from "@/lib/api/sample-playbook";
 import { CATEGORY_LABEL, GLOSSARY, ISSUE_STATUS, MODE_INFO } from "@/lib/terms";
@@ -40,5 +40,17 @@ describe("theme and formatting helpers", () => {
     expect([fmtMs(250), fmtMs(2600), fmtBytes(512), fmtBytes(2048), fmtUsd(0.0094), fmtUsd(1.5)]).toEqual(["250ms", "2.6s", "512 B", "2.0 KB", "$0.0094", "$1.50"]);
     expect(ago(new Date(Date.now() - 5 * 60_000).toISOString())).toBe("5m ago");
     expect(ago(new Date().toISOString())).toBe("just now");
+  });
+});
+
+describe("same-origin deployment", () => {
+  it("treats /api as the API base but serves screenshots from the host root", async () => {
+    vi.resetModules();
+    vi.stubEnv("NEXT_PUBLIC_API_URL", "/api");
+    const c = await import("../api/client");
+    expect(c.USE_MOCK).toBe(false);
+    expect(c.API_URL).toBe("/api");
+    expect(c.API_ORIGIN).toBe("");
+    vi.unstubAllEnvs();
   });
 });

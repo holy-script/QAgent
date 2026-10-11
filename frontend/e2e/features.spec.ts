@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { APP, finishRun } from "./helpers";
+import { APP, expectAccessible, finishRun } from "./helpers";
 
 // Each test is a user journey on the built-in demo data (no backend).
 
@@ -71,4 +71,21 @@ test("signing out returns to the sign-in page", async ({ page }) => {
   await page.getByRole("button", { name: "Account" }).click();
   await page.getByRole("menuitem", { name: "Sign out" }).click();
   await expect(page).toHaveURL(/login/);
+});
+
+test("the AI calls tab lists every model call with its cost and is accessible", async ({ page }) => {
+  await page.goto(`${APP}/runs/run-h3`);
+  await page.getByRole("tab", { name: "AI calls" }).click();
+  await expect(page.getByRole("heading", { name: /^Steps/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Checks/ })).toBeVisible();
+  await expect(page.getByText(/AI calls, \$/)).toBeVisible();
+  await expectAccessible(page, "ai calls");
+});
+
+test("planning is an opt-in choice when starting a run, and hidden for practice runs", async ({ page }) => {
+  await page.goto(APP);
+  const plan = page.getByRole("checkbox", { name: /plan each journey first/ });
+  await expect(plan).not.toBeChecked();
+  await page.getByRole("radio", { name: /Practice/ }).click();
+  await expect(plan).toHaveCount(0);
 });

@@ -66,18 +66,25 @@ make test         # 55 backend tests
 - **Deleting**: app and run deletion cascade through the database and object storage; confirmation dialogs (type the app name for an app).
 - **Reliability**: orphaned runs are marked failed on restart; uploads retry with backoff and emit `artifact.uploaded`.
 - **Editor**: CodeMirror 6 with Markdown highlighting, item IDs and bindings coloured, problems underlined on their line, edit-in-place for existing items (unseen fields are preserved).
-- **Tests and demo data**: every page and feature has demo data (in-browser fixtures with a scripted live run). Backend 75 pytest tests, frontend 40 unit tests, 53 Playwright tests (all pages x both themes, accessibility, phone width, auth, key journeys). CI runs all of them.
+- **Tests and demo data**: every page and feature has demo data (in-browser fixtures with a scripted live run). Backend 83 pytest tests, frontend 42 unit tests, 55 Playwright tests (all pages x both themes, accessibility, phone width, auth, key journeys). CI runs all of them.
 - **Done**: credential rotation (not needed, closed), `qagent-artifacts` bucket created and configured.
+
+- **Tape and cost**: judge verdicts and report calls are recorded as `model_calls` (new table, migration `b7e2c4a91d30`), so "Repeat exactly" answers judgements and reports from the recording with no model calls. Judge, planner and report cost roll into the run total with a breakdown; `GET /runs/{id}/tape` lists every call and the run page has an **AI calls** tab.
+- **Planner (opt-in)**: "Let the strong AI plan each journey first" has Claude write a short note per step that becomes a hint for the step decisions. Steps are never rewritten; plans are on the tape.
+- **Determinism**: the browser clock is fixed (`FIXED_CLOCK_ISO`), animations are off, locale and timezone are pinned, and each journey resets its own server-side state (demo shop: `POST /__reset?scope=session`) so parallel journeys never disturb each other. `DETERMINISTIC_BROWSER=false` turns this off.
+- **API**: app-scoped routes only for creating and listing (`/apps/{id}/runs`, `/apps/{id}/playbooks`); lookups by id stay flat (`/runs/{id}`, `/issues/{id}`).
+- **Deploy**: `docker-compose.yml` + `deploy/` run Caddy, the web app and the backend (one worker) on one machine behind one address. See `deploy/README.md`. Not yet exercised on a real VM.
 
 ## Known gaps
 
-- The "tape" timeline from the plan is not built (the journey strips and the decision loop stand in for it).
-- Auth is one shared account; no per-person identity, audit trail or roles.
-- Claude planner, judged calls on the tape, per-flow reset and deterministic browser, cost accounting for judge/report calls (plan section 16).
+- Auth is one shared account by choice; no per-person identity, audit trail or roles.
+- Run events are held in memory, so the backend must run as a single worker.
+- Retention (per-app clean-up of old runs and files) is not built.
+- The planner is opt-in and has only been exercised with a stubbed model in tests; try it live once before relying on it.
 
 ## Next steps
 
-1. **Review and land the branch**: merge `ui-refresh` into `integration` / `main` once reviewed.
-2. **Backend gaps** (plan section 16): Claude planner, judged calls on the tape, determinism, cost accounting.
-3. **Production hardening**: per-user accounts, `Secure` cookie behind HTTPS, rotate `AUTH_SECRET`, multi-worker SSE, hosting choice.
-4. **Demo readiness**: disable Neon scale-to-zero or pin a branch, rehearse hybrid vs baseline (`make bench` numbers are in ASSUMPTIONS.md).
+1. **Push and review** `ui-refresh`, then merge into `integration` / `main`.
+2. **Apply the migration** to your Neon database (`make migrate`): the new `model_calls` table is required.
+3. **First deployment** on a VM with `docker compose up -d --build` (the images have not been built in this environment).
+4. **Demo readiness**: turn off Neon scale-to-zero (paid plan) or warm the database first, point `DATABASE_URL` at a dedicated "demo" branch, rehearse Smart vs Thorough with `make bench`.

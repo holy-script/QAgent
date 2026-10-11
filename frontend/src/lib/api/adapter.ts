@@ -14,6 +14,7 @@ export const toTotals = (t: B = {}): RunTotals => ({
   steps: t.total_steps ?? 0, flows: t.flows ?? 0, findings: t.findings_count ?? 0, jev_decisions: t.jev_decisions ?? 0,
   claude_decisions: t.claude_decisions ?? 0, escalations: t.escalations ?? 0, cost_usd: t.total_cost_usd ?? 0,
   p50_decide_ms: t.avg_decision_latency_ms ?? 0, p95_decide_ms: t.avg_decision_latency_ms ?? 0,
+  judge_cost_usd: t.judge_cost_usd ?? 0, planner_cost_usd: t.planner_cost_usd ?? 0, report_cost_usd: t.report_cost_usd ?? 0,
 });
 
 const runStatus = (s: string): RunStatus => (s === "pending" ? "queued" : (s as RunStatus));

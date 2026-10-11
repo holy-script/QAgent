@@ -2,7 +2,7 @@
 // Hooks for the features that only exist on the real backend (issues, reports, traceability, evidence, playbook
 // validation, PRD extraction, normalize, replay). Types come from the generated schema (npm run gen:api).
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { API_URL, USE_MOCK, api, http } from "./client";
+import { API_ORIGIN, USE_MOCK, api, http } from "./client";
 import { mockLive } from "./mock-live";
 import type { components } from "./schema";
 
@@ -14,6 +14,7 @@ export type Traceability = S["TraceabilityResponse"];
 export type Validation = S["PlaybookValidationResponse"];
 export type Proposal = S["RequirementProposal"];
 export type FlowSummary = S["FlowSummaryResponse"];
+export type TapeEntry = S["TapeEntry"];
 
 export interface StepArtifact { id: string; kind: string; flow_key: string | null; step_seq: number | null; url: string; content_type: string }
 export interface EvidenceItem { id: string; kind: string; ref_id: string; note: string; artifact_id?: string | null; available?: boolean; url?: string | null; call?: { id: string; method: string; url: string; status: number; duration_ms: number; traceparent?: string | null } }
@@ -27,7 +28,7 @@ export interface Evidence {
 }
 
 /** Absolute URL for a backend-relative path such as /api/artifacts/... */
-export const assetUrl = (path?: string | null) => (path ? (path.startsWith("http") ? path : API_URL + path) : "");
+export const assetUrl = (path?: string | null) => (path ? (path.startsWith("http") ? path : API_ORIGIN + path) : "");
 const pick = <T,>(mock: () => Promise<T>, real: () => Promise<T>) => (USE_MOCK ? mock() : real());
 
 export const useIssues = (slug: string, status?: string) =>
@@ -64,3 +65,7 @@ export function useRegenerateReport(runId: string) {
   const qc = useQueryClient();
   return useMutation({ mutationFn: () => USE_MOCK ? mockLive.runReport(runId) : http<Report>(`/runs/${runId}/report`, { method: "POST" }), onSuccess: (r) => qc.setQueryData(["run-report", runId], r) });
 }
+
+/** Every model call of a run in order: plans, step decisions, judgements, report calls. */
+export const useTape = (runId: string) =>
+  useQuery({ queryKey: ["tape", runId], queryFn: () => pick(() => mockLive.tape(runId), () => http<TapeEntry[]>(`/runs/${runId}/tape`)) });

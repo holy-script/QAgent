@@ -1,0 +1,43 @@
+# One machine, one command:  docker compose up -d --build
+# Needs backend/.env (keys, database, storage; see .env.example) and a .env next to this file with:
+#   AUTH_SECRET=<a long random string>      SITE_ADDRESS=qagent.example.com   (or :80 for plain HTTP)
+# The backend runs ONE worker on purpose: live run events are held in memory.
+services:
+  backend:
+    build: { context: ., dockerfile: backend/Dockerfile }
+    env_file: backend/.env
+    environment:
+      AUTH_SECRET: ${AUTH_SECRET:?set AUTH_SECRET in .env}
+      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-true}
+      CORS_ORIGINS: ${PUBLIC_URL:-http://localhost}
+      QAGENT_HEADLESS: "true"
+    command: sh -c "uv run alembic upgrade head && uv run uvicorn qagent.api.main:app --host 0.0.0.0 --port 8000 --workers 1"
+    restart: unless-stopped
+    shm_size: 1gb   # Chromium needs more than Docker's default 64 MB of shared memory
+
+  frontend:
+    build: { context: ., dockerfile: frontend/Dockerfile }
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2
+    ports: ["80:80", "443:443"]
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-:80}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on: [backend, frontend]
+    restart: unless-stopped
+
+  # Optional sample app to test against:  docker compose --profile demo up -d
+  demo-shop:
+    profiles: ["demo"]
+    image: python:3.12-slim
+    working_dir: /shop
+    volumes: ["./demo-shop:/shop:ro"]
+    command: sh -c "pip install -q fastapi uvicorn jinja2 && uvicorn main:app --host 0.0.0.0 --port 8001"
+    restart: unless-stopped
+
+volumes:
+  caddy_data:

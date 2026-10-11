@@ -65,3 +65,10 @@ describe("EventTranslator: one run, event by event", () => {
     expect(t.translate("artifact.uploaded", env(9, "artifact.uploaded", {}))).toEqual([]); // unknown events are ignored
   });
 });
+
+import { toTotals as totalsOf } from "../api/adapter";
+describe("cost breakdown", () => {
+  it("carries where the money went, defaulting to zero", () => {
+    expect(totalsOf({ total_cost_usd: 0.05, judge_cost_usd: 0.01, report_cost_usd: 0.02 })).toMatchObject({ cost_usd: 0.05, judge_cost_usd: 0.01, planner_cost_usd: 0, report_cost_usd: 0.02 });
+  });
+});

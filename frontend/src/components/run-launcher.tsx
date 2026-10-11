@@ -3,6 +3,7 @@ import { Play } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, Card, SelectField, cn } from "@/components/ui";
+import { Checkbox } from "@/components/ui/checkbox";
 import { usePlaybooks, useStartRun } from "@/lib/api/hooks";
 import type { Mode } from "@/lib/api/types";
 import { MODE_INFO } from "@/lib/terms";
@@ -14,6 +15,7 @@ export function RunLauncher({ slug }: { slug: string }) {
   const { data: pbs } = usePlaybooks(slug);
   const start = useStartRun(slug);
   const [mode, setMode] = useState<Mode>("hybrid");
+  const [plan, setPlan] = useState(false);
   const [pick, setPick] = useState<string>();
   const confirmed = pbs?.filter((p) => p.status === "confirmed") ?? [];
   const pb = confirmed.find((p) => p.id === pick) ?? confirmed[0];
@@ -38,9 +40,15 @@ export function RunLauncher({ slug }: { slug: string }) {
               </button>
             ))}
           </div>
+          {mode !== "stub" && (
+            <label className="flex items-start gap-2 text-sm">
+              <Checkbox checked={plan} onCheckedChange={(v) => setPlan(v === true)} className="mt-0.5" />
+              <span>Let the strong AI plan each journey first<span className="block text-xs text-muted-foreground">It reads the steps and writes a short note for each one. Slightly slower and a little extra cost; it can help with unclear steps.</span></span>
+            </label>
+          )}
           {start.error && <p role="alert" className="text-sm text-bad">{start.error.message}</p>}
           <Button variant="primary" className="w-full" disabled={start.isPending}
-            onClick={async () => { const r = await start.mutateAsync({ versionId: pb.current_version_id, mode }); router.push(`/apps/${slug}/runs/${r.id}`); }}>
+            onClick={async () => { const r = await start.mutateAsync({ versionId: pb.current_version_id, mode, plan: plan && mode !== "stub" }); router.push(`/apps/${slug}/runs/${r.id}`); }}>
             <Play className="size-4" />{start.isPending ? "Starting…" : "Run now"}
           </Button>
         </>

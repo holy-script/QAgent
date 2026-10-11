@@ -999,13 +999,13 @@ What exists today, and where it differs from the target in sections 5–12. **55
 
 | Area | Today | Target |
 |---|---|---|
-| Planner | `plan` node only validates the flow; steps run as written | Claude planner with reasoning examples |
-| Judged check replay | Jev/Claude judge and report calls are not written to the tape, so a replay re-asks them | Recorded on the tape |
-| Determinism | Fixed viewport; target reset once per run (`reset_path`), not before every flow (flows share the demo shop's payment counter) | Frozen clock, animations disabled, reset per flow |
+| Planner | Done, opt-in per run: Claude writes a note per step (hints only; steps are not rewritten), on the tape | Claude planner with reasoning examples |
+| Judged check replay | Done: judge, planner and report calls are `model_calls`, served back on replay, with cost | Recorded on the tape |
+| Determinism | Done: fixed clock, animations off, per-flow reset through the flow's own browser session | Frozen clock, animations disabled, reset per flow |
 | Uploads | `artifacts_complete` is set when a step is verified, not when its uploads finish; no `artifact.uploaded` event | Set by the upload worker, with the event |
 | Retention, upload retry | Not built (a failed upload is swallowed) | Backoff retries, per-app retention (P2) |
 | Redaction | App `redact_keys` are masked in stored request and response bodies; headers are never stored | Same |
-| API paths | Both flat (`/runs`, `/playbooks`) and app-scoped paths exist | App-scoped only |
+| API paths | Done: create/list are app-scoped; lookups by id stay flat | App-scoped only |
 | Neon branch pin | Not done | "Pin for demo" (P2) |
 | Existing Neon data | Events written before the dotted-name migration keep the old uppercase names | n/a |
 

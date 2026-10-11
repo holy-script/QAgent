@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { Badge, Card, SeverityBadge, cn, fmtMs } from "@/components/ui";
 import { CallBodies } from "@/components/live/call-bodies";
-import { API_URL } from "@/lib/api/client";
+import { API_ORIGIN } from "@/lib/api/client";
 import { useState } from "react";
 
-const img = (id?: string | null) => (id ? `${API_URL}/api/artifacts/${id}/content` : "");
+const img = (id?: string | null) => (id ? `${API_ORIGIN}/api/artifacts/${id}/content` : "");
 
 /** Renders a stored bug report (assembled by the backend from recorded facts; only impact/cause are model prose). */
 export function BugReportView({ content, slug }: { content: Record<string, any>; slug: string }) {

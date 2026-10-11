@@ -70,6 +70,10 @@ export interface RunTotals {
   cost_usd: number;
   p50_decide_ms: number;
   p95_decide_ms: number;
+  /** Where the cost went (real backend only): step decisions are cost_usd minus the rest. */
+  judge_cost_usd?: number;
+  planner_cost_usd?: number;
+  report_cost_usd?: number;
 }
 export interface Run {
   id: string;

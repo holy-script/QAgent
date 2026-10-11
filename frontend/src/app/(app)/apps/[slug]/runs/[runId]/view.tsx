@@ -13,6 +13,7 @@ import { GraphTab } from "@/components/run/graph-tab";
 import { LogsTab } from "@/components/run/logs-tab";
 import { NetworkTab } from "@/components/run/network-tab";
 import { StepDrawer } from "@/components/run/step-drawer";
+import { TapeTab } from "@/components/run/tape-tab";
 import { TraceTab } from "@/components/run/trace-tab";
 import { Badge, Button, ErrorState, Loading, Metric, StateTabs, StatusPill, fmtMs, fmtUsd } from "@/components/ui";
 import { ReplayPanel } from "@/components/live/replay-panel";
@@ -21,7 +22,7 @@ import { useRun } from "@/lib/api/hooks";
 import type { Run } from "@/lib/api/types";
 import { SPEEDS, useRunStream } from "@/lib/use-run-stream";
 
-type Tab = "flows" | "graph" | "network" | "trace" | "logs" | "findings";
+type Tab = "flows" | "graph" | "calls" | "network" | "trace" | "logs" | "findings";
 
 export default function RunPage() {
   const { slug, runId } = useParams<{ slug: string; runId: string }>();
@@ -98,13 +99,15 @@ function RunBody({ slug, run, replay, onReplay }: { slug: string; run: Run; repl
         <Metric label="Problems found" info="Checks that failed in this run." value={view.findings.length} tone={view.findings.length ? "bad" : "ok"} />
         <Metric label="Fast AI / Strong AI" info="How many decisions each AI made. The fast AI handles most steps; the strong AI is asked when the fast one is unsure." value={`${jev} / ${claude}`} hint={`${steps.filter((s) => s.decisions.length > 1).length} double-checked`} />
         <Metric label="AI speed" info="Average time the AI took to choose an action." value={avg ? fmtMs(avg) : "–"} hint={t.p95_decide_ms ? `p95 ${fmtMs(t.p95_decide_ms)}` : undefined} />
-        <Metric label="AI cost (estimate)" info="Approximate spend on AI calls for this run." value={fmtUsd(view.done ? t.cost_usd : cost)} />
+        <Metric label="AI cost" info="Spend on AI calls for this run: choosing actions, answering checks, planning and writing reports." value={fmtUsd(view.done ? t.cost_usd : cost)}
+          hint={view.done && (t.judge_cost_usd || t.planner_cost_usd || t.report_cost_usd) ? `checks ${fmtUsd(t.judge_cost_usd ?? 0)} · reports ${fmtUsd(t.report_cost_usd ?? 0)}` : undefined} />
         <Metric label="Server calls" info="Requests the app made to its server while being tested." value={view.network.length} hint={`${view.network.filter((n) => n.status >= 400).length} failed`} tone={view.network.some((n) => n.status >= 400) ? "bad" : undefined} />
       </div>
 
       <StateTabs<Tab> value={tab} onChange={setTab} tabs={[
         { id: "flows", label: "Journeys", count: view.flows.length },
         { id: "graph", label: "How it decided" },
+        { id: "calls", label: "AI calls" },
         { id: "network", label: "Server calls", count: view.network.length },
         { id: "trace", label: "Timeline", count: view.spans.length },
         { id: "logs", label: "Activity", count: view.logs.length },
@@ -113,6 +116,7 @@ function RunBody({ slug, run, replay, onReplay }: { slug: string; run: Run; repl
 
       {tab === "flows" && <FlowsTab view={view} onOpen={open} selected={sel} />}
       {tab === "graph" && <GraphTab view={view} running={running} />}
+      {tab === "calls" && <TapeTab runId={run.id} />}
       {tab === "network" && <NetworkTab view={view} onOpen={open} />}
       {tab === "trace" && <TraceTab view={view} />}
       {tab === "logs" && <LogsTab view={view} live={running} onOpen={open} />}

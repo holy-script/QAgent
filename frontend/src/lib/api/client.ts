@@ -6,6 +6,8 @@ import { toApp, toFlowHistory, toPlaybook, toRun } from "./adapter";
 /** Unset → in-browser mock backed by fixtures (F0–F5). Set → real API (F6). */
 export const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "";
 export const USE_MOCK = !API_URL;
+/** Where `/api/...` paths from the backend (screenshot URLs) are served. API_URL may already end in /api (same-origin deploy: NEXT_PUBLIC_API_URL=/api). */
+export const API_ORIGIN = API_URL.replace(/\/api$/, "");
 
 export async function http<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(API_URL + path, { ...init, credentials: "include", headers: { "Content-Type": "application/json", ...init?.headers } });
@@ -140,9 +142,9 @@ export const api = {
     return delay(r);
   },
 
-  async startRun(slug: string, playbookVersionId: string, mode: Mode): Promise<Run> {
+  async startRun(slug: string, playbookVersionId: string, mode: Mode, plan = false): Promise<Run> {
     if (!USE_MOCK) {
-      const r = await http<any>(`/apps/${slug}/runs`, { method: "POST", body: JSON.stringify({ playbook_version_id: playbookVersionId, mode }) });
+      const r = await http<any>(`/apps/${slug}/runs`, { method: "POST", body: JSON.stringify({ playbook_version_id: playbookVersionId, mode, plan }) });
       return toRun(r, (await versionNames(r.app_id)).get(r.playbook_version_id));
     }
     const run = makeRun("run-" + uid(), mode, 0, playbookVersionId);

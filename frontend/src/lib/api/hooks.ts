@@ -32,7 +32,7 @@ export function useConfirmPlaybook(slug: string) {
 export function useStartRun(slug: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (v: { versionId: string; mode: Mode }) => api.startRun(slug, v.versionId, v.mode),
+    mutationFn: (v: { versionId: string; mode: Mode; plan?: boolean }) => api.startRun(slug, v.versionId, v.mode, v.plan),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["runs", slug] }),
   });
 }

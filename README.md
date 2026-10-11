@@ -34,5 +34,8 @@ Runs use the pinned Playwright Chromium. Override with `QAGENT_BROWSER_PATH` (a 
 
 CI (`.github/workflows/ci.yml`) runs all of the above on every push and pull request.
 
+## Deploying
+`docker compose up -d --build` runs the web app, the API and Caddy on one machine behind one address. Steps: [deploy/README.md](deploy/README.md).
+
 ## Deleting data
 Settings > Delete this app removes the app and everything it owns (plans, runs, bugs, reports) and its stored files. A single run can be deleted from its page.

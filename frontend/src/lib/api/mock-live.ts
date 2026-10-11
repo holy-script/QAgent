@@ -3,7 +3,7 @@
 // numbers on every page agree with each other.
 import { api } from "./client";
 import { shot } from "./fixtures";
-import type { Evidence, Issue, IssueDetail, Proposal, Report, Traceability, Validation } from "./live";
+import type { Evidence, Issue, IssueDetail, Proposal, Report, TapeEntry, Traceability, Validation } from "./live";
 import type { Run, SseEnvelope } from "./types";
 import { validateMarkdown } from "../playbook-validate";
 
@@ -85,6 +85,27 @@ const issueContent = async (s: Spec) => {
 };
 
 export const mockLive = {
+  /** The run's model calls, built from the same scripted events the run viewer plays. */
+  async tape(runId: string): Promise<TapeEntry[]> {
+    const ev = (await eventsFor(runId)).map((e) => e.event);
+    const out: TapeEntry[] = [];
+    for (const e of ev) {
+      if (e.type !== "step.decided") continue;
+      const d = e.payload.decision;
+      out.push({
+        kind: "decision", phase: 1, flow_key: e.payload.flow_key, step_seq: e.payload.seq, decider: d.decider, model_version: d.model_version,
+        label: d.question, outcome: e.payload.action_label, confidence: d.confidence, branch: d.branch, latency_ms: d.latency_ms,
+        input_tokens: d.input_tokens, output_tokens: d.output_tokens, cost_usd: d.decider === "claude" ? 0.0094 : 0.00006, replayed: false,
+      });
+    }
+    for (const spec of SPECS.filter((x) => x.judged && x.runs.includes(runId))) {
+      out.push({ kind: "judge", phase: 2, flow_key: spec.flow, step_seq: null, decider: spec.judged!, model_version: "jev-1.13.0", label: spec.title, outcome: "false", confidence: 0.81, branch: null, latency_ms: 420, input_tokens: 610, output_tokens: 8, cost_usd: 0, replayed: false });
+    }
+    const bugs = SPECS.filter((x) => x.runs.includes(runId));
+    for (const b of bugs) out.push({ kind: "bug_narrative", phase: 3, flow_key: null, step_seq: null, decider: "claude", model_version: "claude-sonnet", label: b.title, outcome: "", confidence: null, branch: null, latency_ms: 2100, input_tokens: 1800, output_tokens: 240, cost_usd: 0.009, replayed: false });
+    if (bugs.length) out.push({ kind: "report", phase: 3, flow_key: null, step_seq: null, decider: "claude", model_version: "claude-sonnet", label: "recommendations", outcome: "", confidence: null, branch: null, latency_ms: 4800, input_tokens: 5200, output_tokens: 900, cost_usd: 0.029, replayed: false });
+    return out;
+  },
   async issues(status?: string): Promise<Issue[]> {
     const runs = await runsById();
     return SPECS.filter((s) => !status || s.status === status).map((s) => { const { occurrence_list: _o, ...rest } = toIssue(s, runs); void _o; return rest; });
