@@ -2,7 +2,7 @@
 import { Play } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button, Card, cn } from "@/components/ui";
+import { Button, Card, SelectField, cn } from "@/components/ui";
 import { usePlaybooks, useStartRun } from "@/lib/api/hooks";
 import type { Mode } from "@/lib/api/types";
 import { MODE_INFO } from "@/lib/terms";
@@ -27,10 +27,8 @@ export function RunLauncher({ slug }: { slug: string }) {
         <p className="text-sm text-muted-foreground">You need a test plan first. A test plan says what to check. Open the Test plans tab to add one.</p>
       ) : (
         <>
-          <select aria-label="Test plan" value={pb.id} onChange={(e) => setPick(e.target.value)}
-            className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm">
-            {confirmed.map((p) => <option key={p.id} value={p.id}>{p.name} (v{p.versions[0].version_no})</option>)}
-          </select>
+          <SelectField label="Test plan" value={pb.id} onChange={setPick}
+            options={confirmed.map((p) => ({ value: p.id, label: `${p.name} (version ${p.versions[0].version_no})` }))} />
           <div className="grid gap-2" role="radiogroup" aria-label="How should decisions be made?">
             {MODES.map((m) => (
               <button key={m.id} role="radio" aria-checked={mode === m.id} onClick={() => setMode(m.id)}

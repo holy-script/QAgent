@@ -2,9 +2,7 @@
 import { Link2 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { NeedsApi } from "@/components/live/needs-api";
 import { Badge, Card, Empty, ErrorState, Loading, Metric, type Tone } from "@/components/ui";
-import { USE_MOCK } from "@/lib/api/client";
 import { useTraceability } from "@/lib/api/live";
 
 const TONE: Record<string, [Tone, string]> = {
@@ -16,7 +14,6 @@ const TONE: Record<string, [Tone, string]> = {
 export default function Traceability() {
   const { slug } = useParams<{ slug: string }>();
   const { data, error, isPending, refetch } = useTraceability(slug);
-  if (USE_MOCK) return <NeedsApi what="The requirements matrix" />;
   if (isPending) return <Loading />;
   if (error) return <ErrorState error={error} retry={refetch} />;
   const reqs = (data.requirements ?? []) as any[];

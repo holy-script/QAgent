@@ -1,4 +1,5 @@
 "use client";
+import { SelectField } from "@/components/ui";
 import { ConfirmDelete } from "@/components/confirm-delete";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -48,9 +49,8 @@ function Form({ app }: { app: App }) {
         <Field label="Product document (optional)" hint="Paste your requirements or product spec. The test plan editor can suggest requirements from it."><textarea className={`${inputCls} font-mono text-xs`} rows={6} value={f.prd} onChange={set("prd")} /></Field>
         <Field label="Other sites tests may visit" hint="Comma-separated. For safety the browser refuses to go anywhere that is not your app or listed here."><input className={inputCls} value={f.hosts} onChange={set("hosts")} /></Field>
         <Field label="Default mode" hint="How decisions are made when you run a test. Smart is recommended.">
-          <select className={inputCls} value={f.default_mode} onChange={(e) => setF({ ...f, default_mode: e.target.value as Mode })}>
-            <option value="hybrid">Smart: fast AI, stronger AI when unsure (recommended)</option><option value="baseline">Thorough: stronger AI every time</option><option value="stub">Practice: no AI</option>
-          </select>
+          <SelectField label="Default mode" value={f.default_mode} onChange={(v) => setF({ ...f, default_mode: v as Mode })}
+            options={[{ value: "hybrid", label: "Smart: fast AI, stronger AI when unsure (recommended)" }, { value: "baseline", label: "Thorough: stronger AI every time" }, { value: "stub", label: "Practice: no AI" }]} />
         </Field>
         <div className="grid grid-cols-2 gap-4">
           <Field label="Act on its own above this confidence" hint="0 to 1. Blank uses the default (0.75)."><input className={inputCls} value={f.auto} onChange={set("auto")} inputMode="decimal" placeholder="0.75" /></Field>

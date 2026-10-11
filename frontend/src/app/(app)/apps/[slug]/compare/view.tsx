@@ -1,4 +1,5 @@
 "use client";
+import { SelectField } from "@/components/ui";
 import { MODE_INFO } from "@/lib/terms";
 import { useParams } from "next/navigation";
 import { useState } from "react";
@@ -18,9 +19,8 @@ const METRICS: { label: string; get: (r: Run) => number; fmt: (n: number) => str
 
 function RunSelect({ value, onChange, label, runs }: { value: string; onChange: (v: string) => void; label: string; runs: Run[] }) {
   return (
-    <select aria-label={label} value={value} onChange={(e) => onChange(e.target.value)} className="rounded-lg border border-border bg-secondary px-3 py-2 text-sm">
-      {runs.map((r) => <option key={r.id} value={r.id}>{MODE_INFO[r.mode].label} · {r.id.slice(0, 10)} · {r.playbook_name}</option>)}
-    </select>
+    <SelectField label={label} value={value} onChange={onChange} className="w-80"
+      options={runs.map((r) => ({ value: r.id, label: `${MODE_INFO[r.mode].label} · ${r.id.slice(0, 8)} · ${r.playbook_name}` }))} />
   );
 }
 

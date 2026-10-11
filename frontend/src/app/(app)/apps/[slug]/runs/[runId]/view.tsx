@@ -16,7 +16,7 @@ import { StepDrawer } from "@/components/run/step-drawer";
 import { TraceTab } from "@/components/run/trace-tab";
 import { Badge, Button, ErrorState, Loading, Metric, StateTabs, StatusPill, fmtMs, fmtUsd } from "@/components/ui";
 import { ReplayPanel } from "@/components/live/replay-panel";
-import { api, USE_MOCK } from "@/lib/api/client";
+import { api } from "@/lib/api/client";
 import { useRun } from "@/lib/api/hooks";
 import type { Run } from "@/lib/api/types";
 import { SPEEDS, useRunStream } from "@/lib/use-run-stream";
@@ -80,14 +80,14 @@ function RunBody({ slug, run, replay, onReplay }: { slug: string; run: Run; repl
               <Button variant="danger" onClick={() => api.stopRun(live.id)}><Square className="size-4" />Stop run</Button>
             </>
           )}
-          {!running && !USE_MOCK && <Link href={`/apps/${slug}/runs/${live.id}/report`} className="inline-flex items-center gap-2 rounded-lg border border-brand/40 bg-brand/10 px-3.5 py-2 text-sm font-medium text-brand hover:bg-brand/15"><FileText className="size-4" />View report</Link>}
-          {!running && !USE_MOCK && <Button onClick={() => setTapePanel((v) => !v)} aria-expanded={tapePanel}><History className="size-4" />Repeat exactly</Button>}
+          {!running && <Link href={`/apps/${slug}/runs/${live.id}/report`} className="inline-flex items-center gap-2 rounded-lg border border-brand/40 bg-brand/10 px-3.5 py-2 text-sm font-medium text-brand hover:bg-brand/15"><FileText className="size-4" />View report</Link>}
+          {!running && <Button onClick={() => setTapePanel((v) => !v)} aria-expanded={tapePanel}><History className="size-4" />Repeat exactly</Button>}
           {!running && <Button variant="danger" onClick={() => setConfirmDelete(true)}><Trash2 className="size-4" />Delete run</Button>}
           {!running && <Button onClick={onReplay}><RotateCcw className="size-4" />Watch again</Button>}
         </div>
       </div>
 
-      {tapePanel && !USE_MOCK && <ReplayPanel slug={slug} runId={live.id} onClose={() => setTapePanel(false)} />}
+      {tapePanel && <ReplayPanel slug={slug} runId={live.id} onClose={() => setTapePanel(false)} />}
 
       {running && progress.n > 0 && (
         <div className="h-1 overflow-hidden rounded-full bg-foreground/10"><div className="h-full bg-brand transition-all" style={{ width: `${(progress.i / progress.n) * 100}%` }} /></div>

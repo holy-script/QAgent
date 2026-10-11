@@ -2,47 +2,10 @@ import type {
   App, Candidate, Decision, Finding, Mode, NetworkCall, Playbook, Run, RunTotals,
   Severity, SseEnvelope, Step, Tier,
 } from "./types";
-import { parsePlaybook } from "../playbook-parser";
+import { toParsedFlows, validateMarkdown } from "../playbook-validate";
 
-export const SAMPLE_PLAYBOOK = `# Playbook: Checkout flow
-base_url: http://localhost:8001
-
-## Flow: add-to-cart
-Severity: high
-
-### Steps
-1. Open /products
-2. Add 2 items to cart
-3. Go to /cart
-
-### Expect
-- Cart shows 2 items
-- Total is visible
-
-### Test data
-- qty: 2
-- coupon: EXPIRED10
-
-### Formulas
-- cart_total: \`total == round(sum(i.price * i.qty for i in items) * (1 + tax_rate), 2)\`
-  - source: both
-  - bindings: items=api:/api/cart.items, total=ui:[data-testid=cart-total], tax_rate=const:0.08
-
-### Edge cases
-- Quantity set to 0
-- Apply expired coupon
-
-## Flow: checkout
-Severity: critical
-
-### Steps
-1. Open /checkout
-2. Fill shipping address
-3. Pay with test card
-
-### Expect
-- Order confirmation is shown
-`;
+export { SAMPLE_PLAYBOOK } from "./sample-playbook";
+import { SAMPLE_PLAYBOOK } from "./sample-playbook";
 
 const iso = (minsAgo: number) => new Date(Date.now() - minsAgo * 60_000).toISOString();
 
@@ -63,12 +26,21 @@ export const seedApps = (): App[] => [
   },
 ];
 
+/** A stored version built the way the backend does it: parse, validate, keep the problems as warnings. */
+export function versionFrom(id: string, playbookId: string, no: number, md: string, created: string) {
+  const val = validateMarkdown(md);
+  return {
+    id, playbook_id: playbookId, version_no: no, raw_markdown: md,
+    parsed: { title: val.title, base_url: val.base_url, flows: toParsedFlows(val) },
+    warnings: [...val.errors.map((message) => ({ line: 0, level: "error" as const, message })), ...val.warnings.map((message) => ({ line: 0, level: "warning" as const, message }))],
+    content_hash: `sha${no}${md.length}`.padEnd(12, "0"), created_at: created,
+  };
+}
+
 export const seedPlaybooks = (): Playbook[] => {
-  const v = (n: number, md: string) => ({
-    id: `pbv-${n}`, playbook_id: "pb-checkout", version_no: n, raw_markdown: md,
-    ...parsePlaybook(md), content_hash: `sha${n}c0ffee`.padEnd(12, "0"), created_at: iso(60 * 24 * (3 - n)),
-  });
-  const v1 = v(1, SAMPLE_PLAYBOOK.replace(/\n## Flow: checkout[\s\S]*/, "\n"));
+  const v = (n: number, md: string) => versionFrom(`pbv-${n}`, "pb-checkout", n, md, iso(60 * 24 * (3 - n)));
+  // Version 1 is the earlier, smaller plan: no checkout journey and no edge case for it.
+  const v1 = v(1, SAMPLE_PLAYBOOK.replace(/### Flow: checkout[\s\S]*?(?=## Reasoning examples)/, "").replace(/### EC-3:[\s\S]*?(?=## Flows)/, ""));
   const v2 = v(2, SAMPLE_PLAYBOOK);
   return [{
     id: "pb-checkout", app_id: APP_ID, name: "Checkout flow", current_version_id: v2.id,
@@ -79,7 +51,7 @@ export const seedPlaybooks = (): Playbook[] => {
 // ---------- screenshots (inline SVG so fixtures need no binary assets) ----------
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
-function shot(title: string, badge: number, cands: Candidate[], active: number | null, extra = "") {
+export function shot(title: string, badge: number, cands: Candidate[], active: number | null, extra = "") {
   const rects = cands.map((c) => {
     const [x, y, w, h] = c.rect;
     const on = c.id === active;
@@ -236,40 +208,3 @@ export function seedRuns(): Run[] {
     return { ...r, status: fin.payload.status, totals: fin.payload.totals, finished_at: iso(ago - 1) };
   });
 }
-
-/** Sample in the backend's seven-category format (used when talking to the real API). */
-export const SAMPLE_PLAYBOOK_V2 = `# Playbook: Checkout
-base_url: http://localhost:8001
-
-## Requirements
-### REQ-1: Cart total applies the discount before tax
-- prd_ref: §3.2 Pricing
-- acceptance: total = (subtotal − discount) × (1 + tax_rate), rounded to 2 decimals
-- priority: high
-
-## Formulas
-### F-1: cart_total
-- rule: \`total == round((sum(i.price * i.qty for i in items) - discount) * (1 + tax_rate), 2)\`
-- bindings: items=api:/api/cart.items, discount=api:/api/cart.discount, total=ui:[data-testid=cart-total], tax_rate=const:0.08
-- verifies: REQ-1
-
-## UX rules
-### UX-1: Cart count is consistent across the app
-- check: consistent_value
-- targets: ui:[data-testid=cart-badge], api:/api/cart.count
-- severity: medium
-
-## Flows
-### Flow: add-to-cart
-- covers: REQ-1
-- checks: F-1, UX-1
-- severity: high
-
-#### Steps
-1. Open /products
-2. Add 2 items to cart
-3. Go to /cart
-
-#### Expect
-- Cart shows 2 items
-`;

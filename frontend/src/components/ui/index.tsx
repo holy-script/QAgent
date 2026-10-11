@@ -10,6 +10,8 @@ import type { ComponentProps, ReactNode } from "react";
 import { Badge as ShadBadge } from "@/components/ui/badge";
 import { Button as ShadButton, buttonVariants } from "@/components/ui/button";
 import { Tabs as ShadTabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
@@ -153,10 +155,30 @@ export const Field = ({ label, hint, children }: { label: string; hint?: string;
 );
 export const inputCls = "w-full rounded-lg border border-input bg-card px-3 py-2 text-sm shadow-xs outline-none transition placeholder:text-muted-foreground/70 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30";
 
-export const fmtMs = (ms: number) => (ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${Math.round(ms)}ms`);
-export const fmtBytes = (b: number) => (b < 1024 ? `${b} B` : `${(b / 1024).toFixed(1)} KB`);
-export const fmtUsd = (n: number) => `$${n < 0.01 ? n.toFixed(4) : n.toFixed(2)}`;
-export const ago = (iso: string) => {
-  const s = (Date.now() - new Date(iso).getTime()) / 1000;
-  return s < 60 ? "just now" : s < 3600 ? `${Math.floor(s / 60)}m ago` : s < 86400 ? `${Math.floor(s / 3600)}h ago` : `${Math.floor(s / 86400)}d ago`;
-};
+export { ago, fmtBytes, fmtMs, fmtUsd } from "./format";
+
+export { TableCell, TableRow };
+
+/** A bordered table with a header row. Rows are plain <TableRow>/<TableCell> children. */
+export function SimpleTable({ head, children, className }: { head: string[]; children: ReactNode; className?: string }) {
+  return (
+    <div className={cn("overflow-hidden rounded-xl border bg-card", className)}>
+      <Table>
+        <TableHeader className="bg-muted/60">
+          <TableRow className="hover:bg-transparent">{head.map((h) => <TableHead key={h} className="h-10 px-4 text-xs font-medium text-muted-foreground">{h}</TableHead>)}</TableRow>
+        </TableHeader>
+        <TableBody>{children}</TableBody>
+      </Table>
+    </div>
+  );
+}
+
+/** A dropdown built on the library's Select (use instead of a native <select>). */
+export function SelectField({ value, onChange, options, label, className }: { value: string; onChange: (v: string) => void; options: { value: string; label: string }[]; label: string; className?: string }) {
+  return (
+    <Select value={value} onValueChange={(v) => v != null && onChange(String(v))} items={options}>
+      <SelectTrigger aria-label={label} className={cn("h-9 w-full bg-card", className)}><SelectValue /></SelectTrigger>
+      <SelectContent>{options.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+    </Select>
+  );
+}

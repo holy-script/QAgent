@@ -2,7 +2,8 @@
 // Hooks for the features that only exist on the real backend (issues, reports, traceability, evidence, playbook
 // validation, PRD extraction, normalize, replay). Types come from the generated schema (npm run gen:api).
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { API_URL, USE_MOCK, http } from "./client";
+import { API_URL, USE_MOCK, api, http } from "./client";
+import { mockLive } from "./mock-live";
 import type { components } from "./schema";
 
 type S = components["schemas"];
@@ -27,39 +28,39 @@ export interface Evidence {
 
 /** Absolute URL for a backend-relative path such as /api/artifacts/... */
 export const assetUrl = (path?: string | null) => (path ? (path.startsWith("http") ? path : API_URL + path) : "");
-const off = !USE_MOCK;
+const pick = <T,>(mock: () => Promise<T>, real: () => Promise<T>) => (USE_MOCK ? mock() : real());
 
 export const useIssues = (slug: string, status?: string) =>
-  useQuery({ queryKey: ["issues", slug, status], enabled: off, queryFn: () => http<Issue[]>(`/apps/${slug}/issues${status ? `?status=${status}` : ""}`) });
-export const useIssue = (id: string) => useQuery({ queryKey: ["issue", id], enabled: off, queryFn: () => http<IssueDetail>(`/issues/${id}`) });
-export const useIssueReport = (id: string) => useQuery({ queryKey: ["issue-report", id], enabled: off, queryFn: () => http<Report>(`/issues/${id}/report`), retry: false });
+  useQuery({ queryKey: ["issues", slug, status], queryFn: () => pick(() => mockLive.issues(status), () => http<Issue[]>(`/apps/${slug}/issues${status ? `?status=${status}` : ""}`)) });
+export const useIssue = (id: string) => useQuery({ queryKey: ["issue", id], queryFn: () => pick(() => mockLive.issue(id), () => http<IssueDetail>(`/issues/${id}`)) });
+export const useIssueReport = (id: string) => useQuery({ queryKey: ["issue-report", id], queryFn: () => pick(() => mockLive.issueReport(id), () => http<Report>(`/issues/${id}/report`)), retry: false });
 export const useRunReport = (runId: string) =>
-  useQuery({ queryKey: ["run-report", runId], enabled: off, queryFn: () => http<Report>(`/runs/${runId}/report`), retry: false, refetchInterval: (q) => (q.state.status === "error" ? 3000 : false) });
-export const useTraceability = (slug: string) => useQuery({ queryKey: ["trace", slug], enabled: off, queryFn: () => http<Traceability>(`/apps/${slug}/traceability`), retry: false });
+  useQuery({ queryKey: ["run-report", runId], queryFn: () => pick(() => mockLive.runReport(runId), () => http<Report>(`/runs/${runId}/report`)), retry: false, refetchInterval: (q) => (q.state.status === "error" ? 3000 : false) });
+export const useTraceability = (slug: string) => useQuery({ queryKey: ["trace", slug], queryFn: () => pick(() => mockLive.traceability(), () => http<Traceability>(`/apps/${slug}/traceability`)), retry: false });
 export const useEvidence = (findingId: string | null) =>
-  useQuery({ queryKey: ["evidence", findingId], enabled: off && !!findingId, queryFn: () => http<Evidence>(`/findings/${findingId}/evidence`) });
+  useQuery({ queryKey: ["evidence", findingId], enabled: !!findingId, queryFn: () => pick(() => mockLive.evidence(findingId!), () => http<Evidence>(`/findings/${findingId}/evidence`)) });
 export const useStepArtifacts = (runId: string, flow: string, seq: number, enabled: boolean) =>
-  useQuery({ queryKey: ["step-artifacts", runId, flow, seq], enabled: off && enabled,
+  useQuery({ queryKey: ["step-artifacts", runId, flow, seq], enabled: !USE_MOCK && enabled,
     queryFn: () => http<StepArtifact[]>(`/runs/${runId}/artifacts?flow_key=${encodeURIComponent(flow)}&step_seq=${seq}`) });
-export const useAppFlows = (slug: string) => useQuery({ queryKey: ["app-flows", slug], enabled: off, queryFn: () => http<FlowSummary[]>(`/apps/${slug}/flows`) });
+export const useAppFlows = (slug: string) => useQuery({ queryKey: ["app-flows", slug], enabled: !USE_MOCK, queryFn: () => http<FlowSummary[]>(`/apps/${slug}/flows`) });
 
 /** Live validation of playbook Markdown (errors, warnings, coverage, parsed items). Debounce in the caller. */
 export const useValidate = (markdown: string) =>
-  useQuery({ queryKey: ["validate", markdown], enabled: off && markdown.trim().length > 0, placeholderData: (prev) => prev,
-    queryFn: () => http<Validation>("/playbooks/validate", { method: "POST", body: JSON.stringify({ raw_text: markdown }) }) });
+  useQuery({ queryKey: ["validate", markdown], enabled: markdown.trim().length > 0, placeholderData: (prev) => prev,
+    queryFn: () => pick(async () => mockLive.validate(markdown), () => http<Validation>("/playbooks/validate", { method: "POST", body: JSON.stringify({ raw_text: markdown }) })) });
 
 export const useExtractPrd = (slug: string) =>
-  useMutation({ mutationFn: () => http<{ proposals: Proposal[]; markdown: string }>(`/apps/${slug}/prd/extract`, { method: "POST" }) });
+  useMutation({ mutationFn: () => pick(() => mockLive.extractPrd(slug), () => http<{ proposals: Proposal[]; markdown: string }>(`/apps/${slug}/prd/extract`, { method: "POST" })) });
 export const useNormalize = () =>
-  useMutation({ mutationFn: (raw: string) => http<{ markdown: string; warnings: string[]; notes: string | null }>("/playbooks/normalize", { method: "POST", body: JSON.stringify({ raw_text: raw }) }) });
+  useMutation({ mutationFn: (raw: string) => pick(() => mockLive.normalize(raw), () => http<{ markdown: string; warnings: string[]; notes: string | null }>("/playbooks/normalize", { method: "POST", body: JSON.stringify({ raw_text: raw }) })) });
 export function useReplay() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (v: { runId: string; overrides: Record<string, unknown> }) => http<{ id: string; app_id: string }>(`/runs/${v.runId}/replay`, { method: "POST", body: JSON.stringify({ overrides: v.overrides }) }),
+    mutationFn: (v: { runId: string; overrides: Record<string, unknown> }) => USE_MOCK ? api.mockReplay(v.runId) : http<{ id: string; app_id: string }>(`/runs/${v.runId}/replay`, { method: "POST", body: JSON.stringify({ overrides: v.overrides }) }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["runs"] }),
   });
 }
 export function useRegenerateReport(runId: string) {
   const qc = useQueryClient();
-  return useMutation({ mutationFn: () => http<Report>(`/runs/${runId}/report`, { method: "POST" }), onSuccess: (r) => qc.setQueryData(["run-report", runId], r) });
+  return useMutation({ mutationFn: () => USE_MOCK ? mockLive.runReport(runId) : http<Report>(`/runs/${runId}/report`, { method: "POST" }), onSuccess: (r) => qc.setQueryData(["run-report", runId], r) });
 }

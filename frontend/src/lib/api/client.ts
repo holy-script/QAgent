@@ -1,6 +1,6 @@
 import type { App, AppInput, FlowHistory, Mode, Playbook, PlaybookVersion, Run, SseEnvelope } from "./types";
-import { buildRunEvents, makeRun, seedApps, seedPlaybooks, seedRuns } from "./fixtures";
-import { parsePlaybook } from "../playbook-parser";
+import { buildRunEvents, makeRun, seedApps, seedPlaybooks, seedRuns, versionFrom } from "./fixtures";
+import { validateMarkdown } from "../playbook-validate";
 import { toApp, toFlowHistory, toPlaybook, toRun } from "./adapter";
 
 /** Unset → in-browser mock backed by fixtures (F0–F5). Set → real API (F6). */
@@ -54,7 +54,6 @@ const db = { apps: seedApps(), playbooks: seedPlaybooks(), runs: seedRuns(), liv
 const delay = <T,>(v: T, ms = 150) => new Promise<T>((r) => setTimeout(() => r(v), ms));
 const uid = () => Math.random().toString(36).slice(2, 10);
 const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "app";
-const hash = (s: string) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7).toString(16).padStart(8, "0");
 
 export const api = {
   listApps: async (): Promise<App[]> => USE_MOCK ? delay([...db.apps]) : (await http<any[]>("/apps")).map(toApp),
@@ -106,19 +105,18 @@ export const api = {
       return realPlaybook(saved.playbook.id);
     }
     const app = await api.getApp(slug);
-    const parsed = parsePlaybook(markdown);
+    const val = validateMarkdown(markdown);
+    if (val.errors.length) throw new ApiError(422, val.errors.join("\n")); // errors block saving, like the real API
     let pb = playbookId ? db.playbooks.find((p) => p.id === playbookId) : undefined;
     if (!pb) {
-      pb = { id: "pb-" + uid(), app_id: app.id, name: parsed.parsed.title || "Untitled playbook", current_version_id: "", status: "draft", versions: [] };
+      pb = { id: "pb-" + uid(), app_id: app.id, name: val.title || "Untitled test plan", current_version_id: "", status: "confirmed", versions: [] };
       db.playbooks.push(pb);
     }
-    const v: PlaybookVersion = {
-      id: "pbv-" + uid(), playbook_id: pb.id, version_no: pb.versions.length + 1, raw_markdown: markdown,
-      ...parsed, content_hash: hash(markdown), created_at: new Date().toISOString(),
-    };
+    const v: PlaybookVersion = versionFrom("pbv-" + uid(), pb.id, pb.versions.length + 1, markdown, new Date().toISOString());
+    if (pb.versions[0]?.content_hash === v.content_hash) return delay(pb, 200); // unchanged: no new version
     pb.versions.unshift(v);
     pb.current_version_id = v.id;
-    pb.status = "draft";
+    pb.status = "confirmed";
     return delay(pb, 300);
   },
 
@@ -175,6 +173,16 @@ export const api = {
       }
     }
     return delay([...by.values()]);
+  },
+
+  /** Mock only: a "repeat exactly" run that starts from a finished run. */
+  async mockReplay(sourceId: string): Promise<Run> {
+    const src = db.runs.find((r) => r.id === sourceId);
+    if (!src) throw new ApiError(404, "Run not found");
+    const run = { ...makeRun("run-" + uid(), src.mode, 0, src.playbook_version_id), trigger: "replay" as const, replay_of_run_id: src.id, playbook_name: src.playbook_name };
+    db.runs.unshift(run);
+    db.live.set(run.id, buildRunEvents(run));
+    return run;
   },
 
   /** Deletes the app with its test plans, runs, bugs, reports and stored files. */

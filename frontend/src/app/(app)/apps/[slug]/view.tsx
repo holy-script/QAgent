@@ -6,7 +6,6 @@ import { Card, ErrorState, Loading, Metric, fmtMs } from "@/components/ui";
 import { useApp, useRuns } from "@/lib/api/hooks";
 import { GettingStarted } from "@/components/getting-started";
 import { OverviewLive } from "@/components/live/overview-live";
-import { USE_MOCK } from "@/lib/api/client";
 
 export default function Overview() {
   const { slug } = useParams<{ slug: string }>();
@@ -32,7 +31,7 @@ export default function Overview() {
           <h2 className="font-medium">Recent test runs</h2>
           <RunsTable slug={slug} runs={runs.slice(0, 5)} />
         </section>
-        {!USE_MOCK && <OverviewLive slug={slug} />}
+        <OverviewLive slug={slug} />
         {app?.description && <Card className="p-5 text-sm text-muted-foreground">{app.description}</Card>}
       </div>
       <RunLauncher slug={slug} />

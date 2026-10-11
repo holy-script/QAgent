@@ -4,7 +4,6 @@ import { Bug } from "lucide-react";
 import { useState } from "react";
 import { Badge, Card, Empty, SeverityBadge } from "@/components/ui";
 import { EvidencePanel } from "@/components/live/evidence-panel";
-import { USE_MOCK } from "@/lib/api/client";
 import type { RunView } from "@/lib/run-state";
 
 const ORDER = ["critical", "high", "medium", "low"];
@@ -28,10 +27,7 @@ export function FindingsTab({ view, onOpen, slug }: { view: RunView; onOpen: (fl
             <div><div className="text-xs text-muted-foreground">What should happen</div><div className="font-mono text-ok">{f.expected}</div></div>
             <div><div className="text-xs text-muted-foreground">What happened</div><div className="font-mono text-bad">{f.actual}</div></div>
           </div>
-          {USE_MOCK ? (
-            <details className="text-xs text-muted-foreground"><summary className="cursor-pointer">Proof</summary>
-              <pre className="mt-2 overflow-auto rounded bg-code p-2">{JSON.stringify(f.evidence, null, 2)}</pre></details>
-          ) : <button className="text-xs text-brand hover:underline" onClick={() => setEvidence(f.id)}>See the proof →</button>}
+          <button className="text-xs text-brand hover:underline" onClick={() => setEvidence(f.id)}>See the proof →</button>
         </Card>
       ))}
     {evidence && <EvidencePanel findingId={evidence} slug={slug} onClose={() => setEvidence(null)} />}

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { api, http, USE_MOCK } from "@/lib/api/client";
+import { mockLive } from "@/lib/api/mock-live";
 
 interface Entry { id: string; label: string; hint: string; href: string; group: string }
 const TABS: [string, string][] = [["", "Overview"], ["playbooks", "Test plans"], ["runs", "Runs"], ["flows", "Journeys"], ["issues", "Bugs found"], ["traceability", "Requirements"], ["compare", "Compare"], ["settings", "Settings"]];
@@ -26,9 +27,8 @@ export function CommandPalette() {
       for (const app of await api.listApps()) {
         for (const [t, name] of TABS) out.push({ id: `${app.slug}/${t}`, label: `${app.name}: ${name}`, hint: "page", href: `/apps/${app.slug}${t ? "/" + t : ""}`, group: "Pages" });
         for (const r of (await api.listRuns(app.slug)).slice(0, 5)) out.push({ id: r.id, label: `Run ${r.id.slice(0, 8)} · ${r.playbook_name} · ${r.status}`, hint: app.name, href: `/apps/${app.slug}/runs/${r.id}`, group: "Recent runs" });
-        if (!USE_MOCK) {
-          for (const i of await http<{ id: string; title: string; status: string }[]>(`/apps/${app.slug}/issues`)) out.push({ id: i.id, label: i.title, hint: i.status, href: `/apps/${app.slug}/issues/${i.id}`, group: "Bugs found" });
-        }
+        const bugs = USE_MOCK ? await mockLive.issues() : await http<{ id: string; title: string; status: string }[]>(`/apps/${app.slug}/issues`);
+        for (const i of bugs) out.push({ id: i.id, label: i.title, hint: i.status, href: `/apps/${app.slug}/issues/${i.id}`, group: "Bugs found" });
       }
       return out;
     },

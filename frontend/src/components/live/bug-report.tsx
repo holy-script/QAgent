@@ -70,7 +70,7 @@ export function BugReportView({ content, slug }: { content: Record<string, any>;
                 </button>
               ))}
             </div>
-            <img src={img((shots[shot] as any).artifact_id)} alt="Evidence screenshot" className="w-full max-w-3xl rounded-lg border border-border" />
+            <img src={(shots[shot] as any).src ?? img((shots[shot] as any).artifact_id)} alt="Evidence screenshot" className="w-full max-w-3xl rounded-lg border border-border" />
           </>
         )}
         {(content.evidence?.network_calls ?? []).map((c: any) => (
@@ -80,7 +80,7 @@ export function BugReportView({ content, slug }: { content: Record<string, any>;
             </button>
           </Card>
         ))}
-        {call && <Card className="mt-2 p-3"><CallBodies callId={call} /></Card>}
+        {call && <Card className="mt-2 p-3"><CallBodies callId={call} inline={(content.evidence?.network_calls ?? []).find((n: any) => n.id === call)?.inline} /></Card>}
         <div className="mt-2 flex flex-wrap gap-3 text-sm">
           {env.run_id && content.evidence?.flow_key && (
             <Link className="text-brand hover:underline" href={`/apps/${slug}/runs/${env.run_id}?tab=flows&step=${encodeURIComponent(content.evidence.flow_key)}:${content.evidence.step_seq}`}>Open the step in the run viewer →</Link>

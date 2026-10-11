@@ -1,11 +1,10 @@
 "use client";
+import { SimpleTable, TableCell, TableRow } from "@/components/ui";
 import { Bug } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import { NeedsApi } from "@/components/live/needs-api";
 import { Badge, Empty, ErrorState, Loading, SeverityBadge, ago, cn, type Tone } from "@/components/ui";
-import { USE_MOCK } from "@/lib/api/client";
 import { useIssues } from "@/lib/api/live";
 import { ISSUE_STATUS } from "@/lib/terms";
 
@@ -17,7 +16,6 @@ export default function Issues() {
   const { slug } = useParams<{ slug: string }>();
   const [status, setStatus] = useState<(typeof FILTERS)[number]>("all");
   const { data, error, isPending, refetch } = useIssues(slug, status === "all" ? undefined : status);
-  if (USE_MOCK) return <NeedsApi what="Issues" />;
   if (isPending) return <Loading />;
   if (error) return <ErrorState error={error} retry={refetch} />;
   return (
@@ -33,26 +31,19 @@ export default function Issues() {
       {!data.length ? (
         <Empty icon={<Bug className="size-8" />} title="No bugs found" hint="Nothing has gone wrong in your runs so far. Bugs appear here the first time a run finds a problem." />
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-foreground/[0.03] text-xs uppercase tracking-wide text-muted-foreground">
-              <tr>{["Bug", "Status", "How serious", "Journey", "Check", "Found in", "Updated"].map((h) => <th key={h} className="px-4 py-2.5 font-medium">{h}</th>)}</tr>
-            </thead>
-            <tbody className="divide-y divide-border">
+        <SimpleTable head={["Bug", "Status", "How serious", "Journey", "Check", "Found in", "Updated"]}>
               {data.map((i) => (
-                <tr key={i.id} className="hover:bg-foreground/[0.03]">
-                  <td className="max-w-md px-4 py-2.5"><Link href={`/apps/${slug}/issues/${i.id}`} className="font-medium hover:text-brand">{i.title}</Link></td>
-                  <td className="px-4 py-2.5"><Badge tone={TONE[i.status]} title={ISSUE_STATUS[i.status]?.hint}>{ISSUE_STATUS[i.status]?.label ?? i.status}</Badge></td>
-                  <td className="px-4 py-2.5"><SeverityBadge severity={i.severity} /></td>
-                  <td className="px-4 py-2.5 font-mono text-xs">{i.flow_key}</td>
-                  <td className="px-4 py-2.5 font-mono text-xs">{i.check_key}</td>
-                  <td className="px-4 py-2.5 tabular-nums">{i.occurrences} run{i.occurrences === 1 ? "" : "s"}</td>
-                  <td className="px-4 py-2.5 text-xs text-muted-foreground">{i.updated_at ? ago(i.updated_at) : "–"}</td>
-                </tr>
+                <TableRow key={i.id} className="hover:bg-foreground/[0.03]">
+                  <TableCell className="max-w-md px-4 py-2.5"><Link href={`/apps/${slug}/issues/${i.id}`} className="font-medium hover:text-brand">{i.title}</Link></TableCell>
+                  <TableCell className="px-4 py-2.5"><Badge tone={TONE[i.status]} title={ISSUE_STATUS[i.status]?.hint}>{ISSUE_STATUS[i.status]?.label ?? i.status}</Badge></TableCell>
+                  <TableCell className="px-4 py-2.5"><SeverityBadge severity={i.severity} /></TableCell>
+                  <TableCell className="px-4 py-2.5 font-mono text-xs">{i.flow_key}</TableCell>
+                  <TableCell className="px-4 py-2.5 font-mono text-xs">{i.check_key}</TableCell>
+                  <TableCell className="px-4 py-2.5 tabular-nums">{i.occurrences} run{i.occurrences === 1 ? "" : "s"}</TableCell>
+                  <TableCell className="px-4 py-2.5 text-xs text-muted-foreground">{i.updated_at ? ago(i.updated_at) : "–"}</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
+      </SimpleTable>
       )}
     </div>
   );

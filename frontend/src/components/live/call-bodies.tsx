@@ -15,15 +15,16 @@ async function fetchBody(path: string | null | undefined): Promise<unknown> {
 }
 
 /** Request and response bodies of one recorded call, side by side. Bodies are fetched on demand through the API proxy. */
-export function CallBodies({ callId }: { callId: string }) {
+export function CallBodies({ callId, inline }: { callId: string; inline?: { request?: unknown; response?: unknown } }) {
   const { data, isPending } = useQuery({
-    queryKey: ["call-bodies", callId],
+    queryKey: ["call-bodies", callId], enabled: !inline,
     queryFn: async () => {
       const d = await http<Detail>(`/network/${callId}`);
       const [req, res] = await Promise.all([fetchBody(d.req_body_url), fetchBody(d.resp_body_url)]);
       return { detail: d, req, res };
     },
   });
+  if (inline) return <div className="grid gap-3 md:grid-cols-2"><Body title="Request" body={inline.request} /><Body title="Response" body={inline.response} /></div>;
   if (isPending) return <div className="text-xs text-muted-foreground">Loading bodies…</div>;
   return (
     <div className="space-y-2">

@@ -2,11 +2,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { AlertCircle, AlertTriangle, CheckCircle2, Pencil, Plus, Sparkles, Trash2, Wand2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Badge, Button, Card, Field, cn, inputCls } from "@/components/ui";
+import { Badge, Button, Card, Field, SelectField, cn, inputCls } from "@/components/ui";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useExtractPrd, useNormalize, useValidate, type Validation } from "@/lib/api/live";
 import { MarkdownEditor, type Problem } from "@/components/live/markdown-editor";
-import { CATEGORIES, FORMS, diffLines, insertItem, itemMarkdown, itemToValues, nextKey, removeItem, replaceItem, type Category, type FieldSpec } from "@/lib/playbook-md";
+import { CATEGORIES, FORMS, diffLines, extraFieldLines, insertItem, itemMarkdown, itemToValues, nextKey, removeItem, replaceItem, type Category, type FieldSpec } from "@/lib/playbook-md";
 
 function useDebounced<T>(value: T, ms: number): T {
   const [v, setV] = useState(value);
@@ -75,7 +76,7 @@ export function PlaybookEditor({ value, onChange, slug, onValidation }: { value:
             <p className="text-sm text-muted-foreground">{CATEGORIES.find((c) => c.id === cat)!.hint}</p>
             {cat === "requirement" && <PrdExtract slug={slug} items={items} value={value} onChange={onChange} />}
             {editing && items.find((i) => i.key === editing) ? (
-              <AddCard key={`edit-${editing}`} cat={cat} items={items} flowKeys={flowKeys} editKey={editing} initial={itemToValues(cat, items.find((i) => i.key === editing)!)}
+              <AddCard key={`edit-${editing}`} cat={cat} items={items} flowKeys={flowKeys} editKey={editing} initial={itemToValues(cat, items.find((i) => i.key === editing)!)} extra={extraFieldLines(cat, items.find((i) => i.key === editing)!.body)}
                 onCancel={() => setEditing(null)} onAdd={(md) => { onChange(replaceItem(value, editing, md)); setEditing(null); }} />
             ) : (
               <AddCard key={cat} cat={cat} items={items} flowKeys={flowKeys} onAdd={(md) => onChange(insertItem(value, CATEGORIES.find((c) => c.id === cat)!.heading, md))} />
@@ -126,7 +127,7 @@ function Summary({ item }: { item: { category: string; body: Record<string, any>
   return <dl className="grid grid-cols-[7rem_1fr] gap-x-3 gap-y-0.5 text-xs">{bits.map(([k, val]) => <><dt key={k} className="text-muted-foreground">{k}</dt><dd key={k + "v"} className="break-words font-mono">{val}</dd></>)}</dl>;
 }
 
-function AddCard({ cat, items, flowKeys, onAdd, initial, editKey, onCancel }: { cat: Category; items: { key: string }[]; flowKeys: string[]; onAdd: (md: string) => void; initial?: Record<string, string>; editKey?: string; onCancel?: () => void }) {
+function AddCard({ cat, items, flowKeys, onAdd, initial, editKey, extra, onCancel }: { cat: Category; items: { key: string }[]; flowKeys: string[]; onAdd: (md: string) => void; initial?: Record<string, string>; editKey?: string; extra?: string; onCancel?: () => void }) {
   const spec: FieldSpec[] = FORMS[cat].map((f) => (f.name === "applies_to" ? { ...f, options: flowKeys } : f));
   const init = () => Object.fromEntries(spec.map((f) => [f.name, f.kind === "select" ? (f.options?.[f.name === "severity" || f.name === "priority" ? 2 : 0] ?? "") : ""]));
   const [v, setV] = useState<Record<string, string>>(() => ({ ...init(), ...(initial ?? {}) }));
@@ -142,12 +143,12 @@ function AddCard({ cat, items, flowKeys, onAdd, initial, editKey, onCancel }: { 
             <Field label={f.label + (f.required ? " *" : "")} hint={f.hint}>
               {f.kind === "text" && <input className={inputCls} value={v[f.name]} placeholder={f.placeholder} onChange={(e) => set(f.name, e.target.value)} />}
               {(f.kind === "area" || f.kind === "lines") && <textarea className={cn(inputCls, "min-h-20", f.kind === "lines" && "font-mono text-xs")} value={v[f.name]} placeholder={f.placeholder} onChange={(e) => set(f.name, e.target.value)} />}
-              {f.kind === "select" && <select className={inputCls} value={v[f.name]} onChange={(e) => set(f.name, e.target.value)}>{(f.options ?? []).map((o) => <option key={o}>{o}</option>)}</select>}
+              {f.kind === "select" && <SelectField label={f.label} value={v[f.name]} onChange={(x) => set(f.name, x)} options={(f.options ?? []).map((o) => ({ value: o, label: o }))} />}
               {f.kind === "scope" && (
                 <div className="flex flex-wrap gap-3 pt-1">
                   {f.options!.map((o) => {
                     const on = (v[f.name] ?? "").split(",").map((s) => s.trim()).includes(o);
-                    return <label key={o} className="flex items-center gap-1.5 text-sm"><input type="checkbox" checked={on} onChange={() => set(f.name, (on ? (v[f.name] ?? "").split(",").map((s) => s.trim()).filter((s) => s && s !== o) : [...(v[f.name] ? v[f.name].split(",").map((s) => s.trim()) : []), o]).join(", "))} />{o}</label>;
+                    return <label key={o} className="flex items-center gap-1.5 text-sm"><Checkbox checked={on} onCheckedChange={() => set(f.name, (on ? (v[f.name] ?? "").split(",").map((s) => s.trim()).filter((s) => s && s !== o) : [...(v[f.name] ? v[f.name].split(",").map((s) => s.trim()) : []), o]).join(", "))} />{o}</label>;
                   })}
                 </div>
               )}
@@ -158,7 +159,7 @@ function AddCard({ cat, items, flowKeys, onAdd, initial, editKey, onCancel }: { 
       <div className="flex justify-end gap-2">
         {editKey && <Button onClick={onCancel}>Cancel</Button>}
         <Button variant="primary" disabled={missing.length > 0} title={missing.length ? `Needs: ${missing.map((m) => m.label).join(", ")}` : undefined}
-          onClick={() => { onAdd(itemMarkdown(cat, editKey ?? nextKey(items.map((i) => i.key), prefix), v)); if (!editKey) setV(init()); }}>
+          onClick={() => { onAdd(itemMarkdown(cat, editKey ?? nextKey(items.map((i) => i.key), prefix), v, extra)); if (!editKey) setV(init()); }}>
           {editKey ? <CheckCircle2 className="size-4" /> : <Plus className="size-4" />}{editKey ? "Save changes" : "Add to test plan"}
         </Button>
       </div>

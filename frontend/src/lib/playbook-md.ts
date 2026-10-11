@@ -80,7 +80,12 @@ export const FORMS: Record<Category, FieldSpec[]> = {
 
 const lines = (v: string) => v.split("\n").map((l) => l.trim()).filter(Boolean);
 
-export function itemMarkdown(cat: Category, key: string, v: Record<string, string>): string {
+export function itemMarkdown(cat: Category, key: string, v: Record<string, string>, extra = ""): string {
+  const out = itemBlock(cat, key, v);
+  return extra ? `${out.replace(/\s+$/, "")}\n${extra}` : out;
+}
+
+function itemBlock(cat: Category, key: string, v: Record<string, string>): string {
   const f = (name: string) => (v[name] ?? "").trim();
   const field = (name: string, value = f(name)) => (value ? `- ${name}: ${value}\n` : "");
   switch (cat) {
@@ -177,4 +182,14 @@ export function itemToValues(cat: Category, item: { key: string; title: string; 
     case "edge_case": return { title: item.title, applies_to: str("applies_to"), expect: str("expect"), covers: join(b.covers), checks: join(b.checks), test_data: pairs(b.test_data, "=").join(", ") };
     case "reasoning_example": return { title: item.title, context: str("context"), strategy: ((b.strategy as string[]) ?? []).join("\n"), scope: join(b.scope) };
   }
+}
+
+const FLOW_BLOCKS = new Set(["steps", "expect", "test_data"]);
+/** `- field: value` lines for fields an item has that the form does not show, so editing never drops them. */
+export function extraFieldLines(cat: Category, body: Record<string, unknown>): string {
+  const shown = new Set(FORMS[cat].map((f) => f.name));
+  return Object.entries(body)
+    .filter(([k, v]) => !shown.has(k) && !FLOW_BLOCKS.has(k) && v != null && !(Array.isArray(v) && !v.length))
+    .map(([k, v]) => `- ${k}: ${Array.isArray(v) ? v.join(", ") : typeof v === "object" ? Object.entries(v as object).map(([a, b]) => `${a}=${b}`).join(", ") : v}`)
+    .join("\n");
 }

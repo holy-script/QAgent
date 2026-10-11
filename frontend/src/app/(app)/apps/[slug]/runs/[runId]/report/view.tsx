@@ -2,9 +2,8 @@
 import { ChevronLeft, Download, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { NeedsApi } from "@/components/live/needs-api";
 import { Badge, Button, Card, ErrorState, Loading, Metric, SeverityBadge, StatusPill, fmtMs, fmtUsd, type Tone } from "@/components/ui";
-import { API_URL, USE_MOCK } from "@/lib/api/client";
+import { API_URL } from "@/lib/api/client";
 import { useRegenerateReport, useRunReport } from "@/lib/api/live";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -14,7 +13,6 @@ export default function RunReport() {
   const { slug, runId } = useParams<{ slug: string; runId: string }>();
   const { data: report, error, isPending } = useRunReport(runId);
   const regen = useRegenerateReport(runId);
-  if (USE_MOCK) return <NeedsApi what="Reports" />;
   if (isPending && !error) return <Loading label="Loading report…" />;
   if (error || !report) {
     return (

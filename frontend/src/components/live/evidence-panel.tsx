@@ -59,7 +59,7 @@ export function EvidencePanel({ findingId, slug, onClose }: { findingId: string;
                   ))}
                   <span className="ml-auto self-center text-xs text-muted-foreground">at step {f.step_seq}</span>
                 </div>
-                <img src={`${API_URL}/api/artifacts/${current.artifact_id}/content`} alt={`${LABEL[current.kind]} screenshot`} className="w-full rounded-lg border border-border" />
+                <img src={(current as { src?: string }).src ?? `${API_URL}/api/artifacts/${current.artifact_id}/content`} alt={`${LABEL[current.kind]} screenshot`} className="w-full rounded-lg border border-border" />
               </section>
             )}
             {waits.length > 0 && (
@@ -98,7 +98,7 @@ export function EvidencePanel({ findingId, slug, onClose }: { findingId: string;
                         <Badge tone={e.call!.status >= 400 ? "bad" : "ok"}>{e.call!.status}</Badge><span>{e.call!.method}</span>
                         <span className="truncate">{e.call!.url}</span><span className="ml-auto text-muted-foreground">{fmtMs(e.call!.duration_ms)}</span>
                       </button>
-                      {openCall === e.call!.id && <div className="mt-2"><CallBodies callId={e.call!.id} /></div>}
+                      {openCall === e.call!.id && <div className="mt-2"><CallBodies callId={e.call!.id} inline={(e as { inline?: { request?: unknown; response?: unknown } }).inline} /></div>}
                     </div>
                   ))}
                 </Card>

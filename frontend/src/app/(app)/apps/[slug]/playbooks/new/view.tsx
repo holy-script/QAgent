@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { Button, Card } from "@/components/ui";
 import { useSavePlaybook } from "@/lib/api/hooks";
-import { SAMPLE_PLAYBOOK, SAMPLE_PLAYBOOK_V2 } from "@/lib/api/fixtures";
+import { SAMPLE_PLAYBOOK } from "@/lib/api/fixtures";
 import { USE_MOCK } from "@/lib/api/client";
 import { MarkdownEditor } from "@/components/live/markdown-editor";
 import { PlaybookEditor } from "@/components/live/playbook-editor";
@@ -26,7 +26,7 @@ export default function UploadPlaybook() {
           <input ref={file} type="file" accept=".md,text/markdown,text/plain" hidden
             onChange={async (e) => { const f = e.target.files?.[0]; if (f) setMd(await f.text()); e.target.value = ""; }} />
           <Button onClick={() => file.current?.click()}><Upload className="size-4" />Upload a file</Button>
-          <Button onClick={() => setMd(USE_MOCK ? SAMPLE_PLAYBOOK : SAMPLE_PLAYBOOK_V2)}>Start from a sample</Button>
+          <Button onClick={() => setMd(SAMPLE_PLAYBOOK)}>Start from a sample</Button>
           <span className="text-xs text-muted-foreground">or paste text below. You can review everything before it is saved.</span>
         </div>
         {USE_MOCK ? (

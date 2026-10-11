@@ -4,9 +4,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { BugReportView } from "@/components/live/bug-report";
-import { NeedsApi } from "@/components/live/needs-api";
 import { Badge, Button, Card, ErrorState, Loading, ago, type Tone } from "@/components/ui";
-import { API_URL, USE_MOCK } from "@/lib/api/client";
+import { API_URL } from "@/lib/api/client";
 import { useIssue, useIssueReport } from "@/lib/api/live";
 import { ISSUE_STATUS } from "@/lib/terms";
 import { toast } from "sonner";
@@ -18,7 +17,6 @@ export default function IssuePage() {
   const { data: issue, error, isPending, refetch } = useIssue(issueId);
   const { data: report, error: reportError } = useIssueReport(issueId);
   const [copied, setCopied] = useState(false);
-  if (USE_MOCK) return <NeedsApi what="Issues" />;
   if (isPending) return <Loading />;
   if (error) return <ErrorState error={error} retry={refetch} />;
 
