@@ -6,6 +6,9 @@ from qagent.storage.db import async_session_factory
 from qagent.domain.models import Artifact
 
 
+UPLOAD_CONCURRENCY = 4
+
+
 class UploadItem:
     def __init__(
         self,
@@ -29,13 +32,13 @@ class UploadItem:
 class UploadQueue:
     def __init__(self):
         self._queue: asyncio.Queue[UploadItem] = asyncio.Queue()
-        self._worker_task: Optional[asyncio.Task] = None
+        self._workers: list = []
         self._running = False
 
     def start(self):
         if not self._running:
             self._running = True
-            self._worker_task = asyncio.create_task(self._worker())
+            self._workers = [asyncio.create_task(self._worker()) for _ in range(UPLOAD_CONCURRENCY)]
 
     async def drain(self):
         """Waits until every queued upload has been stored and recorded."""
@@ -45,9 +48,9 @@ class UploadQueue:
         """Flushes every queued upload, then stops the worker (never abandons items mid-queue)."""
         await self._queue.join()
         self._running = False
-        if self._worker_task:
-            self._worker_task.cancel()
-            self._worker_task = None
+        for task in self._workers:
+            task.cancel()
+        self._workers = []
 
     async def enqueue(
         self,
@@ -76,7 +79,7 @@ class UploadQueue:
                 item = await self._queue.get()
                 try:
                     # Upload object to storage
-                    object_store.put_object(item.key, item.data, item.content_type)
+                    await asyncio.to_thread(object_store.put_object, item.key, item.data, item.content_type)  # boto3 blocks
                     sha = hashlib.sha256(item.data).hexdigest()
 
                     # Save record in DB

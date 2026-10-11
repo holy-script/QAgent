@@ -1,6 +1,7 @@
 import type { App, AppInput, FlowHistory, Mode, Playbook, PlaybookVersion, Run, SseEnvelope } from "./types";
 import { buildRunEvents, makeRun, seedApps, seedPlaybooks, seedRuns } from "./fixtures";
 import { parsePlaybook } from "../playbook-parser";
+import { toApp, toFlowHistory, toPlaybook, toRun } from "./adapter";
 
 /** Unset → in-browser mock backed by fixtures (F0–F5). Set → real API (F6). */
 export const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "";
@@ -8,11 +9,39 @@ export const USE_MOCK = !API_URL;
 
 async function http<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(API_URL + path, { ...init, headers: { "Content-Type": "application/json", ...init?.headers } });
-  if (!res.ok) throw new ApiError(res.status, (await res.text().catch(() => "")) || res.statusText);
+  if (!res.ok) throw new ApiError(res.status, detailOf(await res.text().catch(() => "")) || res.statusText);
   return res.json();
 }
 export class ApiError extends Error {
   constructor(public status: number, message: string) { super(message); }
+}
+
+/** FastAPI validation errors arrive as {detail: {errors: [...]}} or {detail: "..."}; show them as readable text. */
+function detailOf(text: string): string {
+  try {
+    const d = JSON.parse(text).detail;
+    if (d?.errors) return d.errors.join("\n");
+    return typeof d === "string" ? d : text;
+  } catch { return text; }
+}
+
+// ---------- real API helpers ----------
+/* eslint-disable @typescript-eslint/no-explicit-any */
+async function realPlaybook(id: string): Promise<Playbook> {
+  const [pb, versions] = await Promise.all([http<any>(`/playbooks/${id}`), http<any[]>(`/playbooks/${id}/versions`)]);
+  const full = await Promise.all(versions.map(async (v) => ({ ...v, ...(await http<any>(`/playbook-versions/${v.id}/markdown`)) })));
+  return toPlaybook(pb, full);
+}
+async function versionNames(appId: string): Promise<Map<string, string>> {
+  const names = new Map<string, string>();
+  for (const pb of await http<any[]>(`/playbooks?app_id=${encodeURIComponent(appId)}`))
+    for (const v of await http<any[]>(`/playbooks/${pb.id}/versions`)) names.set(v.id, pb.name);
+  return names;
+}
+async function realRuns(path: string): Promise<Run[]> {
+  const runs = await http<any[]>(path);
+  const names = runs.length ? await versionNames(runs[0].app_id) : new Map<string, string>();
+  return runs.map((r) => toRun(r, names.get(r.playbook_version_id)));
 }
 
 // ---------- mock store (module-level so it survives client navigations) ----------
@@ -23,17 +52,17 @@ const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").repla
 const hash = (s: string) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7).toString(16).padStart(8, "0");
 
 export const api = {
-  listApps: (): Promise<App[]> => USE_MOCK ? delay([...db.apps]) : http("/apps"),
+  listApps: async (): Promise<App[]> => USE_MOCK ? delay([...db.apps]) : (await http<any[]>("/apps")).map(toApp),
 
   async getApp(slug: string): Promise<App> {
-    if (!USE_MOCK) return http(`/apps/${slug}`);
+    if (!USE_MOCK) return toApp(await http(`/apps/${slug}`));
     const a = db.apps.find((x) => x.slug === slug);
     if (!a) throw new ApiError(404, `App '${slug}' not found`);
     return delay(a);
   },
 
   async createApp(input: AppInput): Promise<App> {
-    if (!USE_MOCK) return http("/apps", { method: "POST", body: JSON.stringify(input) });
+    if (!USE_MOCK) return toApp(await http("/apps", { method: "POST", body: JSON.stringify(input) }));
     let slug = slugify(input.name);
     while (db.apps.some((a) => a.slug === slug)) slug += "-" + uid().slice(0, 2);
     const app: App = {
@@ -45,20 +74,20 @@ export const api = {
   },
 
   async updateApp(slug: string, patch: Partial<App>): Promise<App> {
-    if (!USE_MOCK) return http(`/apps/${slug}`, { method: "PATCH", body: JSON.stringify(patch) });
+    if (!USE_MOCK) return toApp(await http(`/apps/${slug}`, { method: "PATCH", body: JSON.stringify(patch) }));
     const a = db.apps.find((x) => x.slug === slug);
     if (!a) throw new ApiError(404, "not found");
     return delay(Object.assign(a, patch));
   },
 
   async listPlaybooks(slug: string): Promise<Playbook[]> {
-    if (!USE_MOCK) return http(`/apps/${slug}/playbooks`);
+    if (!USE_MOCK) return Promise.all((await http<any[]>(`/apps/${slug}/playbooks`)).map((p) => realPlaybook(p.id)));
     const app = await api.getApp(slug);
     return delay(db.playbooks.filter((p) => p.app_id === app.id));
   },
 
   async getPlaybook(id: string): Promise<Playbook> {
-    if (!USE_MOCK) return http(`/playbooks/${id}`);
+    if (!USE_MOCK) return realPlaybook(id);
     const p = db.playbooks.find((x) => x.id === id);
     if (!p) throw new ApiError(404, "Playbook not found");
     return delay(p);
@@ -66,7 +95,11 @@ export const api = {
 
   /** Upload a new playbook, or a new version when `playbookId` is given. Parse errors come back as warnings, not exceptions. */
   async savePlaybook(slug: string, markdown: string, playbookId?: string): Promise<Playbook> {
-    if (!USE_MOCK) return http(playbookId ? `/playbooks/${playbookId}/versions` : `/apps/${slug}/playbooks`, { method: "POST", body: JSON.stringify({ raw_markdown: markdown }) });
+    if (!USE_MOCK) {
+      // Errors (HTTP 422) block the upload; the thrown message lists them for the editor to show.
+      const saved = await http<any>(playbookId ? `/playbooks/${playbookId}/versions` : `/apps/${slug}/playbooks`, { method: "POST", body: JSON.stringify({ raw_markdown: markdown }) });
+      return realPlaybook(saved.playbook.id);
+    }
     const app = await api.getApp(slug);
     const parsed = parsePlaybook(markdown);
     let pb = playbookId ? db.playbooks.find((p) => p.id === playbookId) : undefined;
@@ -85,27 +118,30 @@ export const api = {
   },
 
   async confirmPlaybook(id: string): Promise<Playbook> {
-    if (!USE_MOCK) return http(`/playbooks/${id}/confirm`, { method: "POST" });
+    if (!USE_MOCK) return realPlaybook(id); // the backend confirms on save: no draft state
     const p = await api.getPlaybook(id);
     p.status = "confirmed";
     return p;
   },
 
   async listRuns(slug: string): Promise<Run[]> {
-    if (!USE_MOCK) return http(`/apps/${slug}/runs`);
+    if (!USE_MOCK) return realRuns(`/apps/${slug}/runs`);
     const app = await api.getApp(slug);
     return delay(db.runs.filter((r) => r.app_id === app.id).sort((a, b) => b.started_at.localeCompare(a.started_at)));
   },
 
   async getRun(id: string): Promise<Run> {
-    if (!USE_MOCK) return http(`/runs/${id}`);
+    if (!USE_MOCK) { const r = await http<any>(`/runs/${id}`); return toRun(r, (await versionNames(r.app_id)).get(r.playbook_version_id)); }
     const r = db.runs.find((x) => x.id === id);
     if (!r) throw new ApiError(404, "Run not found");
     return delay(r);
   },
 
   async startRun(slug: string, playbookVersionId: string, mode: Mode): Promise<Run> {
-    if (!USE_MOCK) return http("/runs", { method: "POST", body: JSON.stringify({ app_slug: slug, playbook_version_id: playbookVersionId, mode }) });
+    if (!USE_MOCK) {
+      const r = await http<any>(`/apps/${slug}/runs`, { method: "POST", body: JSON.stringify({ playbook_version_id: playbookVersionId, mode }) });
+      return toRun(r, (await versionNames(r.app_id)).get(r.playbook_version_id));
+    }
     const run = makeRun("run-" + uid(), mode, 0, playbookVersionId);
     const pb = db.playbooks.find((p) => p.versions.some((v) => v.id === playbookVersionId));
     run.playbook_name = pb?.name ?? run.playbook_name;
@@ -116,7 +152,10 @@ export const api = {
 
   /** Per-flow results across runs. Mock derives them from the scripted event logs. */
   async flowHistory(slug: string): Promise<FlowHistory[]> {
-    if (!USE_MOCK) return http(`/apps/${slug}/flows`);
+    if (!USE_MOCK) {
+      const [flows, runs] = await Promise.all([http<any[]>(`/apps/${slug}/flows`), realRuns(`/apps/${slug}/runs`)]);
+      return toFlowHistory(flows, new Map(runs.map((r) => [r.id, r.mode])));
+    }
     const runs = await api.listRuns(slug);
     const by = new Map<string, FlowHistory>();
     for (const r of [...runs].reverse()) {

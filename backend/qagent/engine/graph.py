@@ -7,7 +7,7 @@ import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from urllib.parse import urljoin, urlparse
+from urllib.parse import quote, urljoin, urlparse
 
 import httpx
 from langchain_core.runnables import RunnableConfig, RunnableLambda
@@ -270,6 +270,7 @@ class EngineRunner:
             "totals": totals,
             "environment": environment,
         })
+        await self.sink.flush()  # rows are durable when run() returns
         return {
             "run_id": self.spec.run_id,
             "status": status,
@@ -582,7 +583,7 @@ class EngineRunner:
         except Exception:
             pass
 
-        shot_url = f"/api/artifacts/{self.spec.run_id}/flows/{ctx.flow.key}/steps/{seq}/screenshot.jpg"
+        shot_url = f"/api/artifacts/{self.spec.run_id}/flows/{quote(ctx.flow.key, safe='')}/steps/{seq}/screenshot.jpg"
         await self.sink.emit(QAgentEventType.STEP_OBSERVED, {
             **self._base(state), "intent": state["intent"], "url": page.url, "page_title": title,
             "candidates_count": len(candidates), "screenshot_url": shot_url,

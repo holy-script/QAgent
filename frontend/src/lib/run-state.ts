@@ -21,7 +21,10 @@ export function reduce(v: RunView, e: RunEvent): RunView {
     case "run.started":
       return { ...emptyView, run: e.payload.run, flows: e.payload.flows.map((f) => ({ flow_key: f.key, severity: f.severity, status: "pending", duration_ms: 0, failure_reason: null, steps: [] })) };
     case "flow.started":
-      return { ...v, flows: v.flows.map((f) => (f.flow_key === e.payload.flow_key ? { ...f, status: "running" } : f)) };
+      return e.payload.severity && !v.flows.some((f) => f.flow_key === e.payload.flow_key)
+        // Real runs announce flows as they start (the backend knows only a count at run.started).
+        ? { ...v, flows: [...v.flows, { flow_key: e.payload.flow_key, severity: e.payload.severity, status: "running", duration_ms: 0, failure_reason: null, steps: [] }] }
+        : { ...v, flows: v.flows.map((f) => (f.flow_key === e.payload.flow_key ? { ...f, status: "running" } : f)) };
     case "step.observed": {
       const s = e.payload.step;
       return { ...v, flows: v.flows.map((f) => (f.flow_key === s.flow_key ? { ...f, steps: [...f.steps.filter((x) => x.seq !== s.seq), s] } : f)) };
@@ -33,7 +36,7 @@ export function reduce(v: RunView, e: RunEvent): RunView {
     case "step.acted":
       return patchStep(v, e.payload.flow_key, e.payload.seq, (s) => ({ ...s, timings: e.payload.timings, wait_frames: e.payload.wait_frames }));
     case "step.verified":
-      return patchStep(v, e.payload.flow_key, e.payload.seq, (s) => ({ ...s, status: e.payload.status, verified: e.payload.verified }));
+      return patchStep(v, e.payload.flow_key, e.payload.seq, (s) => ({ ...s, status: e.payload.status, verified: e.payload.verified, screenshot: e.payload.screenshot ?? s.screenshot }));
     case "network.call": return { ...v, network: [...v.network, e.payload] };
     case "span": return { ...v, spans: [...v.spans.filter((s) => s.span_id !== e.payload.span_id), e.payload] };
     case "log": return { ...v, logs: [...v.logs, e.payload] };

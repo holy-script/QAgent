@@ -256,7 +256,7 @@ class HealthResponse(BaseModel):
 # --- Playbook upload, observability DTOs (added in B7; additive to the frozen B0 contract) ---
 
 class CreatePlaybookRequest(BaseModel):
-    app_id: str
+    app_id: str = Field(default="", description="Ignored on app-scoped and version routes")
     name: Optional[str] = None
     raw_markdown: str
 

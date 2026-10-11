@@ -236,3 +236,40 @@ export function seedRuns(): Run[] {
     return { ...r, status: fin.payload.status, totals: fin.payload.totals, finished_at: iso(ago - 1) };
   });
 }
+
+/** Sample in the backend's seven-category format (used when talking to the real API). */
+export const SAMPLE_PLAYBOOK_V2 = `# Playbook: Checkout
+base_url: http://localhost:8001
+
+## Requirements
+### REQ-1: Cart total applies the discount before tax
+- prd_ref: §3.2 Pricing
+- acceptance: total = (subtotal − discount) × (1 + tax_rate), rounded to 2 decimals
+- priority: high
+
+## Formulas
+### F-1: cart_total
+- rule: \`total == round((sum(i.price * i.qty for i in items) - discount) * (1 + tax_rate), 2)\`
+- bindings: items=api:/api/cart.items, discount=api:/api/cart.discount, total=ui:[data-testid=cart-total], tax_rate=const:0.08
+- verifies: REQ-1
+
+## UX rules
+### UX-1: Cart count is consistent across the app
+- check: consistent_value
+- targets: ui:[data-testid=cart-badge], api:/api/cart.count
+- severity: medium
+
+## Flows
+### Flow: add-to-cart
+- covers: REQ-1
+- checks: F-1, UX-1
+- severity: high
+
+#### Steps
+1. Open /products
+2. Add 2 items to cart
+3. Go to /cart
+
+#### Expect
+- Cart shows 2 items
+`;

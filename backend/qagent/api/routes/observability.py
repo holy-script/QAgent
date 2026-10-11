@@ -1,6 +1,7 @@
 """Findings evidence, network call detail, per-app flows and history."""
 import statistics
 from typing import List, Optional
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -39,9 +40,9 @@ async def network_call(call_id: str, session: AsyncSession = Depends(get_session
         id=c.id, flow_run_id=c.flow_run_id, step_seq=c.step_seq, method=c.method, url=c.url, status=c.status,
         duration_ms=c.duration_ms, req_size=c.req_size, resp_size=c.resp_size, is_api=c.is_api,
         traceparent=c.traceparent, flow_key=flow.flow_key if flow else None,
-        req_body_url=f"/api/artifacts/{flow.run_id}/flows/{flow.flow_key}/network/{c.id}/request.json"
+        req_body_url=f"/api/artifacts/{flow.run_id}/flows/{quote(flow.flow_key, safe='')}/network/{c.id}/request.json"
         if flow and c.req_size else None,
-        resp_body_url=f"/api/artifacts/{flow.run_id}/flows/{flow.flow_key}/network/{c.id}/response.json"
+        resp_body_url=f"/api/artifacts/{flow.run_id}/flows/{quote(flow.flow_key, safe='')}/network/{c.id}/response.json"
         if flow and c.resp_size else None,
         req_artifact_key=f"{base}/request.json" if base and c.req_size else None,
         resp_artifact_key=f"{base}/response.json" if base and c.resp_size else None,

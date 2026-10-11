@@ -1,6 +1,6 @@
 import asyncio
 from datetime import datetime, timezone
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -38,47 +38,77 @@ class PersistenceSink:
         run_id: str,
         session_factory: Optional[Callable[[], AsyncSession]] = None,
         start_seq: int = 0,
+        batch_size: int = 50,
     ):
         self.run_id = run_id
         self._seq = start_seq
         self._session_factory = session_factory or async_session_factory
         self.listeners: List[asyncio.Queue] = []
-        # Parallel flows emit concurrently; seq assignment, persistence and fan-out must happen
-        # in one order, or SSE consumers and resume cursors would see gaps.
-        self._lock = asyncio.Lock()
+        # Every event of the run, in order. Live consumers (SSE) read from here, so they never wait on the
+        # database and a late joiner still gets the full history while the run is active.
+        self.buffer: List[EventEnvelope] = []
+        self._pending: asyncio.Queue = asyncio.Queue()
+        self._writer: Optional[asyncio.Task] = None
+        self._batch_size = batch_size
 
     def subscribe(self) -> asyncio.Queue:
         q: asyncio.Queue = asyncio.Queue()
         self.listeners.append(q)
         return q
 
+    def attach(self) -> Tuple[asyncio.Queue, List[EventEnvelope]]:
+        """Atomically (no await in between) snapshot the history and subscribe to what follows."""
+        return self.subscribe(), list(self.buffer)
+
     def unsubscribe(self, q: asyncio.Queue) -> None:
         if q in self.listeners:
             self.listeners.remove(q)
 
     async def emit(self, event_type: QAgentEventType, payload: Dict[str, Any]) -> EventEnvelope:
-        async with self._lock:
-            self._seq += 1
-            now = datetime.now(timezone.utc)
-            envelope = EventEnvelope(
-                run_id=self.run_id, seq=self._seq, type=event_type, payload=payload, ts=now.isoformat()
-            )
+        """Assigns the next seq, broadcasts immediately, and queues the event for batched persistence."""
+        self._seq += 1
+        now = datetime.now(timezone.utc)
+        envelope = EventEnvelope(
+            run_id=self.run_id, seq=self._seq, type=event_type, payload=payload, ts=now.isoformat()
+        )
+        self.buffer.append(envelope)
+        for listener in list(self.listeners):
+            listener.put_nowait(envelope)
+        if self._writer is None or self._writer.done():
+            self._writer = asyncio.create_task(self._write_loop())
+        self._pending.put_nowait((envelope, now))
+        return envelope
 
+    async def flush(self) -> None:
+        """Waits until every emitted event has been written to the database."""
+        await self._pending.join()
+
+    async def _write_loop(self) -> None:
+        while True:
+            batch = [await self._pending.get()]
+            while len(batch) < self._batch_size and not self._pending.empty():
+                batch.append(self._pending.get_nowait())
             try:
-                async with self._session_factory() as session:
-                    session.add(EventRecord(
-                        run_id=self.run_id, seq=self._seq, type=event_type.value, payload=payload, ts=now
-                    ))
-                    await self._project(session, event_type, payload, now)
-                    await session.commit()
-            except Exception as exc:  # persistence must never kill a run
-                logger.error("sink.persist_failed", run_id=self.run_id, type=event_type.value,
-                             error=type(exc).__name__)
+                await self._write(batch)
+            except Exception as exc:  # persistence must never kill a run: fall back to one event per transaction
+                logger.error("sink.batch_failed", run_id=self.run_id, error=type(exc).__name__, size=len(batch))
+                for item in batch:
+                    try:
+                        await self._write([item])
+                    except Exception as inner:
+                        logger.error("sink.persist_failed", run_id=self.run_id, type=item[0].type.value,
+                                     error=type(inner).__name__)
+            finally:
+                for _ in batch:
+                    self._pending.task_done()
 
-            # Notify listeners after the row is durable so SSE resume never skips an event.
-            for listener in list(self.listeners):
-                await listener.put(envelope)
-            return envelope
+    async def _write(self, batch: List[Tuple[EventEnvelope, datetime]]) -> None:
+        async with self._session_factory() as session:
+            for env, now in batch:
+                session.add(EventRecord(run_id=self.run_id, seq=env.seq, type=env.type.value,
+                                        payload=env.payload, ts=now))
+                await self._project(session, env.type, env.payload, now)
+            await session.commit()
 
     async def _project(self, session: AsyncSession, t: QAgentEventType, p: Dict[str, Any], now: datetime) -> None:
         if t == QAgentEventType.RUN_STARTED:

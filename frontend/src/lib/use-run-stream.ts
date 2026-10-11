@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { API_URL, USE_MOCK, api } from "./api/client";
 import type { Run, RunEvent } from "./api/types";
 import { emptyView, reduce, type RunView } from "./run-state";
+import { EVENT_TYPES, EventTranslator } from "./api/adapter";
 
 export const SPEEDS = [1, 2, 4, 10] as const;
 
@@ -25,8 +26,18 @@ export function useRunStream(run: Run, animate: boolean) {
   useEffect(() => {
     if (instant) return;
     if (!USE_MOCK) {
+      // The backend sends named SSE events, so each type needs its own listener (onmessage never fires).
+      // The browser resends Last-Event-ID on reconnect; we close for good once the run's report is ready.
       const es = new EventSource(`${API_URL}/runs/${run.id}/events`);
-      es.onmessage = (m) => setView((v) => reduce(v, JSON.parse(m.data) as RunEvent));
+      const tr = new EventTranslator(run, API_URL);
+      for (const type of EVENT_TYPES) {
+        es.addEventListener(type, (m) => {
+          const env = JSON.parse((m as MessageEvent).data);
+          const out = tr.translate(type, env);
+          if (out.length) setView((v) => out.reduce((acc, ev) => reduce(acc, ev as RunEvent), v));
+          if (type === "error" || type === "report.failed" || (type === "report.ready" && env.payload?.kind === "run")) es.close();
+        });
+      }
       es.onerror = () => es.readyState === EventSource.CLOSED && es.close();
       return () => es.close();
     }

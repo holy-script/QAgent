@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
-from qagent.api.deps import get_session
+from qagent.api.deps import get_session, resolve_app_id
 from qagent.api.mappers import iso
 from qagent.config import settings
 from qagent.domain.models import App, Playbook, PlaybookItem, PlaybookVersion
@@ -49,7 +49,7 @@ async def list_playbooks(app_id: Optional[str] = None, session: AsyncSession = D
 
 @router.get("/apps/{app_id}/playbooks", response_model=List[PlaybookResponse])
 async def list_app_playbooks(app_id: str, session: AsyncSession = Depends(get_session)):
-    return await list_playbooks(app_id, session)
+    return await list_playbooks(await resolve_app_id(session, app_id), session)
 
 
 @router.post("/playbooks/validate", response_model=PlaybookValidationResponse)
@@ -64,8 +64,7 @@ async def validate_playbook_markdown(payload: NormalizeRequest):
 
 
 async def _upload(app_id: str, payload: CreatePlaybookRequest, session: AsyncSession) -> PlaybookUploadResponse:
-    if await session.get(App, app_id) is None:
-        raise HTTPException(status_code=404, detail="App not found")
+    app_id = await resolve_app_id(session, app_id)
 
     name = payload.name
     pb = None
@@ -105,6 +104,16 @@ async def _upload(app_id: str, payload: CreatePlaybookRequest, session: AsyncSes
 async def upload_app_playbook(app_id: str, payload: CreatePlaybookRequest, session: AsyncSession = Depends(get_session)):
     """Parses, validates and stores a Markdown playbook; unchanged content does not create a new version."""
     return await _upload(app_id, payload, session)
+
+
+@router.post("/playbooks/{playbook_id}/versions", response_model=PlaybookUploadResponse, status_code=201)
+async def add_playbook_version(playbook_id: str, payload: CreatePlaybookRequest,
+                               session: AsyncSession = Depends(get_session)):
+    """Confirms edited Markdown as a new version of an existing playbook (same content creates nothing)."""
+    pb = await session.get(Playbook, playbook_id)
+    if pb is None:
+        raise HTTPException(status_code=404, detail="Playbook not found")
+    return await _upload(pb.app_id, payload.model_copy(update={"name": pb.name}), session)
 
 
 @router.post("/playbooks", response_model=PlaybookUploadResponse, status_code=201)

@@ -1,4 +1,4 @@
-.PHONY: setup doctor dev test bench migrate clean
+.PHONY: setup doctor dev dev-mock e2e test bench migrate clean
 
 migrate:
 	@echo "Running database migrations..."
@@ -27,7 +27,15 @@ dev:
 	npx concurrently -k -n "demo,backend,frontend" -c "yellow,blue,green" \
 		"cd demo-shop && uv run uvicorn main:app --port 8001 --reload" \
 		"cd backend && uv run uvicorn qagent.api.main:app --port 8000 --reload" \
-		"cd frontend && npm run dev"
+		"cd frontend && NEXT_PUBLIC_API_URL=http://localhost:8000 npm run dev"
+
+dev-mock:
+	@echo "Frontend only, on in-browser fixtures (no backend needed)..."
+	cd frontend && npm run dev
+
+e2e:
+	@echo "Drive the running stack through the UI (start 'make dev' first)..."
+	cd backend && uv run python ../scripts/e2e_ui.py Stub
 
 test:
 	@echo "Running backend test suite..."

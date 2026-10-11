@@ -188,11 +188,11 @@ export interface LogEntry {
 
 export type RunEvent =
   | { type: "run.started"; payload: { run: Run; flows: { key: string; severity: Severity }[] } }
-  | { type: "flow.started"; payload: { flow_key: string } }
+  | { type: "flow.started"; payload: { flow_key: string; severity?: Severity } }
   | { type: "step.observed"; payload: { step: Step } }
   | { type: "step.decided"; payload: { flow_key: string; seq: number; decision: Decision; action_id: number; action_label: string } }
   | { type: "step.acted"; payload: { flow_key: string; seq: number; timings: StepTimings; wait_frames: string[] } }
-  | { type: "step.verified"; payload: { flow_key: string; seq: number; status: "ok" | "failed"; verified: Step["verified"] } }
+  | { type: "step.verified"; payload: { flow_key: string; seq: number; status: "ok" | "failed"; verified: Step["verified"]; screenshot?: string } }
   | { type: "network.call"; payload: NetworkCall }
   | { type: "span"; payload: Span }
   | { type: "log"; payload: LogEntry }

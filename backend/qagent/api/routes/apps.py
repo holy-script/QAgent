@@ -59,7 +59,7 @@ async def create_app(payload: CreateAppRequest, session: AsyncSession = Depends(
     host = parsed.hostname
     name = payload.name or host
     app = m.App(
-        slug=payload.slug or _slug(host), name=name, base_url=payload.base_url.rstrip("/"),
+        slug=payload.slug or _slug(payload.name or host), name=name, base_url=payload.base_url.rstrip("/"),
         allowed_hosts=payload.allowed_hosts or [host], description=payload.description,
         prd_markdown=payload.prd_markdown, default_mode=payload.default_mode.value, reset_path=payload.reset_path,
     )

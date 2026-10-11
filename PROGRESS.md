@@ -1,96 +1,57 @@
-# QAgent Implementation Progress
+# QAgent progress
 
-## Overall Status
-- **Current Phase**: Parallel execution across Phase 2 (Backend foundation) & Phase 3 (Browser layer)
-- **Frontend**: Initialized with Next.js 16 (App Router, TypeScript, Tailwind CSS, `@xyflow/react`, `lucide-react`)
-- **Parallel Work Plan**: See [TRACKS.md](file:///Users/holyscript/Desktop/projects/QAgent/TRACKS.md) (Backend Feature Flow vs Frontend UX Flow) and [DUAL_CODER_PLAN.md](file:///Users/holyscript/Desktop/projects/QAgent/DUAL_CODER_PLAN.md)
+Branches: `be` (backend, pushed), `fe` (frontend, pushed by Coder 2), `integration` (both merged, local). Details of every
+task live in [DUAL_CODER_PLAN.md](DUAL_CODER_PLAN.md) section 15 (status per task) and section 16 (what exists vs the target).
 
----
+## Where we are
 
-## Phases & Breakdown
+| Track | Status |
+|---|---|
+| Backend B0-B21 | Done and tested (55 tests). Live run with real Jev, Claude, Neon Postgres and object storage: 8 findings, 8 issues, bug and run reports |
+| Frontend F0-F5, F7 | Done on fixtures with a mock SSE replay (Coder 2) |
+| Integration (F6) | **Started on `integration`**: the UI talks to the real API through `frontend/src/lib/api/adapter.ts`. Verified by driving the UI with a browser: app list, app page, playbooks, starting a run, live run page (flows, screenshots, graph, findings, network, logs), revisiting a finished run |
 
-### [x] Phase 1 — Root scaffold (~10 min)
-- [x] **1a.** Create monorepo structure (dirs: `backend/`, `frontend/`, `.gitignore`, `.env.example`)
-- [x] **1b.** Write `Makefile` with `setup`, `doctor`, `dev`, `test`, `bench` targets
-- [x] **1c.** Write `ASSUMPTIONS.md` + `README.md` skeleton
+## How to run everything
 
----
+```bash
+make setup        # once: uv sync, npm install, Playwright browsers
+make dev          # demo shop :8001, API :8000, frontend :3000 (frontend gets NEXT_PUBLIC_API_URL)
+make dev-mock     # frontend only, on in-browser fixtures
+make e2e          # drive the running stack through the UI, screenshots in /tmp/e2e
+make doctor       # preflight: Postgres, object storage, Jev, Bedrock, browser
+make test         # 55 backend tests
+```
 
-### [ ] Phase 2 — Backend foundation (~20 min)
-- [x] **2a.** `uv init backend/`, `pyproject.toml` with all dependencies configured (`qagent` package)
-- [ ] **2b.** `.env.example` with all variables & sync local environment
-- [ ] **2c.** `backend/qagent/decision/` — Pydantic models + `DecisionModel` Protocol
-- [ ] **2d.** `JevDecider` (`httpx` async, retry with backoff, semaphore concurrency, latency timing, tape recording)
-- [ ] **2e.** `StubDecider` + `RecordingDecider` + `ReplayDecider`
+## Integration work done on `integration`
 
----
+- Merged `fe` into a new branch (no conflicts).
+- Frontend adapter: backend DTOs and SSE events are translated into the shapes the UI already uses (apps, playbooks with
+  versions and parsed flows, runs, flow history, step/decision/network/finding/span/log events). Check results are attached
+  to the step they ran on, so the step drawer's "verified" list shows real checks.
+- EventSource now registers a listener per backend event name (named SSE events never reach `onmessage`) and closes for
+  good when the run report is ready.
+- Backend changes found while integrating:
+  - Playbook routes accept an app slug as well as an id; `POST /playbooks/{id}/versions` added.
+  - Flow keys with `#` (edge-case variants) are URL-encoded in artifact URLs.
+  - SSE now serves a live run from an in-memory event buffer and persists events in batches in the background: a stub run
+    went from about 140 s to about 35 s against Neon, and a late viewer still gets the full history.
+  - Artifact requests wait (up to about 30 s while the run is live) for an upload that has not landed yet, instead of
+    redirecting to a storage URL that answers 404; uploads now run 4 at a time off the event loop.
+  - New apps get their slug from the name (not the hostname).
 
-### [ ] Phase 3 — Browser layer (~20 min)
-- [ ] **3a.** `sandbox.py` — Playwright context, frozen clock, viewport
-- [ ] **3b.** `extractor.py` — compact state dict + candidate action list (≤40 IDs)
-- [ ] **3c.** `executor.py` — resolve ID → locator, screenshot, network capture
+## Next steps
 
----
-
-### [ ] Phase 4 — LangGraph engine (~20 min)
-- [ ] **4a.** State graph: `plan` → `observe` → `decide` → `gate` → `act` → `verify` → (`loop` | `finish` | `escalate`) → `report`
-- [ ] **4b.** SQLite checkpointer, step/time budgets, cancel flag
-- [ ] **4c.** Telemetry: `asyncio` event bus → SSE
-
----
-
-### [ ] Phase 5 — FastAPI + SSE (~10 min)
-- [ ] **5a.** `POST /runs`, `GET /runs/{id}`, `GET /runs/{id}/events`, `POST /runs/{id}/stop`
-- [ ] **5b.** `GET /health` (Jev + Bedrock reachability checks)
-
----
-
-### [ ] Phase 6 — Demo shop (~15 min)
-- [ ] **6a.** FastAPI + Jinja: `/products`, `/cart`, `/checkout`
-- [ ] **6b.** 4 bugs (toggled via env/query param)
-- [ ] **6c.** `POST /__reset`, seeded RNG
-
----
-
-### [ ] Phase 7 — Playbook + formulas (~10 min)
-- [ ] **7a.** `checkout-flow.yaml`
-- [ ] **7b.** Pydantic validator
-- [ ] **7c.** Empty formula module with safe-eval TODO
-
----
-
-### [ ] Phase 8 — ClaudeDecider (~15 min)
-- [ ] **8a.** `httpx` Bearer-token client to Bedrock Converse
-- [ ] **8b.** Forced tool-use for structured JSON output
-- [ ] **8c.** Wire into engine with baseline mode toggle
-
----
-
-### [ ] Phase 9 — Frontend (~25 min)
-- [x] **9a.** Next.js (App Router, TS, Tailwind) — initialized + installed `@xyflow/react`, `lucide-react`, verified build passes
-- [ ] **9b.** `/runs/new` — form with URL, playbook selector, mode toggle
-- [ ] **9c.** `/runs/[id]` — SSE consumer, step timeline, screenshot pane, metrics strip, React Flow decision graph
-- [ ] **9d.** `/runs/[id]/replay`, `/compare` — empty stubs
-
----
-
-### [ ] Phase 10 — Tests + bench (~15 min)
-- [ ] **10a.** pytest: `JevDecider` (fixture+retry), gate logic, extractor, playbook
-- [ ] **10b.** `make bench` script: p50/p95 Jev latency, cost/step, accuracy at 10/20/40 candidates
-
----
-
-## Coder 2 — Frontend (`fe` branch)
-Runs on fixtures with no backend; set `NEXT_PUBLIC_API_URL` to switch to the real API. `npm run gen:api` regenerates types from the OpenAPI schema once B0 lands (hand-written stand-ins live in `frontend/src/lib/api/types.ts`).
-
-- [x] **F0** Tailwind tokens, typed API client (`lib/api/`), app shell, TanStack Query
-- [x] **F1** Home, `/apps/new`, app layout (tabs + live-run banner), Overview with run launcher
-- [x] **F2** Playbooks list, upload, review screen (inline parse errors, edit → new version, history, confirm)
-- [x] **F3** Run page: flow rows with screenshot strips, `@xyflow/react` Graph tab, step drawer; pause/speed/replay on the mock SSE stream
-- [x] **F4** Network, Trace, Logs, Findings tabs
-- [x] **F5** Runs history, Flows + flow history, Settings
-- [ ] **F6** Real API switch — client paths are guessed in `lib/api/client.ts`; reconcile with B0/B7 (event envelope, route names)
-- [x] **F7** Compare view (two finished runs, per-metric bars)
-- [ ] **F8** Replay tape editor / normalize diff (P2)
-
-Deep link: `/apps/<slug>/runs/<id>?tab=graph&step=checkout:3`.
+1. **Review the merge** and decide how `integration` lands: merge `be` + `fe` into `main`, or keep `integration` as the shared branch for F6.
+2. **Close the F6 gaps** (backend data exists, UI does not show it yet):
+   - candidate overlays and wait-frame strips on steps (`steps/{n}/candidates.json`, `wait/{n}.jpg`)
+   - request/response bodies in the Network tab (`/network/{id}` and `/api/artifacts/.../response.json`)
+   - decision `question`/`reasoning`, escalation reasons
+3. **Pages for the new backend features** (F5, F7-F9 in the plan): issues list and issue page with the bug report, run report page
+   with exports, traceability matrix, evidence drawer from a finding, playbook editor per category with live validation
+   (`POST /playbooks/validate`), PRD extraction and normalize diff, replay with overrides.
+4. **Types from the schema**: generate `frontend/src/lib/api/schema.d.ts` from `backend/openapi.json` (`npm run gen:api`) and
+   retire the hand-written types where they overlap.
+5. **Backend gaps** (plan section 16): Claude planner, judged calls on the tape, per-flow reset and deterministic browser,
+   upload retries and `artifact.uploaded`, Neon branch pin.
+6. **Demo readiness**: rotate the shared Neon credentials, create the `qagent-artifacts` bucket (or keep `captures`), disable
+   scale-to-zero, rehearse hybrid vs baseline (`make bench` numbers are in ASSUMPTIONS.md).

@@ -36,30 +36,34 @@ async def stream_run_events(
     after_seq: int = 0,
 ) -> AsyncGenerator[dict, None]:
     """
-    Replays persisted events with seq > after_seq, then follows the live run.
-    Subscribing before the replay query means no event can fall between the two; the
-    `last` cursor drops anything delivered twice.
+    Live run: replays the in-memory history after `after_seq`, then follows new events (history and subscription
+    are taken together, so nothing falls between them). Finished run: replays from the database.
     """
-    queue = manager.subscribe(run_id)
+    live = manager.attach(run_id)
     last = after_seq
     try:
-        async with session_factory() as session:
-            rows = (await session.execute(
-                select(EventRecord).where(EventRecord.run_id == run_id, EventRecord.seq > after_seq)
-                .order_by(EventRecord.seq)
-            )).scalars().all()
-        for row in rows:
-            last = row.seq
-            yield _sse(row.seq, row.type, _record_to_dict(row))
-            if is_terminal(row.type, row.payload or {}):
-                return
+        if live is None:
+            async with session_factory() as session:
+                rows = (await session.execute(
+                    select(EventRecord).where(EventRecord.run_id == run_id, EventRecord.seq > after_seq)
+                    .order_by(EventRecord.seq)
+                )).scalars().all()
+            for row in rows:
+                yield _sse(row.seq, row.type, _record_to_dict(row))
+                if is_terminal(row.type, row.payload or {}):
+                    return
+            return
 
-        if queue is None:
-            return  # run is not live in this process: nothing more will arrive
-
+        queue, history = live
+        for env in history:
+            if env.seq > last:
+                last = env.seq
+                yield _sse(env.seq, env.type.value, env.model_dump(mode="json"))
+                if is_terminal(env.type.value, env.payload):
+                    return
         while True:
             try:
-                env: EventEnvelope = await asyncio.wait_for(queue.get(), timeout=15)
+                env = await asyncio.wait_for(queue.get(), timeout=15)
             except asyncio.TimeoutError:
                 if manager.active.get(run_id) is None:
                     return
@@ -71,5 +75,5 @@ async def stream_run_events(
             if is_terminal(env.type.value, env.payload):
                 return
     finally:
-        if queue is not None:
-            manager.unsubscribe(run_id, queue)
+        if live is not None:
+            manager.unsubscribe(run_id, live[0])

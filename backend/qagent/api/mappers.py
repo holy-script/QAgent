@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Optional
+from urllib.parse import quote
 
 from qagent.domain import models as m
 from qagent.domain import schemas as s
@@ -26,7 +27,7 @@ def run_out(r: m.Run) -> s.RunResponse:
 
 
 def screenshot_url(run_id: str, flow_key: str, seq: int) -> str:
-    return f"/api/artifacts/{run_id}/flows/{flow_key}/steps/{seq}/screenshot.jpg"
+    return f"/api/artifacts/{run_id}/flows/{quote(flow_key, safe='')}/steps/{seq}/screenshot.jpg"
 
 
 def finding_out(f: m.FindingRecord) -> s.Finding:
@@ -61,7 +62,7 @@ def step_out(
             total_ms=timing.observe_ms + timing.extract_ms + timing.decide_ms + timing.gate_ms
             + timing.act_ms + timing.settle_ms + timing.verify_ms,
         )
-    base = f"/api/artifacts/{run_id}/flows/{flow_key}/steps/{step.seq}"
+    base = f"/api/artifacts/{run_id}/flows/{quote(flow_key, safe='')}/steps/{step.seq}"
     return s.StepSummary(
         id=step.id, flow_run_id=step.flow_run_id, seq=step.seq, intent=step.intent, action_id=step.action_id,
         action_label=step.action_label, page_tag=step.page_tag, url=step.url, status=step.status, timings=t,
@@ -73,7 +74,7 @@ def step_out(
 
 
 def network_out(c: m.NetworkCallRecord, run_id: str, flow_key: str) -> s.NetworkCall:
-    base = f"/api/artifacts/{run_id}/flows/{flow_key}/network/{c.id}"
+    base = f"/api/artifacts/{run_id}/flows/{quote(flow_key, safe='')}/network/{c.id}"
     return s.NetworkCall(
         id=c.id, flow_run_id=c.flow_run_id, step_seq=c.step_seq, method=c.method, url=c.url, status=c.status,
         duration_ms=c.duration_ms, req_size=c.req_size, resp_size=c.resp_size, is_api=c.is_api,

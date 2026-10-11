@@ -32,7 +32,7 @@ export default function ReviewPlaybook() {
               <>
                 <Button onClick={() => setDraft(null)}>Discard</Button>
                 <Button variant="primary" disabled={save.isPending || draft === v.raw_markdown}
-                  onClick={async () => { await save.mutateAsync({ markdown: draft, playbookId: pb.id }); setDraft(null); setSel(undefined); }}>
+                  onClick={() => save.mutate({ markdown: draft, playbookId: pb.id }, { onSuccess: () => { setDraft(null); setSel(undefined); } })}>
                   Save as v{pb.versions.length + 1}
                 </Button>
               </>
@@ -44,12 +44,14 @@ export default function ReviewPlaybook() {
           </div>
         </div>
 
+        {save.error && <p role="alert" className="whitespace-pre-line text-sm text-bad">{save.error.message}</p>}
+
         {v.warnings.length > 0 && (
           <Card className="divide-y divide-line">
             {v.warnings.map((w, i) => (
               <div key={i} className="flex items-start gap-2 px-4 py-2 text-sm">
                 {w.level === "error" ? <AlertCircle className="mt-0.5 size-4 shrink-0 text-bad" /> : <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warn" />}
-                <span className="text-muted">Line {w.line}</span><span>{w.message}</span>
+                {w.line > 0 && <span className="text-muted">Line {w.line}</span>}<span>{w.message}</span>
               </div>
             ))}
           </Card>

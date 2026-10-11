@@ -147,6 +147,7 @@ async def run_report_pipeline(session_factory, sink, spec, uploader) -> None:
     """Runs after a run finishes: waits for uploads, generates reports, emits report.* events."""
     await sink.emit(QAgentEventType.REPORT_GENERATING, {"kind": "run", "run_id": spec.run_id})
     try:
+        await sink.flush()  # findings, checks and evidence links are read back from the database
         if hasattr(uploader, "drain"):
             await uploader.drain()
 

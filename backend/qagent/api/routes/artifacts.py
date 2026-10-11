@@ -1,3 +1,4 @@
+import asyncio
 import mimetypes
 import re
 
@@ -32,7 +33,18 @@ async def get_flow_artifact(run_id: str, flow_key: str, path: str, session: Asyn
     if run is None:
         raise HTTPException(status_code=404, detail="Run not found")
     path = re.sub(r"^(steps/\d+)/screenshot\.jpg$", r"\1/after.jpg", path)  # stable alias used in events/DTOs
-    return await _serve(f"apps/{run.app_id}/runs/{run_id}/flows/{flow_key}/{path}")
+    key = f"apps/{run.app_id}/runs/{run_id}/flows/{flow_key}/{path}"
+    # Uploads are asynchronous: a client following a live run may ask for a file a moment before it lands.
+    # Wait (briefly) for its row instead of redirecting to a storage URL that would answer 404.
+    for attempt in range(200):  # up to ~30s while the run is live
+        if (await session.execute(select(Artifact.id).where(Artifact.object_key == key))).first():
+            break
+        if run.status not in ("pending", "running") and attempt >= 2:
+            break
+        await asyncio.sleep(0.15)
+    else:
+        raise HTTPException(status_code=404, detail="Artifact not uploaded yet")
+    return await _serve(key)
 
 
 @router.get("/{run_id}/steps/{step_seq}/screenshot.jpg")

@@ -79,7 +79,8 @@ async def main(argv=None) -> int:
     upload_queue.start()
     checkpointer, checkpoint_conn = await open_checkpointer()
     escalator = ClaudeDecider() if mode == RunMode.HYBRID and settings.bedrock_api_key else None
-    runner = EngineRunner(spec, build_decider(mode), PersistenceSink(run_id), headless=not args.headed,
+    sink = PersistenceSink(run_id)
+    runner = EngineRunner(spec, build_decider(mode), sink, headless=not args.headed,
                           escalator=escalator, checkpointer=checkpointer,
                           judge=None if mode == RunMode.STUB else Judge.from_settings(use_jev=mode == RunMode.HYBRID))
     print(f"[*] run {run_id} mode={mode.value} flows={[f.key for f in flows]} target={spec.base_url}")
@@ -93,6 +94,7 @@ async def main(argv=None) -> int:
         issues = {k: len(v) for k, v in report["issues"].items()}
         print(f"[+] reports: run report {report['run_report_id']}, {len(report['bug_reports'])} bug reports, "
               f"issues {issues}, manifest {report['manifest_hash'][:12]}")
+    await sink.flush()
     await upload_queue.stop()
     if checkpoint_conn is not None:
         await checkpoint_conn.close()

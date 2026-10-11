@@ -977,6 +977,21 @@ What exists today, and where it differs from the target in sections 5–12. **55
   Recording and Replay (divergence reported when the page differs from the tape).
 - **Tooling**: `make doctor` preflight (Postgres pooled and direct, object storage with presign, Jev, Bedrock, browser), `make bench`.
 
+**Integration (branch `integration`: `be` + `fe`)**
+
+- The frontend runs against the real API when `NEXT_PUBLIC_API_URL` is set (`make dev`); without it, on in-browser fixtures (`make dev-mock`).
+- `frontend/src/lib/api/adapter.ts` maps backend DTOs and dotted SSE events to the UI's types. Driving the UI with a browser
+  confirmed: app list, playbooks, starting a run, live run page, revisiting a finished run, with no console errors from the integration.
+- Not yet shown in the UI: candidate overlays, wait frames, network bodies, issues, reports, traceability, evidence, per-category playbook editor.
+
+**Frontend task status (Coder 2's branch, merged here)**
+
+| Code | Status |
+|---|---|
+| F0, F1, F2, F3, F4, F5, F7 | Built on fixtures with a mock SSE replay (pre-dates the seven-category playbooks, issues, reports and evidence) |
+| F6 | 🟡 Started: list/create/run/watch flows work against the real API; the gaps above remain |
+| F8, F9 | Not started |
+
 **Known gaps and differences from the target**
 
 | Area | Today | Target |
