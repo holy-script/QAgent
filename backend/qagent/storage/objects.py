@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 from typing import Optional
 import boto3
@@ -61,6 +62,24 @@ class ObjectStore:
                 return None
         path = self._local_path(key)
         return path.read_bytes() if path.exists() else None
+
+    def delete_prefix(self, prefix: str) -> int:
+        """Deletes every stored object under a key prefix. Returns how many were removed."""
+        if not self.client:
+            root = self._local_path(prefix.rstrip("/"))
+            if not root.exists():
+                return 0
+            n = sum(1 for f in root.rglob("*") if f.is_file())
+            shutil.rmtree(root, ignore_errors=True)
+            return n
+        removed = 0
+        paginator = self.client.get_paginator("list_objects_v2")
+        for page in paginator.paginate(Bucket=self.bucket, Prefix=prefix):
+            keys = [{"Key": o["Key"]} for o in page.get("Contents", [])]
+            for i in range(0, len(keys), 1000):
+                self.client.delete_objects(Bucket=self.bucket, Delete={"Objects": keys[i:i + 1000], "Quiet": True})
+            removed += len(keys)
+        return removed
 
     def get_presigned_url(self, key: str, expires_in_seconds: int = 3600) -> str:
         if not self.client:

@@ -23,6 +23,7 @@ class QAgentEventType(str, Enum):
     REPORT_READY = "report.ready"
     REPORT_FAILED = "report.failed"
     DIVERGENCE = "divergence"
+    ARTIFACT_UPLOADED = "artifact.uploaded"
 
 
 class EventEnvelope(BaseModel):

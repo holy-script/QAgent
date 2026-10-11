@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import select
 
 from qagent.domain.events import EventEnvelope, QAgentEventType
 from qagent.domain.models import (
@@ -179,7 +180,6 @@ class PersistenceSink:
             if step:
                 step.status = p.get("status", step.status)
                 step.url = p.get("url", step.url)
-                step.artifacts_complete = True
             timings = p.get("timings") or {}
             session.add(StepTiming(
                 step_id=p["step_id"],
@@ -187,6 +187,14 @@ class PersistenceSink:
                     "observe_ms", "extract_ms", "decide_ms", "gate_ms", "act_ms", "settle_ms", "verify_ms"
                 )},
             ))
+
+        elif t == QAgentEventType.ARTIFACT_UPLOADED:
+            # A step's evidence is complete once its "after" screenshot is stored.
+            if p.get("kind") == "screenshot_after" and p.get("step_seq") is not None:
+                step = (await session.execute(select(Step).where(
+                    Step.flow_run_id == p["flow_run_id"], Step.seq == p["step_seq"]))).scalars().first()
+                if step:
+                    step.artifacts_complete = True
 
         elif t == QAgentEventType.NETWORK_CALL:
             session.add(NetworkCallRecord(

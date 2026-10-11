@@ -59,6 +59,22 @@ async def get_run(run_id: str, session: AsyncSession = Depends(get_session)):
     return run_out(await _get_run(session, run_id))
 
 
+@router.delete("/{run_id}")
+async def delete_run(run_id: str, session: AsyncSession = Depends(get_session),
+                     manager: RunManager = Depends(get_run_manager)):
+    """Deletes one run with its steps, findings, evidence, reports and stored files. Bugs it was the only proof of go too."""
+    import asyncio
+    from qagent.storage.objects import object_store
+    from qagent.storage.purge import purge_run
+    run = await _get_run(session, run_id)
+    if run_id in manager.active:
+        raise HTTPException(status_code=409, detail="This run is still in progress. Stop it first.")
+    counts = await purge_run(session, run_id)
+    await session.commit()
+    removed = await asyncio.to_thread(object_store.delete_prefix, f"apps/{run.app_id}/runs/{run_id}/")
+    return {"deleted": counts, "files_removed": removed}
+
+
 @router.post("/{run_id}/stop", response_model=RunResponse)
 async def stop_run(run_id: str, session: AsyncSession = Depends(get_session),
                    manager: RunManager = Depends(get_run_manager)):

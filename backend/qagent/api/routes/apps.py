@@ -1,3 +1,4 @@
+import asyncio
 import re
 from typing import List
 from urllib.parse import urlparse
@@ -10,6 +11,9 @@ from sqlmodel import select
 from qagent.api.deps import get_session
 from qagent.api.mappers import app_out, run_out
 from qagent.config import settings
+from qagent.runs.manager import RunManager, get_run_manager
+from qagent.storage.objects import object_store
+from qagent.storage.purge import purge_app
 from qagent.domain import models as m
 from qagent.domain.schemas import (
     PrdExtractResponse, AppResponse, AppSummaryResponse, CreateAppRequest, RunResponse, UpdateAppRequest,
@@ -86,11 +90,17 @@ async def update_app(app_id: str, payload: UpdateAppRequest, session: AsyncSessi
     return app_out(app)
 
 
-@router.delete("/{app_id}", status_code=204)
-async def delete_app(app_id: str, session: AsyncSession = Depends(get_session)):
+@router.delete("/{app_id}")
+async def delete_app(app_id: str, session: AsyncSession = Depends(get_session),
+                     manager: RunManager = Depends(get_run_manager)):
+    """Deletes the app with its test plans, runs, bugs, reports and stored screenshots/files. Cannot be undone."""
     app = await _find(session, app_id)
-    await session.delete(app)
+    if any(a.runner.spec.app_id == app.id for a in manager.active.values()):
+        raise HTTPException(status_code=409, detail="A test run is still in progress. Stop it first, then delete the app.")
+    counts = await purge_app(session, app.id)
     await session.commit()
+    removed_files = await asyncio.to_thread(object_store.delete_prefix, f"apps/{app.id}/")
+    return {"deleted": counts, "files_removed": removed_files}
 
 
 @router.get("/{app_id}/runs", response_model=List[RunResponse])

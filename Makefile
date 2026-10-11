@@ -1,9 +1,13 @@
-.PHONY: setup doctor dev dev-mock e2e test bench migrate clean
+.PHONY: browsers setup doctor dev dev-mock e2e test bench migrate clean
 
 migrate:
 	@echo "Running database migrations..."
 	cd backend && uv run alembic upgrade head
 
+
+browsers:
+	@echo "Installing the pinned Playwright Chromium (same build on every machine)..."
+	cd backend && uv run playwright install chromium
 
 setup:
 	@echo "Setting up Python environments..."

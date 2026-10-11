@@ -112,3 +112,16 @@ async def uploader(mem_sessions, monkeypatch, tmp_path):
     queue.start()
     yield queue
     await queue.stop()
+
+
+@pytest.fixture(autouse=True)
+def signed_in(request):
+    """API tests run as a signed-in user. Tests marked `real_auth` exercise the actual login instead."""
+    from qagent.api import auth
+    from qagent.api.main import app as api_app
+    if request.node.get_closest_marker("real_auth"):
+        yield
+        return
+    api_app.dependency_overrides[auth.require_user] = lambda: "test@example.com"
+    yield
+    api_app.dependency_overrides.pop(auth.require_user, None)

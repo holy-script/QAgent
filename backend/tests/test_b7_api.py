@@ -249,7 +249,7 @@ async def test_app_crud_and_derived_names(client):
     app_id = created.json()["id"]
     patched = await client.patch(f"/apps/{app_id}", json={"name": "Example", "redact_keys": ["email"]})
     assert patched.json()["name"] == "Example" and patched.json()["redact_keys"] == ["email"]
-    assert (await client.delete(f"/apps/{app_id}")).status_code == 204
+    assert (await client.delete(f"/apps/{app_id}")).status_code == 200
     assert (await client.get(f"/apps/{app_id}")).status_code == 404
 
 

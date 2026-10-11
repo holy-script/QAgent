@@ -64,11 +64,24 @@ class Settings(BaseSettings):
     # Browser: leave channel unset to use bundled Chromium; the sandbox falls back
     # to installed Google Chrome when the bundled build is missing.
     browser_channel: Optional[str] = Field(default=None, alias="QAGENT_BROWSER_CHANNEL")
+    browser_path: Optional[str] = Field(default=None, alias="QAGENT_BROWSER_PATH")
     browser_headless: bool = Field(default=True, alias="QAGENT_HEADLESS")
+
+    # Team login. One shared account, kept in config on purpose (simple auth for now). Override with env vars.
+    auth_email: str = Field(default="admin@chryselys.com", alias="AUTH_EMAIL")
+    auth_password: str = Field(default="Admin@QAgent!2026", alias="AUTH_PASSWORD")
+    auth_secret: str = Field(default="qagent-dev-secret-change-me", alias="AUTH_SECRET")
+    auth_ttl_hours: int = Field(default=12, alias="AUTH_TTL_HOURS")
+    auth_cookie_secure: bool = Field(default=False, alias="AUTH_COOKIE_SECURE")
+    cors_origins: str = Field(default="http://localhost:3000,http://127.0.0.1:3000", alias="CORS_ORIGINS")
 
     # Demo & Local Dev
     demo_shop_url: str = Field(default="http://localhost:8001", alias="DEMO_SHOP_URL")
     api_url: str = Field(default="http://localhost:8000", alias="API_URL")
+
+    @property
+    def cors_origin_list(self) -> List[str]:
+        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
     @property
     def allowed_hosts_list(self) -> List[str]:

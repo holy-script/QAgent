@@ -288,6 +288,13 @@ class EngineRunner:
     async def _upload(self, ctx: FlowContext, suffix: str, data: bytes, content_type: str,
                       kind: str, step_seq: Optional[int] = None) -> str:
         key = self._key(ctx.flow.key, suffix)
+
+        async def announce(artifact) -> None:
+            await self.sink.emit(QAgentEventType.ARTIFACT_UPLOADED, {
+                "flow_key": ctx.flow.key, "flow_run_id": ctx.flow_run_id, "step_seq": step_seq,
+                "artifact_id": artifact.id, "kind": kind, "object_key": key,
+            })
+
         await self.uploader.enqueue(
             key=key,
             data=data,
@@ -296,6 +303,7 @@ class EngineRunner:
             flow_run_id=ctx.flow_run_id,
             step_seq=step_seq,
             kind=kind,
+            on_done=announce,
         )
         return key
 

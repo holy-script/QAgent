@@ -4,6 +4,7 @@ from urllib.parse import urlparse
 
 from playwright.async_api import Browser, BrowserContext, Page, Playwright, async_playwright
 
+from qagent.browser.launcher import launch_chromium
 from qagent.config import settings
 
 
@@ -28,6 +29,7 @@ class BrowserSandbox:
         self.page: Optional[Page] = None
         self.console_logs: List[Dict[str, Any]] = []
         self.blocked_requests: List[str] = []
+        self.browser_source: str = ""
         # W3C traceparent injection: set a provider to add the header to every allowed request.
         self.traceparent_provider: Optional[Callable[[], str]] = None
         self.injected: Dict[str, List[str]] = {}
@@ -42,16 +44,8 @@ class BrowserSandbox:
 
     async def _launch(self) -> Browser:
         assert self.playwright
-        args = ["--no-sandbox", "--disable-setuid-sandbox"]
-        if settings.browser_channel:
-            return await self.playwright.chromium.launch(
-                headless=self.headless, args=args, channel=settings.browser_channel
-            )
-        try:
-            return await self.playwright.chromium.launch(headless=self.headless, args=args)
-        except Exception:
-            # Bundled Chromium not installed: use the system Chrome instead.
-            return await self.playwright.chromium.launch(headless=self.headless, args=args, channel="chrome")
+        browser, self.browser_source = await launch_chromium(self.playwright, self.headless)
+        return browser
 
     def _host_allowed(self, url: str) -> bool:
         if not self.allowed_hosts:
