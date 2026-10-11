@@ -55,21 +55,29 @@ make test         # 55 backend tests
 
 ## UI refresh (branch `ui-refresh`, on top of `integration`)
 
-- **Light mode is the default**, with a Light / Dark / Match-my-device switcher in the header (next-themes, choice remembered). Tokens live in `globals.css` (shadcn semantic names plus `brand`, `ok`, `warn`, `bad`, `violet` with soft tints) and every page reads them, so both themes are checked by the same code.
+- **Light mode is the default**, with a Light / Dark / Match-my-device switcher in the header (own provider, choice remembered, no flash). Tokens live in `globals.css` (shadcn semantic names plus `brand`, `ok`, `warn`, `bad`, `violet` with soft tints) and every page reads them, so both themes are checked by the same code.
 - **Component library**: shadcn/ui on Base UI (Nova preset: Geist, Lucide). Buttons, badges, tabs, tooltips, dropdown menu, sheets (step and proof panels), dialog (rewrite review), command palette (cmdk), toasts (sonner) are the library's components; `components/ui/index.tsx` keeps the app-specific pieces (status pills, metrics, empty and error states) on top of them.
 - **Plain-language UX**: one vocabulary in `lib/terms.ts` and a Help page (`/help`). Playbook becomes test plan, flow becomes journey, finding becomes problem, issue becomes bug (Open / Fixed / Came back), mode becomes Smart / Thorough / Practice, Jev and Claude become fast AI and strong AI, "re-run from tape" becomes "Repeat exactly". Added: a four-step "How it works" on Home, a "Getting started" checklist on the Overview, a one-line explanation under each page title, "?" tooltips on jargon, friendlier empty states, and wording for every form field in the test plan editor.
 - Checks: `tsc`, `eslint`, `next build` clean; `scripts/e2e_pages.py` 23/23 against the live stack in the new UI.
 
+- **Brand colours**: gold primary and blue secondary scales in light mode, a navy surface with lifted tints in dark mode (all text pairs pass WCAG AA, enforced by the e2e accessibility checks).
+- **Auth**: shared team account (`admin@chryselys.com`), HMAC-signed HttpOnly cookie, login throttle, every API route protected, CORS limited to the frontend. Sign-in screen, session gate and sign-out in the UI.
+- **Standard browser**: pinned Playwright Chromium first (`make browsers`), explicit overrides, installed Chrome only as a warned fallback; Dockerfile for a reproducible environment.
+- **Deleting**: app and run deletion cascade through the database and object storage; confirmation dialogs (type the app name for an app).
+- **Reliability**: orphaned runs are marked failed on restart; uploads retry with backoff and emit `artifact.uploaded`.
+- **Editor**: CodeMirror 6 with Markdown highlighting, item IDs and bindings coloured, problems underlined on their line, edit-in-place for existing items (unseen fields are preserved).
+- **Tests and demo data**: every page and feature has demo data (in-browser fixtures with a scripted live run). Backend 75 pytest tests, frontend 40 unit tests, 54 Playwright tests (all pages x both themes, accessibility, phone width, auth, key journeys). CI runs all of them.
+- **Done**: credential rotation (not needed, closed), `qagent-artifacts` bucket created and configured.
+
 ## Known gaps
 
-- The "tape" timeline from the plan is not built (the journey strips and the decision loop stand in for it). The Steel/Plex design direction in the plan is superseded by the shadcn/ui decision.
-- New pages show a "Needs the live API" notice in fixture mode; only the original pages have mock data.
-- The playbook editor's add forms cover the common fields of each category (no inline editing of an existing item: remove and re-add, or use the raw view).
-- Compare view still uses the original fixtures-era data shape.
+- The "tape" timeline from the plan is not built (the journey strips and the decision loop stand in for it).
+- Auth is one shared account; no per-person identity, audit trail or roles.
+- Claude planner, judged calls on the tape, per-flow reset and deterministic browser, cost accounting for judge/report calls (plan section 16).
 
 ## Next steps
 
-1. **Review and land the branch**: merge `integration` into `main` (or push it for Coder 2 to continue from).
-2. **Frontend polish** (Coder 2): decide on the design direction, build the tape timeline, mock data for the new pages, inline item editing, Compare on real runs.
-3. **Backend gaps** (plan section 16): Claude planner, judged calls on the tape, per-flow reset and deterministic browser, upload retries and `artifact.uploaded`, Neon branch pin.
-4. **Demo readiness**: rotate the shared Neon credentials, create the `qagent-artifacts` bucket (or keep `captures`), disable scale-to-zero, rehearse hybrid vs baseline (`make bench` numbers are in ASSUMPTIONS.md).
+1. **Review and land the branch**: merge `ui-refresh` into `integration` / `main` once reviewed.
+2. **Backend gaps** (plan section 16): Claude planner, judged calls on the tape, determinism, cost accounting.
+3. **Production hardening**: per-user accounts, `Secure` cookie behind HTTPS, rotate `AUTH_SECRET`, multi-worker SSE, hosting choice.
+4. **Demo readiness**: disable Neon scale-to-zero or pin a branch, rehearse hybrid vs baseline (`make bench` numbers are in ASSUMPTIONS.md).

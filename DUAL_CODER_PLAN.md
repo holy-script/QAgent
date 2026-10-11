@@ -1012,6 +1012,6 @@ What exists today, and where it differs from the target in sections 5–12. **55
 **Environment notes**
 
 - Jev accepts the concrete version `jev-1.13.0` and the aliases `jev-latest` / `jev-preview`, which currently resolve to it. The earlier 400 errors came from a wrong request shape, not the model name.
-- The dev project's object storage bucket is `captures`; `qagent-artifacts` does not exist there (preflight creates a missing bucket).
-- The Playwright Chromium download can time out on restricted networks; the sandbox then falls back to installed Google Chrome.
+- The `qagent-artifacts` bucket now exists and is configured (done); `captures` is no longer used.
+- The sandbox uses the pinned Playwright Chromium (`make browsers`); installed Chrome/Edge is a last-resort fallback with a warning. Override with `QAGENT_BROWSER_PATH`.
 - Tests and CLI runs write to the Neon database configured in `.env`; engine and API tests use a per-test SQLite file.
