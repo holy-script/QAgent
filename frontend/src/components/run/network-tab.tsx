@@ -11,26 +11,26 @@ export function NetworkTab({ view, onOpen }: { view: RunView; onOpen: (flow: str
   const rows = view.network.filter((n) => !apiOnly || n.is_api);
   return (
     <div className="space-y-3">
-      <label className="flex items-center gap-2 text-sm text-muted"><input type="checkbox" checked={apiOnly} onChange={(e) => setApiOnly(e.target.checked)} />API calls only</label>
-      {!rows.length ? <Empty title="No network calls yet" /> : (
-        <div className="overflow-x-auto rounded-xl border border-line">
+      <label className="flex items-center gap-2 text-sm text-muted-foreground"><input type="checkbox" checked={apiOnly} onChange={(e) => setApiOnly(e.target.checked)} />Only calls the app makes to its server (hide page and image loads)</label>
+      {!rows.length ? <Empty title="No server calls yet" hint="Calls appear as the app talks to its server." /> : (
+        <div className="overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-left text-sm">
-            <thead className="bg-white/[0.03] text-xs uppercase tracking-wide text-muted">
-              <tr>{["Flow · step", "Method", "URL", "Status", "Time", "Size"].map((h) => <th key={h} className="px-4 py-2.5 font-medium">{h}</th>)}</tr>
+            <thead className="bg-foreground/[0.03] text-xs uppercase tracking-wide text-muted-foreground">
+              <tr>{["Journey · step", "Method", "Address", "Status", "Time", "Size sent / received"].map((h) => <th key={h} className="px-4 py-2.5 font-medium">{h}</th>)}</tr>
             </thead>
-            <tbody className="divide-y divide-line font-mono text-xs">
+            <tbody className="divide-y divide-border font-mono text-xs">
               {rows.map((c) => (
                 <Fragment key={c.id}>
-                  <tr className={cn("cursor-pointer hover:bg-white/[0.03]", c.status >= 400 && "bg-bad/5")} onClick={() => setOpen(open === c.id ? null : c.id)}>
-                    <td className="px-4 py-2"><button className="text-accent hover:underline" onClick={(e) => { e.stopPropagation(); onOpen(c.flow_key, c.step_seq); }}>{c.flow_key} · {c.step_seq}</button></td>
+                  <tr className={cn("cursor-pointer hover:bg-foreground/[0.03]", c.status >= 400 && "bg-bad/5")} onClick={() => setOpen(open === c.id ? null : c.id)}>
+                    <td className="px-4 py-2"><button className="text-brand hover:underline" onClick={(e) => { e.stopPropagation(); onOpen(c.flow_key, c.step_seq); }}>{c.flow_key} · {c.step_seq}</button></td>
                     <td className="px-4 py-2">{c.method}</td>
                     <td className="max-w-xs truncate px-4 py-2">{c.url}</td>
                     <td className="px-4 py-2"><Badge tone={c.status >= 400 ? "bad" : "ok"}>{c.status}</Badge></td>
                     <td className={cn("px-4 py-2 tabular-nums", c.duration_ms > 2000 && "text-warn")}>{fmtMs(c.duration_ms)}</td>
-                    <td className="px-4 py-2 tabular-nums text-muted">{fmtBytes(c.req_size)} ↑ {fmtBytes(c.resp_size)} ↓</td>
+                    <td className="px-4 py-2 tabular-nums text-muted-foreground">{fmtBytes(c.req_size)} ↑ {fmtBytes(c.resp_size)} ↓</td>
                   </tr>
                   {open === c.id && (
-                    <tr><td colSpan={6} className="bg-black/30 px-4 py-3">
+                    <tr><td colSpan={6} className="bg-muted px-4 py-3">
                       {USE_MOCK ? (
                         <div className="grid gap-3 md:grid-cols-2">
                           <Body title="Request" body={c.request_body} /><Body title="Response" body={c.response_body} />
@@ -49,6 +49,6 @@ export function NetworkTab({ view, onOpen }: { view: RunView; onOpen: (flow: str
 }
 
 const Body = ({ title, body }: { title: string; body: unknown }) => (
-  <div><div className="mb-1 text-[11px] uppercase tracking-wide text-muted">{title}</div>
-    <pre className="max-h-48 overflow-auto rounded bg-black/40 p-2 text-[11px]">{body === undefined ? "(no body captured)" : JSON.stringify(body, null, 2)}</pre></div>
+  <div><div className="mb-1 text-[11px] uppercase tracking-wide text-muted-foreground">{title}</div>
+    <pre className="max-h-48 overflow-auto rounded bg-code p-2 text-[11px]">{body === undefined ? "(no body captured)" : JSON.stringify(body, null, 2)}</pre></div>
 );

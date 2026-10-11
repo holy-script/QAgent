@@ -28,23 +28,23 @@ function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="space-y-5">
       {live && (
-        <Link href={`${base}/runs/${live.id}`} className="flex items-center gap-3 rounded-xl border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm hover:bg-accent/15">
-          <span className="size-2 rounded-full bg-accent pulse-ring" />
-          <span><b>Run in progress</b> · {live.playbook_name} · {live.mode}</span>
-          <span className="ml-auto text-accent">Watch live →</span>
+        <Link href={`${base}/runs/${live.id}`} className="flex items-center gap-3 rounded-xl border border-brand/40 bg-brand/10 px-4 py-2.5 text-sm hover:bg-brand/15">
+          <span className="size-2 rounded-full bg-brand pulse-ring" />
+          <span><b>A test run is in progress</b> · {live.playbook_name}</span>
+          <span className="ml-auto text-brand">Watch it live →</span>
         </Link>
       )}
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">{app.name}</h1>
-        <div className="mt-1 flex items-center gap-1.5 text-sm text-muted"><Globe className="size-3.5" />{app.base_url}</div>
+        <div className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground"><Globe className="size-3.5" />{app.base_url}</div>
       </div>
       <Tabs tabs={[
         { href: base, label: "Overview", exact: true },
-        { href: `${base}/playbooks`, label: "Playbooks" },
+        { href: `${base}/playbooks`, label: "Test plans" },
         { href: `${base}/runs`, label: "Runs", count: runs?.length },
-        { href: `${base}/flows`, label: "Flows" },
-        { href: `${base}/issues`, label: "Issues", count: openIssues?.length },
-        { href: `${base}/traceability`, label: "Traceability" },
+        { href: `${base}/flows`, label: "Journeys" },
+        { href: `${base}/issues`, label: "Bugs", count: openIssues?.length },
+        { href: `${base}/traceability`, label: "Requirements" },
         { href: `${base}/compare`, label: "Compare" },
         { href: `${base}/settings`, label: "Settings" },
       ]} />

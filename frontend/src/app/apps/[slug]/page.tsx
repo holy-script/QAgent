@@ -4,6 +4,7 @@ import { RunLauncher } from "@/components/run-launcher";
 import { RunsTable } from "@/components/runs-table";
 import { Card, ErrorState, Loading, Metric, fmtMs } from "@/components/ui";
 import { useApp, useRuns } from "@/lib/api/hooks";
+import { GettingStarted } from "@/components/getting-started";
 import { OverviewLive } from "@/components/live/overview-live";
 import { USE_MOCK } from "@/lib/api/client";
 
@@ -20,18 +21,19 @@ export default function Overview() {
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
       <div className="space-y-6">
+        <GettingStarted slug={slug} />
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <Metric label="Runs" value={runs.length} />
-          <Metric label="Pass rate" value={passRate == null ? "–" : `${passRate}%`} tone={passRate == null ? undefined : passRate >= 80 ? "ok" : "bad"} />
-          <Metric label="Findings (last run)" value={last?.totals.findings ?? "–"} tone={last?.totals.findings ? "bad" : undefined} />
-          <Metric label="p50 decide" value={last?.totals.p50_decide_ms ? fmtMs(last.totals.p50_decide_ms) : "–"} hint="last run" />
+          <Metric label="Test runs" value={runs.length} info="Each run walks every journey in a test plan in a real browser." />
+          <Metric label="Runs without problems" info="Share of finished runs in which every check passed." value={passRate == null ? "–" : `${passRate}%`} tone={passRate == null ? undefined : passRate >= 80 ? "ok" : "bad"} />
+          <Metric label="Problems in the last run" info="Checks that failed in the most recent run. The same problem across runs is tracked as one bug." value={last?.totals.findings ?? "–"} tone={last?.totals.findings ? "bad" : undefined} />
+          <Metric label="AI speed" info="Typical time the AI takes to choose the next action." value={last?.totals.p50_decide_ms ? fmtMs(last.totals.p50_decide_ms) : "–"} hint="last run" />
         </div>
         <section className="space-y-3">
-          <h2 className="font-medium">Recent runs</h2>
+          <h2 className="font-medium">Recent test runs</h2>
           <RunsTable slug={slug} runs={runs.slice(0, 5)} />
         </section>
         {!USE_MOCK && <OverviewLive slug={slug} />}
-        {app?.description && <Card className="p-5 text-sm text-muted">{app.description}</Card>}
+        {app?.description && <Card className="p-5 text-sm text-muted-foreground">{app.description}</Card>}
       </div>
       <RunLauncher slug={slug} />
     </div>

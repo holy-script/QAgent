@@ -40,21 +40,21 @@ function Form({ app }: { app: App }) {
         save.mutate({ name: f.name.trim(), base_url: f.base_url, description: f.description, prd_markdown: f.prd, default_mode: f.default_mode, allowed_hosts: list(f.hosts), redact_keys: list(f.redact), gate_overrides: { auto_min: num(f.auto), escalate_min: num(f.esc) } });
       }}>
         <Field label="Name"><input className={inputCls} value={f.name} onChange={set("name")} /></Field>
-        <Field label="Base URL"><input className={inputCls} value={f.base_url} onChange={set("base_url")} /></Field>
+        <Field label="Website address" hint="Where test runs start."><input className={inputCls} value={f.base_url} onChange={set("base_url")} /></Field>
         <Field label="Description"><textarea className={inputCls} rows={2} value={f.description} onChange={set("description")} /></Field>
-        <Field label="Product requirements (PRD)" hint="Markdown. The playbook editor can propose requirements from it."><textarea className={`${inputCls} font-mono text-xs`} rows={6} value={f.prd} onChange={set("prd")} /></Field>
-        <Field label="Allowed hosts" hint="Comma-separated. The browser refuses navigation anywhere else."><input className={inputCls} value={f.hosts} onChange={set("hosts")} /></Field>
-        <Field label="Default mode">
+        <Field label="Product document (optional)" hint="Paste your requirements or product spec. The test plan editor can suggest requirements from it."><textarea className={`${inputCls} font-mono text-xs`} rows={6} value={f.prd} onChange={set("prd")} /></Field>
+        <Field label="Other sites tests may visit" hint="Comma-separated. For safety the browser refuses to go anywhere that is not your app or listed here."><input className={inputCls} value={f.hosts} onChange={set("hosts")} /></Field>
+        <Field label="Default mode" hint="How decisions are made when you run a test. Smart is recommended.">
           <select className={inputCls} value={f.default_mode} onChange={(e) => setF({ ...f, default_mode: e.target.value as Mode })}>
-            <option value="hybrid">Hybrid (Jev + Claude)</option><option value="baseline">Baseline (Claude only)</option><option value="stub">Stub</option>
+            <option value="hybrid">Smart: fast AI, stronger AI when unsure (recommended)</option><option value="baseline">Thorough: stronger AI every time</option><option value="stub">Practice: no AI</option>
           </select>
         </Field>
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Auto-act min confidence" hint="Blank = global default (0.75)"><input className={inputCls} value={f.auto} onChange={set("auto")} inputMode="decimal" placeholder="0.75" /></Field>
-          <Field label="Escalate min confidence" hint="Blank = global default (0.45)"><input className={inputCls} value={f.esc} onChange={set("esc")} inputMode="decimal" placeholder="0.45" /></Field>
+          <Field label="Act on its own above this confidence" hint="0 to 1. Blank uses the default (0.75)."><input className={inputCls} value={f.auto} onChange={set("auto")} inputMode="decimal" placeholder="0.75" /></Field>
+          <Field label="Ask the stronger AI above this confidence" hint="0 to 1. Below it the step stops instead of guessing. Blank uses the default (0.45)."><input className={inputCls} value={f.esc} onChange={set("esc")} inputMode="decimal" placeholder="0.45" /></Field>
         </div>
-        {invalid && <p className="text-xs text-bad">Thresholds must be between 0 and 1, and escalate must be below auto.</p>}
-        <Field label="Redacted keys" hint="JSON keys masked in stored request and response bodies. Authorization and cookie headers are never stored."><input className={inputCls} value={f.redact} onChange={set("redact")} /></Field>
+        {invalid && <p className="text-xs text-bad">Both numbers must be between 0 and 1, and the second must be lower than the first.</p>}
+        <Field label="Hide these values in saved server calls" hint="Names of fields (for example email, card) whose values are replaced with [redacted] in stored server calls. Passwords and cookies in headers are never stored."><input className={inputCls} value={f.redact} onChange={set("redact")} /></Field>
         {save.error && <p role="alert" className="text-sm text-bad">{save.error.message}</p>}
         <div className="flex items-center justify-end gap-3">
           {save.isSuccess && <span className="text-sm text-ok">Saved</span>}

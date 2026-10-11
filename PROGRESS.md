@@ -53,9 +53,16 @@ make test         # 55 backend tests
 - Types for the new pages come from the generated schema (`npm run gen:api` reads `backend/openapi.json`).
 - Backend additions: `GET /runs/{id}/artifacts`, textual artifacts proxied instead of redirected, items and links in `POST /playbooks/validate`.
 
+## UI refresh (branch `ui-refresh`, on top of `integration`)
+
+- **Light mode is the default**, with a Light / Dark / Match-my-device switcher in the header (next-themes, choice remembered). Tokens live in `globals.css` (shadcn semantic names plus `brand`, `ok`, `warn`, `bad`, `violet` with soft tints) and every page reads them, so both themes are checked by the same code.
+- **Component library**: shadcn/ui on Base UI (Nova preset: Geist, Lucide). Buttons, badges, tabs, tooltips, dropdown menu, sheets (step and proof panels), dialog (rewrite review), command palette (cmdk), toasts (sonner) are the library's components; `components/ui/index.tsx` keeps the app-specific pieces (status pills, metrics, empty and error states) on top of them.
+- **Plain-language UX**: one vocabulary in `lib/terms.ts` and a Help page (`/help`). Playbook becomes test plan, flow becomes journey, finding becomes problem, issue becomes bug (Open / Fixed / Came back), mode becomes Smart / Thorough / Practice, Jev and Claude become fast AI and strong AI, "re-run from tape" becomes "Repeat exactly". Added: a four-step "How it works" on Home, a "Getting started" checklist on the Overview, a one-line explanation under each page title, "?" tooltips on jargon, friendlier empty states, and wording for every form field in the test plan editor.
+- Checks: `tsc`, `eslint`, `next build` clean; `scripts/e2e_pages.py` 23/23 against the live stack in the new UI.
+
 ## Known gaps
 
-- The visual design still follows the dark theme Coder 2 built, not the Steel/Plex "instrument" direction in the plan; the "tape" timeline is not built (the flow strips and graph stand in for it).
+- The "tape" timeline from the plan is not built (the journey strips and the decision loop stand in for it). The Steel/Plex design direction in the plan is superseded by the shadcn/ui decision.
 - New pages show a "Needs the live API" notice in fixture mode; only the original pages have mock data.
 - The playbook editor's add forms cover the common fields of each category (no inline editing of an existing item: remove and re-add, or use the raw view).
 - Compare view still uses the original fixtures-era data shape.

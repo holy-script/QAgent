@@ -3,13 +3,13 @@
 export type Category = "requirement" | "flow" | "formula" | "ux_rule" | "gotcha" | "edge_case" | "reasoning_example";
 
 export const CATEGORIES: { id: Category; label: string; heading: string; prefix: string; hint: string }[] = [
-  { id: "requirement", label: "Requirements", heading: "Requirements", prefix: "REQ-", hint: "Testable statements from the PRD. Flows, formulas and edge cases point at them." },
-  { id: "flow", label: "Flows", heading: "Flows", prefix: "", hint: "User journeys: steps, expectations, test data, and the checks they run." },
-  { id: "formula", label: "Formulas", heading: "Formulas", prefix: "F-", hint: "Calculations verified in code against UI and API values." },
-  { id: "ux_rule", label: "UX rules", heading: "UX rules", prefix: "UX-", hint: "Consistency and usability rules, checked by code or judged by a model." },
-  { id: "gotcha", label: "Gotchas", heading: "Gotchas", prefix: "G-", hint: "Known traps in this app that would cause false findings." },
-  { id: "edge_case", label: "Edge cases", heading: "Edge cases", prefix: "EC-", hint: "Unusual inputs or states; each runs as a variant of its flow." },
-  { id: "reasoning_example", label: "Reasoning examples", heading: "Reasoning examples", prefix: "RX-", hint: "Few-shot guidance for Claude on tricky situations." },
+  { id: "requirement", label: "Requirements", heading: "Requirements", prefix: "REQ-", hint: "Things the product must do, taken from your product document. Journeys and checks point at them so you can see what is proven." },
+  { id: "flow", label: "Journeys", heading: "Flows", prefix: "", hint: "A path a user takes, such as adding an item and opening the cart: its steps, what should be true afterwards, and the checks it runs." },
+  { id: "formula", label: "Calculations", heading: "Formulas", prefix: "F-", hint: "Math the app must get right, such as a cart total. QAgent recomputes it itself and compares with what the page shows." },
+  { id: "ux_rule", label: "Usability rules", heading: "UX rules", prefix: "UX-", hint: "Things that should look or behave consistently, such as the cart count matching, or nothing loading for longer than a few seconds." },
+  { id: "gotcha", label: "Known quirks", heading: "Gotchas", prefix: "G-", hint: "Things about your app that could fool the test, such as a count that updates a moment late. Telling QAgent avoids false alarms." },
+  { id: "edge_case", label: "Unusual cases", heading: "Edge cases", prefix: "EC-", hint: "Odd situations worth trying, such as an expired coupon or a missing postal code. Each one re-runs its journey with different data." },
+  { id: "reasoning_example", label: "Examples for the AI", heading: "Reasoning examples", prefix: "RX-", hint: "Worked examples that teach the stronger AI how to handle a tricky situation. Optional." },
 ];
 
 export interface FieldSpec {
@@ -32,24 +32,24 @@ export const FORMS: Record<Category, FieldSpec[]> = {
     { name: "priority", label: "Priority", kind: "select", options: SEV },
   ],
   flow: [
-    { name: "title", label: "Flow key", kind: "text", required: true, placeholder: "add-to-cart", hint: "Lowercase with hyphens. Keep it stable across versions." },
+    { name: "title", label: "Journey name", kind: "text", required: true, placeholder: "add-to-cart", hint: "Lowercase with hyphens. Keep it the same across versions so history stays together." },
     { name: "severity", label: "Severity", kind: "select", options: SEV },
-    { name: "covers", label: "Covers", kind: "text", placeholder: "REQ-1, REQ-2" },
-    { name: "checks", label: "Checks", kind: "text", placeholder: "F-1, UX-1" },
-    { name: "steps", label: "Steps", kind: "lines", required: true, hint: "One per line. “Open /path” navigates without a model call." },
-    { name: "expect", label: "Expectations", kind: "lines" },
-    { name: "test_data", label: "Test data", kind: "lines", hint: "key: value, one per line" },
+    { name: "covers", label: "Requirements it proves", kind: "text", placeholder: "REQ-1, REQ-2" },
+    { name: "checks", label: "Calculations and rules to check", kind: "text", placeholder: "F-1, UX-1" },
+    { name: "steps", label: "Steps", kind: "lines", required: true, hint: "One per line, in plain words, e.g. “Add 2 items to cart”. “Open /products” opens a page directly." },
+    { name: "expect", label: "What should be true afterwards", kind: "lines" },
+    { name: "test_data", label: "Values to type in", kind: "lines", hint: "name: value, one per line, e.g. coupon: SAVE10" },
   ],
   formula: [
     { name: "title", label: "Name", kind: "text", required: true, placeholder: "cart_total" },
-    { name: "rule", label: "Rule", kind: "area", required: true, placeholder: "total == round((subtotal - discount) * (1 + tax_rate), 2)", hint: "Evaluated in code. Allowed: sum, round, abs, min, max, len." },
-    { name: "bindings", label: "Bindings", kind: "lines", required: true, hint: "var=api:/path.field, var=ui:[css selector], var=const:value; one per line" },
+    { name: "rule", label: "The calculation", kind: "area", required: true, placeholder: "total == round((subtotal - discount) * (1 + tax_rate), 2)", hint: "Written like a formula using the names below. QAgent checks it with code, not AI." },
+    { name: "bindings", label: "Where each value comes from", kind: "lines", required: true, hint: "One per line: name=api:/path.field (from the server), name=ui:[css selector] (read off the page), or name=const:value (a fixed number)" },
     { name: "tolerance", label: "Tolerance", kind: "text", placeholder: "0.01" },
-    { name: "verifies", label: "Verifies", kind: "text", placeholder: "REQ-1" },
+    { name: "verifies", label: "Requirement it proves", kind: "text", placeholder: "REQ-1" },
   ],
   ux_rule: [
     { name: "title", label: "Rule", kind: "text", required: true },
-    { name: "check", label: "Check type", kind: "select", options: ["consistent_value", "format", "max_wait", "no_console_errors", "a11y", "judged"] },
+    { name: "check", label: "Kind of rule", kind: "select", options: ["consistent_value", "format", "max_wait", "no_console_errors", "a11y", "judged"] },
     { name: "targets", label: "Targets", kind: "text", placeholder: "ui:[data-testid=badge], api:/api/cart.count", show: (v) => v.check === "consistent_value" || v.check === "format" },
     { name: "pattern", label: "Pattern", kind: "text", placeholder: "^\\$\\d+\\.\\d{2}$", show: (v) => v.check === "format" },
     { name: "max_ms", label: "Longest allowed wait (ms)", kind: "text", placeholder: "3000", show: (v) => v.check === "max_wait" },
@@ -59,22 +59,22 @@ export const FORMS: Record<Category, FieldSpec[]> = {
   gotcha: [
     { name: "title", label: "Trap", kind: "text", required: true },
     { name: "note", label: "Note", kind: "area", required: true, hint: "Shown to the planner and judge." },
-    { name: "wait_for", label: "Wait for response (optional)", kind: "text", placeholder: "api:/api/cart" },
-    { name: "ignore_console", label: "Ignore console errors matching (optional)", kind: "text", placeholder: "ResizeObserver" },
+    { name: "wait_for", label: "Wait for this server call first (optional)", kind: "text", placeholder: "api:/api/cart" },
+    { name: "ignore_console", label: "Ignore browser errors containing (optional)", kind: "text", placeholder: "ResizeObserver" },
   ],
   edge_case: [
     { name: "title", label: "Case", kind: "text", required: true },
-    { name: "applies_to", label: "Applies to flow", kind: "select", options: [] },
-    { name: "expect", label: "Expected behaviour", kind: "area", required: true },
+    { name: "applies_to", label: "Which journey", kind: "select", options: [] },
+    { name: "expect", label: "What should happen", kind: "area", required: true },
     { name: "covers", label: "Covers", kind: "text", placeholder: "REQ-3" },
     { name: "checks", label: "Checks", kind: "text", placeholder: "UX-3" },
-    { name: "test_data", label: "Test data", kind: "text", placeholder: "coupon=EXPIRED10", hint: "key=value, comma separated. Use <empty> for an empty field." },
+    { name: "test_data", label: "Values to use", kind: "text", placeholder: "coupon=EXPIRED10", hint: "name=value, comma separated. Use <empty> to leave a field blank." },
   ],
   reasoning_example: [
     { name: "title", label: "Scenario", kind: "text", required: true },
     { name: "context", label: "Context and challenge", kind: "area" },
-    { name: "strategy", label: "Strategy", kind: "lines", required: true, hint: "One numbered step per line." },
-    { name: "scope", label: "Used by", kind: "scope", options: ["planner", "escalation", "judge", "report"] },
+    { name: "strategy", label: "How to handle it", kind: "lines", required: true, hint: "One step per line." },
+    { name: "scope", label: "Where the AI uses it", kind: "scope", options: ["planner", "escalation", "judge", "report"] },
   ],
 };
 

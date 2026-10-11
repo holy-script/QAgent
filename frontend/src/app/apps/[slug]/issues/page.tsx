@@ -7,9 +7,11 @@ import { NeedsApi } from "@/components/live/needs-api";
 import { Badge, Empty, ErrorState, Loading, SeverityBadge, ago, cn, type Tone } from "@/components/ui";
 import { USE_MOCK } from "@/lib/api/client";
 import { useIssues } from "@/lib/api/live";
+import { ISSUE_STATUS } from "@/lib/terms";
 
 const TONE: Record<string, Tone> = { open: "bad", regressed: "warn", resolved: "ok" };
 const FILTERS = ["all", "open", "regressed", "resolved"] as const;
+const FILTER_LABEL: Record<string, string> = { all: "All", open: "Open", regressed: "Came back", resolved: "Fixed" };
 
 export default function Issues() {
   const { slug } = useParams<{ slug: string }>();
@@ -21,31 +23,31 @@ export default function Issues() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        <h2 className="font-medium">Issues</h2>
-        <div role="group" aria-label="Status" className="ml-auto flex overflow-hidden rounded-lg border border-line">
+        <div><h2 className="font-medium">Bugs found</h2><p className="text-sm text-muted-foreground">Every problem a run finds becomes a bug. The same problem across runs is one bug, marked Fixed once a later run no longer finds it.</p></div>
+        <div role="group" aria-label="Status" className="ml-auto flex overflow-hidden rounded-lg border border-border">
           {FILTERS.map((f) => (
-            <button key={f} onClick={() => setStatus(f)} aria-pressed={status === f} className={cn("px-3 py-1.5 text-xs capitalize", status === f ? "bg-accent/20 text-accent" : "text-muted hover:bg-white/5")}>{f}</button>
+            <button key={f} onClick={() => setStatus(f)} aria-pressed={status === f} className={cn("px-3 py-1.5 text-xs", status === f ? "bg-brand/15 text-brand" : "text-muted-foreground hover:bg-foreground/5")}>{FILTER_LABEL[f]}</button>
           ))}
         </div>
       </div>
       {!data.length ? (
-        <Empty icon={<Bug className="size-8" />} title="No issues" hint="Issues open when a run finds a bug and resolve when a later run no longer reproduces it." />
+        <Empty icon={<Bug className="size-8" />} title="No bugs found" hint="Nothing has gone wrong in your runs so far. Bugs appear here the first time a run finds a problem." />
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-line">
+        <div className="overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-left text-sm">
-            <thead className="bg-white/[0.03] text-xs uppercase tracking-wide text-muted">
-              <tr>{["Issue", "Status", "Severity", "Flow", "Check", "Seen", "Updated"].map((h) => <th key={h} className="px-4 py-2.5 font-medium">{h}</th>)}</tr>
+            <thead className="bg-foreground/[0.03] text-xs uppercase tracking-wide text-muted-foreground">
+              <tr>{["Bug", "Status", "How serious", "Journey", "Check", "Found in", "Updated"].map((h) => <th key={h} className="px-4 py-2.5 font-medium">{h}</th>)}</tr>
             </thead>
-            <tbody className="divide-y divide-line">
+            <tbody className="divide-y divide-border">
               {data.map((i) => (
-                <tr key={i.id} className="hover:bg-white/[0.03]">
-                  <td className="max-w-md px-4 py-2.5"><Link href={`/apps/${slug}/issues/${i.id}`} className="font-medium hover:text-accent">{i.title}</Link></td>
-                  <td className="px-4 py-2.5"><Badge tone={TONE[i.status]}>{i.status}</Badge></td>
+                <tr key={i.id} className="hover:bg-foreground/[0.03]">
+                  <td className="max-w-md px-4 py-2.5"><Link href={`/apps/${slug}/issues/${i.id}`} className="font-medium hover:text-brand">{i.title}</Link></td>
+                  <td className="px-4 py-2.5"><Badge tone={TONE[i.status]} title={ISSUE_STATUS[i.status]?.hint}>{ISSUE_STATUS[i.status]?.label ?? i.status}</Badge></td>
                   <td className="px-4 py-2.5"><SeverityBadge severity={i.severity} /></td>
                   <td className="px-4 py-2.5 font-mono text-xs">{i.flow_key}</td>
                   <td className="px-4 py-2.5 font-mono text-xs">{i.check_key}</td>
-                  <td className="px-4 py-2.5 tabular-nums">{i.occurrences}×</td>
-                  <td className="px-4 py-2.5 text-xs text-muted">{i.updated_at ? ago(i.updated_at) : "–"}</td>
+                  <td className="px-4 py-2.5 tabular-nums">{i.occurrences} run{i.occurrences === 1 ? "" : "s"}</td>
+                  <td className="px-4 py-2.5 text-xs text-muted-foreground">{i.updated_at ? ago(i.updated_at) : "–"}</td>
                 </tr>
               ))}
             </tbody>

@@ -24,22 +24,22 @@ export function CallBodies({ callId }: { callId: string }) {
       return { detail: d, req, res };
     },
   });
-  if (isPending) return <div className="text-xs text-muted">Loading bodies…</div>;
+  if (isPending) return <div className="text-xs text-muted-foreground">Loading bodies…</div>;
   return (
     <div className="space-y-2">
       <div className="grid gap-3 md:grid-cols-2">
         <Body title="Request" body={data?.req} />
         <Body title="Response" body={data?.res} />
       </div>
-      {data?.detail.traceparent && <div className="font-mono text-[11px] text-muted">traceparent {data.detail.traceparent}</div>}
+      {data?.detail.traceparent && <div className="font-mono text-[11px] text-muted-foreground">traceparent {data.detail.traceparent}</div>}
     </div>
   );
 }
 
 const Body = ({ title, body }: { title: string; body: unknown }) => (
   <div>
-    <div className="mb-1 text-[11px] uppercase tracking-wide text-muted">{title}</div>
-    <pre className="max-h-56 overflow-auto rounded bg-black/40 p-2 text-[11px]">
+    <div className="mb-1 text-[11px] uppercase tracking-wide text-muted-foreground">{title}</div>
+    <pre className="max-h-56 overflow-auto rounded bg-code p-2 text-[11px]">
       {body === undefined ? "(no body captured)" : typeof body === "string" ? body : JSON.stringify(body, null, 2)}
     </pre>
   </div>

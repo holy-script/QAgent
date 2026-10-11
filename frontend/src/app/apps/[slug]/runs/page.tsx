@@ -9,5 +9,10 @@ export default function Runs() {
   const { data, error, isPending, refetch } = useRuns(slug);
   if (isPending) return <Loading />;
   if (error) return <ErrorState error={error} retry={refetch} />;
-  return <RunsTable slug={slug} runs={data} />;
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-muted-foreground">Every time you run a test plan it is recorded here. Open a run to watch it, see screenshots and read the proof.</p>
+      <RunsTable slug={slug} runs={data} />
+    </div>
+  );
 }

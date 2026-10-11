@@ -1,4 +1,5 @@
 "use client";
+import { MODE_INFO } from "@/lib/terms";
 import { ChevronLeft, FileText, History, Pause, Play, RotateCcw, Square } from "lucide-react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
@@ -55,52 +56,52 @@ function RunBody({ slug, run, replay, onReplay }: { slug: string; run: Run; repl
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center gap-3">
-        <Link href={`/apps/${slug}/runs`} className="text-muted hover:text-foreground" aria-label="Back to runs"><ChevronLeft className="size-5" /></Link>
+        <Link href={`/apps/${slug}/runs`} className="text-muted-foreground hover:text-foreground" aria-label="Back to all runs"><ChevronLeft className="size-5" /></Link>
         <h2 className="text-lg font-medium">{live.playbook_name}</h2>
         <StatusPill status={view.done ? live.status : "running"} />
-        <Badge tone={live.mode === "hybrid" ? "violet" : "neutral"}>{live.mode}</Badge>
-        <span className="font-mono text-xs text-muted">{live.id}</span>
+        <Badge tone={live.mode === "hybrid" ? "violet" : "neutral"}>{MODE_INFO[live.mode].label} mode</Badge>
+        <span className="font-mono text-xs text-muted-foreground">{live.id}</span>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           {running && (
             <>
               <Button onClick={togglePause} aria-label={paused ? "Resume" : "Pause"}>{paused ? <Play className="size-4" /> : <Pause className="size-4" />}{paused ? "Resume" : "Pause"}</Button>
-              <div className="flex overflow-hidden rounded-lg border border-line" role="group" aria-label="Playback speed">
+              <div className="flex overflow-hidden rounded-lg border border-border" role="group" aria-label="Playback speed">
                 {SPEEDS.map((s) => (
                   <button key={s} onClick={() => setSpeed(s)} aria-pressed={speed === s}
-                    className={`px-2.5 py-2 text-xs tabular-nums ${speed === s ? "bg-accent/20 text-accent" : "text-muted hover:bg-white/5"}`}>{s}×</button>
+                    className={`px-2.5 py-2 text-xs tabular-nums ${speed === s ? "bg-brand/20 text-brand" : "text-muted-foreground hover:bg-foreground/5"}`}>{s}×</button>
                 ))}
               </div>
-              <Button variant="danger" onClick={() => api.stopRun(live.id)}><Square className="size-4" />Stop</Button>
+              <Button variant="danger" onClick={() => api.stopRun(live.id)}><Square className="size-4" />Stop run</Button>
             </>
           )}
-          {!running && !USE_MOCK && <Link href={`/apps/${slug}/runs/${live.id}/report`} className="inline-flex items-center gap-2 rounded-lg border border-accent/40 bg-accent/10 px-3.5 py-2 text-sm font-medium text-accent hover:bg-accent/15"><FileText className="size-4" />View report</Link>}
-          {!running && !USE_MOCK && <Button onClick={() => setTapePanel((v) => !v)} aria-expanded={tapePanel}><History className="size-4" />Re-run from tape</Button>}
-          {!running && <Button onClick={onReplay}><RotateCcw className="size-4" />Replay view</Button>}
+          {!running && !USE_MOCK && <Link href={`/apps/${slug}/runs/${live.id}/report`} className="inline-flex items-center gap-2 rounded-lg border border-brand/40 bg-brand/10 px-3.5 py-2 text-sm font-medium text-brand hover:bg-brand/15"><FileText className="size-4" />View report</Link>}
+          {!running && !USE_MOCK && <Button onClick={() => setTapePanel((v) => !v)} aria-expanded={tapePanel}><History className="size-4" />Repeat exactly</Button>}
+          {!running && <Button onClick={onReplay}><RotateCcw className="size-4" />Watch again</Button>}
         </div>
       </div>
 
       {tapePanel && !USE_MOCK && <ReplayPanel slug={slug} runId={live.id} onClose={() => setTapePanel(false)} />}
 
       {running && progress.n > 0 && (
-        <div className="h-1 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-accent transition-all" style={{ width: `${(progress.i / progress.n) * 100}%` }} /></div>
+        <div className="h-1 overflow-hidden rounded-full bg-foreground/10"><div className="h-full bg-brand transition-all" style={{ width: `${(progress.i / progress.n) * 100}%` }} /></div>
       )}
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-        <Metric label="Steps" value={steps.length || t.steps} hint={`${view.flows.length} flows`} />
-        <Metric label="Findings" value={view.findings.length} tone={view.findings.length ? "bad" : "ok"} />
-        <Metric label="Jev / Claude" value={`${jev} / ${claude}`} hint={`${steps.filter((s) => s.decisions.length > 1).length} escalations`} />
-        <Metric label="Avg decide" value={avg ? fmtMs(avg) : "–"} hint={t.p95_decide_ms ? `p95 ${fmtMs(t.p95_decide_ms)}` : undefined} />
-        <Metric label="Est. cost" value={fmtUsd(view.done ? t.cost_usd : cost)} />
-        <Metric label="Network" value={view.network.length} hint={`${view.network.filter((n) => n.status >= 400).length} failed`} tone={view.network.some((n) => n.status >= 400) ? "bad" : undefined} />
+        <Metric label="Steps taken" info="A step is one action, such as opening a page or clicking a button." value={steps.length || t.steps} hint={`${view.flows.length} journeys`} />
+        <Metric label="Problems found" info="Checks that failed in this run." value={view.findings.length} tone={view.findings.length ? "bad" : "ok"} />
+        <Metric label="Fast AI / Strong AI" info="How many decisions each AI made. The fast AI handles most steps; the strong AI is asked when the fast one is unsure." value={`${jev} / ${claude}`} hint={`${steps.filter((s) => s.decisions.length > 1).length} double-checked`} />
+        <Metric label="AI speed" info="Average time the AI took to choose an action." value={avg ? fmtMs(avg) : "–"} hint={t.p95_decide_ms ? `p95 ${fmtMs(t.p95_decide_ms)}` : undefined} />
+        <Metric label="AI cost (estimate)" info="Approximate spend on AI calls for this run." value={fmtUsd(view.done ? t.cost_usd : cost)} />
+        <Metric label="Server calls" info="Requests the app made to its server while being tested." value={view.network.length} hint={`${view.network.filter((n) => n.status >= 400).length} failed`} tone={view.network.some((n) => n.status >= 400) ? "bad" : undefined} />
       </div>
 
       <StateTabs<Tab> value={tab} onChange={setTab} tabs={[
-        { id: "flows", label: "Flows", count: view.flows.length },
-        { id: "graph", label: "Graph" },
-        { id: "network", label: "Network", count: view.network.length },
-        { id: "trace", label: "Trace", count: view.spans.length },
-        { id: "logs", label: "Logs", count: view.logs.length },
-        { id: "findings", label: "Findings", count: view.findings.length },
+        { id: "flows", label: "Journeys", count: view.flows.length },
+        { id: "graph", label: "How it decided" },
+        { id: "network", label: "Server calls", count: view.network.length },
+        { id: "trace", label: "Timeline", count: view.spans.length },
+        { id: "logs", label: "Activity", count: view.logs.length },
+        { id: "findings", label: "Problems", count: view.findings.length },
       ]} />
 
       {tab === "flows" && <FlowsTab view={view} onOpen={open} selected={sel} />}

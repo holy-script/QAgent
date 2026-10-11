@@ -7,21 +7,21 @@ import { activeStep, type RunView } from "@/lib/run-state";
 
 type NodeData = { label: string; sub?: string; count: number; tone: "slate" | "accent" | "violet" | "warn" | "ok" | "bad"; active: boolean };
 const RING: Record<NodeData["tone"], string> = {
-  slate: "border-slate-500/50", accent: "border-accent/60", violet: "border-violet/60", warn: "border-warn/60", ok: "border-ok/60", bad: "border-bad/60",
+  slate: "border-border", accent: "border-brand/60", violet: "border-violet/60", warn: "border-warn/60", ok: "border-ok/60", bad: "border-bad/60",
 };
 
 function StageNode({ data }: NodeProps<Node<NodeData>>) {
   return (
-    <div className={cn("w-36 rounded-xl border bg-surface-2 px-3 py-2.5 text-center transition", RING[data.tone], data.active && "pulse-ring scale-105 border-accent bg-accent/10")}>
-      <Handle type="target" position={Position.Left} className="!size-1.5 !border-0 !bg-slate-500" />
+    <div className={cn("w-36 rounded-xl border bg-secondary px-3 py-2.5 text-center transition", RING[data.tone], data.active && "pulse-ring scale-105 border-brand bg-brand/10")}>
+      <Handle type="target" position={Position.Left} className="!size-1.5 !border-0 !bg-muted-foreground" />
       <div className="text-sm font-medium">{data.label}</div>
-      {data.sub && <div className="text-[11px] text-muted">{data.sub}</div>}
+      {data.sub && <div className="text-[11px] text-muted-foreground">{data.sub}</div>}
       <div className="mt-1 text-lg font-semibold tabular-nums">{data.count}</div>
-      <Handle type="source" position={Position.Right} className="!size-1.5 !border-0 !bg-slate-500" />
-      <Handle id="b" type="source" position={Position.Bottom} className="!size-1.5 !border-0 !bg-slate-500" />
-      <Handle id="bt" type="target" position={Position.Bottom} className="!size-1.5 !border-0 !bg-slate-500" />
-      <Handle id="t" type="source" position={Position.Top} className="!size-1.5 !border-0 !bg-slate-500" />
-      <Handle id="tt" type="target" position={Position.Top} className="!size-1.5 !border-0 !bg-slate-500" />
+      <Handle type="source" position={Position.Right} className="!size-1.5 !border-0 !bg-muted-foreground" />
+      <Handle id="b" type="source" position={Position.Bottom} className="!size-1.5 !border-0 !bg-muted-foreground" />
+      <Handle id="bt" type="target" position={Position.Bottom} className="!size-1.5 !border-0 !bg-muted-foreground" />
+      <Handle id="t" type="source" position={Position.Top} className="!size-1.5 !border-0 !bg-muted-foreground" />
+      <Handle id="tt" type="target" position={Position.Top} className="!size-1.5 !border-0 !bg-muted-foreground" />
     </div>
   );
 }
@@ -52,30 +52,30 @@ export function GraphTab({ view, running }: { view: RunView; running: boolean })
       id, type: "stage", position: { x, y }, data: { label, sub, count, tone, active: act === id }, draggable: false,
     });
     const nodes = [
-      n("plan", 0, 60, "Plan", view.flows.length, "violet", "Claude"),
-      n("observe", 200, 60, "Observe", steps.length, "slate", "extract ≤40"),
-      n("decide", 400, 60, "Decide", steps.length, "accent", mode === "baseline" ? "Claude" : "Jev"),
-      n("gate", 600, 60, "Gate", steps.length, "warn", `auto ≥ 0.75`),
-      n("act", 800, 60, "Act", acted, "ok", "Playwright"),
-      n("verify", 1000, 60, "Verify", verified, failed ? "bad" : "ok", `${failed} failed`),
-      n("finish", 1200, 60, "Report", view.done ? 1 : 0, "violet", "Claude"),
-      n("escalate", 600, 230, "Escalate", escalated, "violet", "Claude re-decide"),
+      n("plan", 0, 60, "Plan", view.flows.length, "violet", "strong AI"),
+      n("observe", 200, 60, "Look", steps.length, "slate", "read the page"),
+      n("decide", 400, 60, "Choose", steps.length, "accent", mode === "baseline" ? "strong AI" : "fast AI"),
+      n("gate", 600, 60, "Confident?", steps.length, "warn", "sure enough to act"),
+      n("act", 800, 60, "Do it", acted, "ok", "click / type"),
+      n("verify", 1000, 60, "Check", verified, failed ? "bad" : "ok", `${failed} failed`),
+      n("finish", 1200, 60, "Report", view.done ? 1 : 0, "violet", "strong AI"),
+      n("escalate", 600, 230, "Ask again", escalated, "violet", "stronger AI re-decides"),
     ];
     const e = (id: string, source: string, target: string, label?: string, extra: Partial<Edge> = {}): Edge => ({
       id, source, target, label, animated: act === source || act === target,
-      markerEnd: { type: MarkerType.ArrowClosed, color: "#64748b" }, style: { stroke: "#64748b", strokeWidth: 1.5 },
-      labelStyle: { fill: "#8b95a9", fontSize: 11 }, labelBgStyle: { fill: "#090d16" }, ...extra,
+      markerEnd: { type: MarkerType.ArrowClosed, color: "var(--muted-foreground)" }, style: { stroke: "var(--muted-foreground)", strokeWidth: 1.5 },
+      labelStyle: { fill: "var(--muted-foreground)", fontSize: 11 }, labelBgStyle: { fill: "var(--background)" }, ...extra,
     });
     const edges = [
       e("plan-observe", "plan", "observe"),
       e("observe-decide", "observe", "decide"),
       e("decide-gate", "decide", "gate"),
-      e("gate-act", "gate", "act", `AUTO ${auto}`),
-      e("gate-escalate", "gate", "escalate", `ESCALATE ${escalated}`, { sourceHandle: "b", targetHandle: "tt", style: { stroke: "#f59e0b", strokeWidth: 1.5 } }),
+      e("gate-act", "gate", "act", `acted alone ${auto}`),
+      e("gate-escalate", "gate", "escalate", `asked again ${escalated}`, { sourceHandle: "b", targetHandle: "tt", style: { stroke: "var(--warn)", strokeWidth: 1.5 } }),
       e("escalate-act", "escalate", "act", undefined, { sourceHandle: "t", targetHandle: "bt" }),
       e("act-verify", "act", "verify"),
       e("verify-observe", "verify", "observe", "next step", { sourceHandle: "t", targetHandle: "tt", type: "smoothstep" }),
-      e("verify-finish", "verify", "finish", "flow done"),
+      e("verify-finish", "verify", "finish", "journey done"),
     ];
     return { nodes, edges };
   }, [view, running]);
@@ -85,10 +85,10 @@ export function GraphTab({ view, running }: { view: RunView; running: boolean })
       <Card className="h-[26rem] overflow-hidden">
         <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} fitView fitViewOptions={{ padding: 0.15 }}
           nodesDraggable={false} nodesConnectable={false} elementsSelectable={false} zoomOnScroll={false} proOptions={{ hideAttribution: true }}>
-          <Background gap={24} color="#1e293b" />
+          <Background gap={24} color="var(--border)" />
         </ReactFlow>
       </Card>
-      <p className="text-xs text-muted">Counts are cumulative across the run. The pulsing stage is where the agent is right now; amber is the escalation path to Claude when Jev&apos;s confidence falls below the gate.</p>
+      <p className="text-xs text-muted-foreground">This is the loop QAgent repeats for every step: look at the page, choose what to do, check it is confident enough, do it, then check the result. Numbers add up across the run. The pulsing box is where the agent is right now. The amber path is taken when the fast AI is unsure and the stronger AI is asked instead.</p>
     </div>
   );
 }

@@ -1,0 +1,45 @@
+import { Card } from "@/components/ui";
+import { GLOSSARY } from "@/lib/terms";
+
+export const metadata = { title: "How QAgent works" };
+
+export default function Help() {
+  return (
+    <div className="mx-auto max-w-3xl space-y-8">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">How QAgent works</h1>
+        <p className="mt-1 text-muted-foreground">QAgent tests a website the way a careful person would. It opens a real browser, follows the journeys you describe, checks that the right things happen, and hands you a list of real bugs with proof.</p>
+      </div>
+      <Card className="p-5">
+        <h2 className="font-medium">The five-minute path</h2>
+        <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm">
+          <li><b>Add your app.</b> Give it a name and the website address.</li>
+          <li><b>Write a test plan.</b> List the journeys to try (&ldquo;add 2 items to the cart, open the cart&rdquo;) and what should be true afterwards. No code needed. You can start from the sample or paste rough notes and let AI tidy them.</li>
+          <li><b>Run it.</b> Choose Smart mode and press <i>Run now</i>. Watch it live or come back later.</li>
+          <li><b>Read what it found.</b> Each problem has screenshots, the exact server calls and the numbers that did not match.</li>
+          <li><b>Fix, then repeat.</b> Run again. Bugs that no longer appear are marked Fixed; any that return are marked Came back.</li>
+        </ol>
+      </Card>
+      <section className="space-y-3">
+        <h2 className="font-medium">Words you will see</h2>
+        <dl className="divide-y rounded-xl border bg-card">
+          {GLOSSARY.map((g) => (
+            <div key={g.term} className="grid gap-1 px-4 py-3 sm:grid-cols-[11rem_1fr]">
+              <dt className="text-sm font-medium">{g.term}</dt>
+              <dd className="text-sm text-muted-foreground">{g.meaning}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+      <section className="space-y-2 text-sm">
+        <h2 className="font-medium">Good to know</h2>
+        <ul className="list-disc space-y-1.5 pl-5 text-muted-foreground">
+          <li>QAgent only visits your app and the extra sites you allow in Settings, so a run cannot wander off.</li>
+          <li>Calculations such as totals are checked by plain code, never guessed by AI. AI is used to choose what to click, to judge things that have no fixed rule, and to write the reports.</li>
+          <li>When an AI judges something, the report says so, and the problem is never rated more serious than medium unless a fixed rule also failed.</li>
+          <li>Press <kbd className="rounded border bg-card px-1">Ctrl</kbd> + <kbd className="rounded border bg-card px-1">K</kbd> anywhere to jump to an app, a run or a bug.</li>
+        </ul>
+      </section>
+    </div>
+  );
+}

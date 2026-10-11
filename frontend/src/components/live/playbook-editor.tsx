@@ -3,6 +3,7 @@
 import { AlertCircle, AlertTriangle, CheckCircle2, Plus, Sparkles, Trash2, Wand2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Badge, Button, Card, Field, cn, inputCls } from "@/components/ui";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useExtractPrd, useNormalize, useValidate, type Validation } from "@/lib/api/live";
 import { CATEGORIES, FORMS, diffLines, insertItem, itemMarkdown, nextKey, removeItem, type Category, type FieldSpec } from "@/lib/playbook-md";
 
@@ -34,60 +35,60 @@ export function PlaybookEditor({ value, onChange, slug, onValidation }: { value:
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        <div role="group" aria-label="Editor view" className="flex overflow-hidden rounded-lg border border-line">
+        <div role="group" aria-label="How to edit" className="flex overflow-hidden rounded-lg border border-border">
           {(["categories", "raw"] as const).map((k) => (
-            <button key={k} onClick={() => setView(k)} aria-pressed={view === k} className={cn("px-3 py-1.5 text-xs", view === k ? "bg-accent/20 text-accent" : "text-muted hover:bg-white/5")}>{k === "raw" ? "Raw Markdown" : "Categories"}</button>
+            <button key={k} onClick={() => setView(k)} aria-pressed={view === k} className={cn("px-3 py-1.5 text-xs", view === k ? "bg-brand/20 text-brand" : "text-muted-foreground hover:bg-foreground/5")}>{k === "raw" ? "Text" : "Guided"}</button>
           ))}
         </div>
-        <Button onClick={() => norm.mutate(value, { onSuccess: (r) => setNormalize(r.markdown) })} disabled={!value.trim() || norm.isPending} title="Claude rewrites freeform text into this format; you review a diff first">
-          <Wand2 className="size-4" />{norm.isPending ? "Normalizing…" : "Normalize with Claude"}
+        <Button onClick={() => norm.mutate(value, { onSuccess: (r) => setNormalize(r.markdown) })} disabled={!value.trim() || norm.isPending} title="Paste rough notes, and AI rewrites them into a proper test plan. You review the changes before anything is replaced.">
+          <Wand2 className="size-4" />{norm.isPending ? "Rewriting…" : "Rewrite my notes as a test plan"}
         </Button>
-        <span className="ml-auto flex items-center gap-2 text-xs text-muted">
-          {isFetching ? "Validating…" : errors.length ? <><AlertCircle className="size-4 text-bad" />{errors.length} error{errors.length > 1 ? "s" : ""}</> : value.trim() ? <><CheckCircle2 className="size-4 text-ok" />Valid</> : null}
+        <span className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
+          {isFetching ? "Validating…" : errors.length ? <><AlertCircle className="size-4 text-bad" />{errors.length} problem{errors.length > 1 ? "s" : ""} to fix</> : value.trim() ? <><CheckCircle2 className="size-4 text-ok" />Valid</> : null}
         </span>
       </div>
       {norm.error && <p role="alert" className="text-sm text-bad">{norm.error.message}</p>}
 
       {(errors.length > 0 || warnings.length > 0) && (
-        <Card className="divide-y divide-line">
+        <Card className="divide-y divide-border">
           {errors.map((m, i) => <Msg key={`e${i}`} level="error" text={m} />)}
           {warnings.map((m, i) => <Msg key={`w${i}`} level="warning" text={m} />)}
         </Card>
       )}
 
       {view === "raw" ? (
-        <textarea aria-label="Playbook Markdown" className={cn(inputCls, "h-[34rem] font-mono text-xs")} value={value} onChange={(e) => onChange(e.target.value)} spellCheck={false} />
+        <textarea aria-label="Test plan text" className={cn(inputCls, "h-[34rem] font-mono text-xs")} value={value} onChange={(e) => onChange(e.target.value)} spellCheck={false} />
       ) : (
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_14rem]">
           <div className="min-w-0 space-y-4">
-            <div role="tablist" className="flex gap-1 overflow-x-auto border-b border-line">
+            <div role="tablist" className="flex gap-1 overflow-x-auto border-b border-border">
               {CATEGORIES.map((c) => (
                 <button key={c.id} role="tab" aria-selected={cat === c.id} onClick={() => setCat(c.id)}
-                  className={cn("-mb-px flex items-center gap-2 whitespace-nowrap border-b-2 px-3 py-2 text-sm", cat === c.id ? "border-accent text-foreground" : "border-transparent text-muted hover:text-foreground")}>
-                  {c.label}<span className="rounded-full bg-white/10 px-1.5 text-xs tabular-nums">{counts[c.id] ?? 0}</span>
+                  className={cn("-mb-px flex items-center gap-2 whitespace-nowrap border-b-2 px-3 py-2 text-sm", cat === c.id ? "border-brand text-foreground" : "border-transparent text-muted-foreground hover:text-foreground")}>
+                  {c.label}<span className="rounded-full bg-foreground/10 px-1.5 text-xs tabular-nums">{counts[c.id] ?? 0}</span>
                 </button>
               ))}
             </div>
-            <p className="text-sm text-muted">{CATEGORIES.find((c) => c.id === cat)!.hint}</p>
+            <p className="text-sm text-muted-foreground">{CATEGORIES.find((c) => c.id === cat)!.hint}</p>
             {cat === "requirement" && <PrdExtract slug={slug} items={items} value={value} onChange={onChange} />}
             <AddCard key={cat} cat={cat} items={items} flowKeys={flowKeys} onAdd={(md) => onChange(insertItem(value, CATEGORIES.find((c) => c.id === cat)!.heading, md))} />
             <div className="space-y-2">
-              <h3 className="text-xs font-medium uppercase tracking-wide text-muted">Existing items</h3>
+              <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Already in this test plan</h3>
               {items.filter((i) => i.category === cat).map((i) => (
                 <Card key={i.key} className="space-y-1 p-3 text-sm">
                   <div className="flex items-center gap-2"><Badge tone="accent">{i.key}</Badge><span className="font-medium">{i.title}</span>
-                    <button className="ml-auto text-muted hover:text-bad" aria-label={`Remove ${i.key}`} onClick={() => onChange(removeItem(value, i.key))}><Trash2 className="size-4" /></button></div>
+                    <button className="ml-auto text-muted-foreground hover:text-bad" aria-label={`Remove ${i.key}`} onClick={() => onChange(removeItem(value, i.key))}><Trash2 className="size-4" /></button></div>
                   <Summary item={i} />
                 </Card>
               ))}
-              {!counts[cat] && <div className="text-sm text-muted">None yet.</div>}
+              {!counts[cat] && <div className="text-sm text-muted-foreground">Nothing here yet. Use the form above to add the first one.</div>}
             </div>
           </div>
           <aside className="space-y-3">
-            <h3 className="text-xs font-medium uppercase tracking-wide text-muted">Coverage</h3>
+            <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Is every requirement tested?</h3>
             <Card className="space-y-2 p-3 text-sm">
-              {uncovered.length === 0 ? <div className="flex items-center gap-2 text-ok"><CheckCircle2 className="size-4" />Every requirement is covered</div> : (
-                <><div className="text-warn">{uncovered.length} requirement{uncovered.length > 1 ? "s" : ""} nothing covers:</div>
+              {uncovered.length === 0 ? <div className="flex items-center gap-2 text-ok"><CheckCircle2 className="size-4" />Yes, every requirement is tested</div> : (
+                <><div className="text-warn">{uncovered.length} requirement{uncovered.length > 1 ? "s" : ""} no journey tests yet:</div>
                   <div className="flex flex-wrap gap-1">{uncovered.map((r) => <Badge key={r} tone="warn">{r}</Badge>)}</div></>
               )}
             </Card>
@@ -113,7 +114,7 @@ function Summary({ item }: { item: { category: string; body: Record<string, any>
   for (const k of ["prd_ref", "acceptance", "priority", "severity", "covers", "checks", "verifies", "rule", "check", "targets", "pattern", "max_ms", "question", "note", "wait_for", "ignore_console", "applies_to", "expect", "test_data", "scope", "context"]) add(k, b[k]);
   if (item.category === "flow") { add("steps", `${b.steps?.length ?? 0}`); add("expectations", `${b.expect?.length ?? 0}`); }
   if (item.category === "reasoning_example") add("strategy", `${b.strategy?.length ?? 0} steps`);
-  return <dl className="grid grid-cols-[7rem_1fr] gap-x-3 gap-y-0.5 text-xs">{bits.map(([k, val]) => <><dt key={k} className="text-muted">{k}</dt><dd key={k + "v"} className="break-words font-mono">{val}</dd></>)}</dl>;
+  return <dl className="grid grid-cols-[7rem_1fr] gap-x-3 gap-y-0.5 text-xs">{bits.map(([k, val]) => <><dt key={k} className="text-muted-foreground">{k}</dt><dd key={k + "v"} className="break-words font-mono">{val}</dd></>)}</dl>;
 }
 
 function AddCard({ cat, items, flowKeys, onAdd }: { cat: Category; items: { key: string }[]; flowKeys: string[]; onAdd: (md: string) => void }) {
@@ -148,7 +149,7 @@ function AddCard({ cat, items, flowKeys, onAdd }: { cat: Category; items: { key:
       <div className="flex justify-end">
         <Button variant="primary" disabled={missing.length > 0} title={missing.length ? `Needs: ${missing.map((m) => m.label).join(", ")}` : undefined}
           onClick={() => { onAdd(itemMarkdown(cat, nextKey(items.map((i) => i.key), prefix), v)); setV(init()); }}>
-          <Plus className="size-4" />Add to playbook
+          <Plus className="size-4" />Add to test plan
         </Button>
       </div>
     </Card>
@@ -162,16 +163,16 @@ function PrdExtract({ slug, items, value, onChange }: { slug: string; items: { k
   return (
     <Card className="space-y-3 p-4">
       <div className="flex items-center gap-2">
-        <div className="font-medium">Extract from the PRD</div>
-        <Button className="ml-auto" onClick={() => { setAccepted(new Set()); extract.mutate(); }} disabled={extract.isPending}><Sparkles className="size-4" />{extract.isPending ? "Reading PRD…" : "Propose requirements"}</Button>
+        <div><div className="font-medium">Suggest from your product document</div><p className="text-xs text-muted-foreground">AI reads the document saved in Settings and proposes requirements, each with a quote from it. You accept the ones you want.</p></div>
+        <Button className="ml-auto" onClick={() => { setAccepted(new Set()); extract.mutate(); }} disabled={extract.isPending}><Sparkles className="size-4" />{extract.isPending ? "Reading…" : "Suggest requirements"}</Button>
       </div>
       {extract.error && <p role="alert" className="text-sm text-bad">{extract.error.message}</p>}
       {proposals.map((p) => (
-        <div key={p.key} className="flex items-start gap-3 rounded-lg border border-line p-3 text-sm">
+        <div key={p.key} className="flex items-start gap-3 rounded-lg border border-border p-3 text-sm">
           <div className="min-w-0 flex-1 space-y-1">
-            <div className="font-medium">{p.title} <span className="text-xs text-muted">({p.prd_ref}, {p.priority})</span></div>
-            <div className="text-muted">{p.acceptance}</div>
-            <div className="border-l-2 border-line pl-2 text-xs italic text-muted">“{p.quote}”</div>
+            <div className="font-medium">{p.title} <span className="text-xs text-muted-foreground">({p.prd_ref}, {p.priority})</span></div>
+            <div className="text-muted-foreground">{p.acceptance}</div>
+            <div className="border-l-2 border-border pl-2 text-xs italic text-muted-foreground">“{p.quote}”</div>
           </div>
           <Button disabled={accepted.has(p.key)} onClick={() => {
             const key = nextKey([...items.map((i) => i.key), ...[...accepted].map((k) => k)], "REQ-");
@@ -180,7 +181,7 @@ function PrdExtract({ slug, items, value, onChange }: { slug: string; items: { k
           }}>{accepted.has(p.key) ? "Added" : "Accept"}</Button>
         </div>
       ))}
-      {extract.isSuccess && !proposals.length && <p className="text-sm text-muted">No requirements in the PRD that its own text supports.</p>}
+      {extract.isSuccess && !proposals.length && <p className="text-sm text-muted-foreground">No requirements in the PRD that its own text supports.</p>}
     </Card>
   );
 }
@@ -188,14 +189,17 @@ function PrdExtract({ slug, items, value, onChange }: { slug: string; items: { k
 function DiffDialog({ before, after, onAccept, onClose }: { before: string; after: string; onAccept: () => void; onClose: () => void }) {
   const d = useMemo(() => diffLines(before, after), [before, after]);
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
-      <div role="dialog" aria-label="Normalized playbook" className="flex max-h-[85vh] w-full max-w-4xl flex-col rounded-xl border border-line bg-background" onClick={(e) => e.stopPropagation()}>
-        <div className="border-b border-line p-4"><div className="font-medium">Review the normalized playbook</div><p className="text-sm text-muted">Claude rewrote your text into the playbook format. Nothing changes until you accept.</p></div>
-        <pre className="flex-1 overflow-auto p-2 font-mono text-xs leading-5">
-          {d.map((l, i) => <div key={i} className={cn("whitespace-pre-wrap break-all px-2", l.type === "add" && "bg-ok/15 text-ok", l.type === "del" && "bg-bad/15 text-bad line-through")}>{l.type === "add" ? "+ " : l.type === "del" ? "- " : "  "}{l.text}</div>)}
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="flex max-h-[85vh] flex-col gap-3 sm:max-w-4xl" aria-label="Normalized playbook">
+        <DialogHeader>
+          <DialogTitle>Review the rewritten test plan</DialogTitle>
+          <DialogDescription>Claude rewrote your text into the playbook format. Green lines are added, red lines are removed. Nothing changes until you accept.</DialogDescription>
+        </DialogHeader>
+        <pre className="flex-1 overflow-auto rounded-lg border bg-code p-2 font-mono text-xs leading-5">
+          {d.map((l, i) => <div key={i} className={cn("whitespace-pre-wrap break-all px-2", l.type === "add" && "bg-ok-soft text-ok", l.type === "del" && "bg-bad-soft text-bad line-through")}>{l.type === "add" ? "+ " : l.type === "del" ? "- " : "  "}{l.text}</div>)}
         </pre>
-        <div className="flex justify-end gap-2 border-t border-line p-4"><Button onClick={onClose}>Keep mine</Button><Button variant="primary" onClick={onAccept}>Use normalized version</Button></div>
-      </div>
-    </div>
+        <DialogFooter><Button onClick={onClose}>Keep mine</Button><Button variant="primary" onClick={onAccept}>Use the rewritten version</Button></DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

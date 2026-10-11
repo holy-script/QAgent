@@ -16,23 +16,23 @@ export default function NewApp() {
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
-      <h1 className="text-2xl font-semibold tracking-tight">New app</h1>
+      <div><h1 className="text-2xl font-semibold tracking-tight">Add an app</h1><p className="mt-1 text-sm text-muted-foreground">Tell QAgent where your app lives. You can add test plans and run tests on the next screen.</p></div>
       <Card className="p-6">
         <form className="space-y-5" onSubmit={async (e) => {
           e.preventDefault();
           const app = await create.mutateAsync({ ...f, name: f.name.trim() });
           router.push(`/apps/${app.slug}`);
         }}>
-          <Field label="Name"><input className={inputCls} value={f.name} onChange={set("name")} placeholder="Demo Shop" required autoFocus /></Field>
-          <Field label="Base URL" hint="Runs may only visit this host (plus any allowed hosts you add later).">
+          <Field label="Name" hint="Any name you will recognise, e.g. “Online shop (staging)”."><input className={inputCls} value={f.name} onChange={set("name")} placeholder="Demo Shop" required autoFocus /></Field>
+          <Field label="Website address" hint="Where QAgent starts. For safety, test runs can only visit this site (and any extra sites you allow in Settings).">
             <input className={inputCls} value={f.base_url} onChange={set("base_url")} inputMode="url" required />
             {f.base_url && urlError && <span className="block text-xs text-bad">{urlError}</span>}
           </Field>
-          <Field label="Description"><textarea className={inputCls} rows={3} value={f.description} onChange={set("description")} placeholder="What does this app do?" /></Field>
+          <Field label="What does it do? (optional)"><textarea className={inputCls} rows={3} value={f.description} onChange={set("description")} placeholder="A short description for your teammates" /></Field>
           {create.error && <p role="alert" className="text-sm text-bad">{create.error.message}</p>}
           <div className="flex justify-end gap-2">
             <Button type="button" onClick={() => router.back()}>Cancel</Button>
-            <Button type="submit" variant="primary" disabled={!valid || create.isPending}>{create.isPending ? "Creating…" : "Create app"}</Button>
+            <Button type="submit" variant="primary" disabled={!valid || create.isPending}>{create.isPending ? "Adding…" : "Add app"}</Button>
           </div>
         </form>
       </Card>

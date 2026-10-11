@@ -5,12 +5,9 @@ import { useState } from "react";
 import { Button, Card, cn } from "@/components/ui";
 import { usePlaybooks, useStartRun } from "@/lib/api/hooks";
 import type { Mode } from "@/lib/api/types";
+import { MODE_INFO } from "@/lib/terms";
 
-const MODES: { id: Mode; label: string; hint: string }[] = [
-  { id: "hybrid", label: "Hybrid", hint: "Jev decides, Claude on escalation" },
-  { id: "baseline", label: "Baseline", hint: "Claude on every step" },
-  { id: "stub", label: "Stub", hint: "No models, scripted" },
-];
+const MODES = (Object.keys(MODE_INFO) as Mode[]).map((id) => ({ id, ...MODE_INFO[id] }));
 
 export function RunLauncher({ slug }: { slug: string }) {
   const router = useRouter();
@@ -23,23 +20,23 @@ export function RunLauncher({ slug }: { slug: string }) {
 
   return (
     <Card className="space-y-4 p-5">
-      <div className="font-medium">Start a run</div>
+      <div><div className="font-medium">Run a test</div><p className="text-sm text-muted-foreground">QAgent opens a browser and works through your test plan. This usually takes under a minute.</p></div>
       {!pbs ? (
-        <p className="text-sm text-muted">Loading playbooks…</p>
+        <p className="text-sm text-muted-foreground">Loading your test plans…</p>
       ) : !pb ? (
-        <p className="text-sm text-muted">Confirm a playbook first. Draft playbooks can&apos;t be run.</p>
+        <p className="text-sm text-muted-foreground">You need a test plan first. A test plan says what to check. Open the Test plans tab to add one.</p>
       ) : (
         <>
-          <select aria-label="Playbook" value={pb.id} onChange={(e) => setPick(e.target.value)}
-            className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2 text-sm">
+          <select aria-label="Test plan" value={pb.id} onChange={(e) => setPick(e.target.value)}
+            className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm">
             {confirmed.map((p) => <option key={p.id} value={p.id}>{p.name} (v{p.versions[0].version_no})</option>)}
           </select>
-          <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Mode">
+          <div className="grid gap-2" role="radiogroup" aria-label="How should decisions be made?">
             {MODES.map((m) => (
               <button key={m.id} role="radio" aria-checked={mode === m.id} onClick={() => setMode(m.id)}
-                className={cn("rounded-lg border p-2.5 text-left transition", mode === m.id ? "border-accent bg-accent/10" : "border-line hover:bg-white/5")}>
-                <div className="text-sm font-medium">{m.label}</div>
-                <div className="text-xs text-muted">{m.hint}</div>
+                className={cn("rounded-lg border p-2.5 text-left transition", mode === m.id ? "border-brand bg-brand/10" : "border-border hover:bg-foreground/5")}>
+                <div className="text-sm font-medium">{m.label}{m.id === "hybrid" && <span className="ml-1.5 text-xs font-normal text-brand">recommended</span>}</div>
+                <div className="text-xs leading-snug text-muted-foreground">{m.hint}</div>
               </button>
             ))}
           </div>

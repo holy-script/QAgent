@@ -30,20 +30,20 @@ export default function ReviewPlaybook() {
         <div className="flex flex-wrap items-center gap-3">
           <h2 className="text-lg font-medium">{pb.name}</h2>
           <StatusPill status={isCurrent ? pb.status : "draft"} />
-          <Badge>v{v.version_no}</Badge>
+          <Badge>Version {v.version_no}</Badge>
           <div className="ml-auto flex gap-2">
-            {draft === null ? <Button onClick={() => setDraft(v.raw_markdown)}>Edit</Button> : (
+            {draft === null ? <Button onClick={() => setDraft(v.raw_markdown)}>Edit test plan</Button> : (
               <>
                 <Button onClick={() => setDraft(null)}>Discard</Button>
                 <Button variant="primary" disabled={save.isPending || draft === v.raw_markdown || (validation?.errors?.length ?? 0) > 0}
                   onClick={() => save.mutate({ markdown: draft, playbookId: pb.id }, { onSuccess: () => { setDraft(null); setSel(undefined); } })}>
-                  Save as v{pb.versions.length + 1}
+                  Save as version {pb.versions.length + 1}
                 </Button>
               </>
             )}
             <Button variant="primary" disabled={!isCurrent || pb.status === "confirmed" || errors.length > 0 || confirm.isPending || draft !== null}
-              title={errors.length ? "Fix parse errors first" : undefined} onClick={() => confirm.mutate(pb.id)}>
-              <CheckCircle2 className="size-4" />Confirm
+              title={errors.length ? "Fix the problems listed above first" : undefined} onClick={() => confirm.mutate(pb.id)}>
+              <CheckCircle2 className="size-4" />Mark ready
             </Button>
           </div>
         </div>
@@ -51,11 +51,11 @@ export default function ReviewPlaybook() {
         {save.error && <p role="alert" className="whitespace-pre-line text-sm text-bad">{save.error.message}</p>}
 
         {v.warnings.length > 0 && (
-          <Card className="divide-y divide-line">
+          <Card className="divide-y divide-border">
             {v.warnings.map((w, i) => (
               <div key={i} className="flex items-start gap-2 px-4 py-2 text-sm">
                 {w.level === "error" ? <AlertCircle className="mt-0.5 size-4 shrink-0 text-bad" /> : <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warn" />}
-                {w.line > 0 && <span className="text-muted">Line {w.line}</span>}<span>{w.message}</span>
+                {w.line > 0 && <span className="text-muted-foreground">Line {w.line}</span>}<span>{w.message}</span>
               </div>
             ))}
           </Card>
@@ -63,11 +63,11 @@ export default function ReviewPlaybook() {
 
         <div className="grid gap-4 xl:grid-cols-2">
           <Card className={cn("overflow-hidden", draft !== null && !USE_MOCK && "xl:col-span-2")}>
-            <div className="border-b border-line px-4 py-2 text-xs uppercase tracking-wide text-muted">{draft === null ? "Markdown" : "Editing"}</div>
+            <div className="border-b border-border px-4 py-2 text-xs uppercase tracking-wide text-muted-foreground">{draft === null ? "The test plan, as text" : "Editing"}</div>
             {draft !== null && !USE_MOCK ? (
               <div className="p-3"><PlaybookEditor value={draft} onChange={setDraft} slug={slug} onValidation={setValidation} /></div>
             ) : draft !== null ? (
-              <textarea aria-label="Edit Markdown" className={cn(inputCls, "h-[32rem] rounded-none border-0 font-mono text-xs")} value={draft} onChange={(e) => setDraft(e.target.value)} spellCheck={false} />
+              <textarea aria-label="Edit test plan text" className={cn(inputCls, "h-[32rem] rounded-none border-0 font-mono text-xs")} value={draft} onChange={(e) => setDraft(e.target.value)} spellCheck={false} />
             ) : (
               <pre className="max-h-[32rem] overflow-auto py-2 font-mono text-xs leading-5">
                 {v.raw_markdown.split("\n").map((line, i) => {
@@ -75,7 +75,7 @@ export default function ReviewPlaybook() {
                   const bad = w.some((x) => x.level === "error");
                   return (
                     <div key={i} className={cn(w.length > 0 && (bad ? "bg-bad/10" : "bg-warn/10"))}>
-                      <div className="flex"><span className="w-10 shrink-0 select-none pr-3 text-right text-muted/60">{i + 1}</span><code className="whitespace-pre-wrap break-all">{line || " "}</code></div>
+                      <div className="flex"><span className="w-10 shrink-0 select-none pr-3 text-right text-muted-foreground/60">{i + 1}</span><code className="whitespace-pre-wrap break-all">{line || " "}</code></div>
                       {w.map((x, k) => <div key={k} className={cn("pl-10 text-[11px]", bad ? "text-bad" : "text-warn")}>↳ {x.message}</div>)}
                     </div>
                   );
@@ -84,29 +84,29 @@ export default function ReviewPlaybook() {
             )}
           </Card>
           <div className="space-y-3">
-            <div className="text-xs uppercase tracking-wide text-muted">Parsed · {v.parsed.flows.length} flows{v.parsed.base_url && ` · ${v.parsed.base_url}`}</div>
-            {!v.parsed.flows.length && <Card className="p-4 text-sm text-muted">No flows parsed yet.</Card>}
+            <div className="text-xs uppercase tracking-wide text-muted-foreground">What QAgent understood · {v.parsed.flows.length} journey{v.parsed.flows.length === 1 ? "" : "s"}{v.parsed.base_url && ` · starts at ${v.parsed.base_url}`}</div>
+            {!v.parsed.flows.length && <Card className="p-4 text-sm text-muted-foreground">No journeys found yet. A journey starts with “### Flow: name” and lists numbered steps.</Card>}
             {v.parsed.flows.map((f) => (
               <Card key={f.key} className="space-y-3 p-4 text-sm">
                 <div className="flex items-center gap-2"><span className="font-medium">{f.key}</span><SeverityBadge severity={f.severity} /></div>
                 <List title="Steps" items={f.steps} ordered />
-                <List title="Expect" items={f.expect} />
+                <List title="Should be true afterwards" items={f.expect} />
                 {f.formulas.map((fo) => (
-                  <div key={fo.name}><div className="text-xs text-muted">Formula · {fo.name} · {fo.source}</div><code className="mt-1 block rounded bg-black/30 p-2 text-xs">{fo.expr}</code></div>
+                  <div key={fo.name}><div className="text-xs text-muted-foreground">Calculation to check · {fo.name}</div><code className="mt-1 block rounded bg-muted p-2 text-xs">{fo.expr}</code></div>
                 ))}
-                <List title="Edge cases" items={f.edge_cases} />
+                <List title="Unusual cases" items={f.edge_cases} />
               </Card>
             ))}
           </div>
         </div>
       </div>
       <aside className="space-y-2">
-        <div className="flex items-center gap-2 text-sm font-medium"><History className="size-4" />Versions</div>
+        <div className="flex items-center gap-2 text-sm font-medium"><History className="size-4" />Earlier versions</div>
         {pb.versions.map((x: PlaybookVersion) => (
           <button key={x.id} onClick={() => { setSel(x.id); setDraft(null); }}
-            className={cn("w-full rounded-lg border p-3 text-left text-sm transition", x.id === v.id ? "border-accent bg-accent/10" : "border-line hover:bg-white/5")}>
-            <div className="flex items-center justify-between"><span>v{x.version_no}</span>{x.id === pb.current_version_id && <Badge tone="ok">current</Badge>}</div>
-            <div className="mt-0.5 text-xs text-muted">{ago(x.created_at)} · {x.content_hash.slice(0, 7)}</div>
+            className={cn("w-full rounded-lg border p-3 text-left text-sm transition", x.id === v.id ? "border-brand bg-brand/10" : "border-border hover:bg-foreground/5")}>
+            <div className="flex items-center justify-between"><span>Version {x.version_no}</span>{x.id === pb.current_version_id && <Badge tone="ok">in use</Badge>}</div>
+            <div className="mt-0.5 text-xs text-muted-foreground">{ago(x.created_at)} · {x.content_hash.slice(0, 7)}</div>
           </button>
         ))}
       </aside>
@@ -119,7 +119,7 @@ function List({ title, items, ordered }: { title: string; items: string[]; order
   const L = ordered ? "ol" : "ul";
   return (
     <div>
-      <div className="text-xs text-muted">{title}</div>
+      <div className="text-xs text-muted-foreground">{title}</div>
       <L className={cn("mt-1 space-y-0.5 pl-5 text-sm", ordered ? "list-decimal" : "list-disc")}>{items.map((s, i) => <li key={i}>{s}</li>)}</L>
     </div>
   );

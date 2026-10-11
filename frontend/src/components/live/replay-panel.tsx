@@ -21,18 +21,18 @@ export function ReplayPanel({ slug, runId, onClose }: { slug: string; runId: str
   return (
     <Card className="space-y-4 p-5">
       <div>
-        <div className="font-medium">Re-run from tape</div>
-        <p className="text-sm text-muted">Every model answer comes from this run&apos;s recorded decisions, so the browser runs again against the app with the same choices. A divergence event is raised when a page no longer matches the recording.</p>
+        <div className="font-medium">Repeat this run exactly</div>
+        <p className="text-sm text-muted-foreground">QAgent re-runs the test using the AI answers it recorded last time, so the browser makes the same choices. Use this to check that a fix works. If a page looks different from last time, the run notes it.</p>
       </div>
       <div className="grid gap-4 md:grid-cols-3">
-        <Field label="Auto gate minimum" hint="Default 0.75"><input className={inputCls} inputMode="decimal" value={auto} onChange={(e) => setAuto(e.target.value)} placeholder="0.75" /></Field>
-        <Field label="Escalate gate minimum" hint="Default 0.45"><input className={inputCls} inputMode="decimal" value={esc} onChange={(e) => setEsc(e.target.value)} placeholder="0.45" /></Field>
-        <label className="flex items-start gap-2 pt-6 text-sm"><input type="checkbox" className="mt-1" checked={fallback} onChange={(e) => setFallback(e.target.checked)} />Use the live model for steps missing from the tape</label>
+        <Field label="Act without double-checking above" hint="Confidence from 0 to 1. Default 0.75"><input className={inputCls} inputMode="decimal" value={auto} onChange={(e) => setAuto(e.target.value)} placeholder="0.75" /></Field>
+        <Field label="Stop instead of guessing below" hint="Confidence from 0 to 1. Default 0.45"><input className={inputCls} inputMode="decimal" value={esc} onChange={(e) => setEsc(e.target.value)} placeholder="0.45" /></Field>
+        <label className="flex items-start gap-2 pt-6 text-sm"><input type="checkbox" className="mt-1" checked={fallback} onChange={(e) => setFallback(e.target.checked)} />Ask the live AI for steps that were not recorded last time</label>
       </div>
       {replay.error && <p role="alert" className="text-sm text-bad">{replay.error.message}</p>}
       <div className="flex justify-end gap-2">
         <Button onClick={onClose}>Cancel</Button>
-        <Button variant="primary" onClick={go} disabled={replay.isPending}>{replay.isPending ? "Starting…" : "Start replay run"}</Button>
+        <Button variant="primary" onClick={go} disabled={replay.isPending}>{replay.isPending ? "Starting…" : "Start repeat run"}</Button>
       </div>
     </Card>
   );
