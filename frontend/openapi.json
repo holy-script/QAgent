@@ -1,0 +1,1005 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "QAgent API",
+    "description": "Backend API for QAgent autonomous web application QA platform",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/dev/events": {
+      "get": {
+        "tags": [
+          "Dev & Fixtures"
+        ],
+        "summary": "List Fixture Events",
+        "description": "Returns static array of all fixture events for testing.",
+        "operationId": "list_fixture_events_dev_events_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dev/sse-replay": {
+      "get": {
+        "tags": [
+          "Dev & Fixtures"
+        ],
+        "summary": "Sse Replay",
+        "description": "Streams recorded QA run events over SSE.\nFrontend Coder 2 connects to this to design real-time charts, telemetry, and step cards.",
+        "operationId": "sse_replay_dev_sse_replay_get",
+        "parameters": [
+          {
+            "name": "delay_ms",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 2000,
+              "minimum": 50,
+              "description": "Delay between events in milliseconds",
+              "default": 300,
+              "title": "Delay Ms"
+            },
+            "description": "Delay between events in milliseconds"
+          },
+          {
+            "name": "loop",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Whether to loop the events indefinitely",
+              "default": false,
+              "title": "Loop"
+            },
+            "description": "Whether to loop the events indefinitely"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/apps": {
+      "get": {
+        "tags": [
+          "Apps"
+        ],
+        "summary": "List Apps",
+        "operationId": "list_apps_apps_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AppResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Apps Apps Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Apps"
+        ],
+        "summary": "Create App",
+        "operationId": "create_app_apps_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAppRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/apps/{slug}": {
+      "get": {
+        "tags": [
+          "Apps"
+        ],
+        "summary": "Get App",
+        "operationId": "get_app_apps__slug__get",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs": {
+      "get": {
+        "tags": [
+          "Runs"
+        ],
+        "summary": "List Runs",
+        "operationId": "list_runs_runs_get",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "App Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RunResponse"
+                  },
+                  "title": "Response List Runs Runs Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Runs"
+        ],
+        "summary": "Create Run",
+        "operationId": "create_run_runs_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRunRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{run_id}": {
+      "get": {
+        "tags": [
+          "Runs"
+        ],
+        "summary": "Get Run",
+        "operationId": "get_run_runs__run_id__get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{run_id}/stop": {
+      "post": {
+        "tags": [
+          "Runs"
+        ],
+        "summary": "Stop Run",
+        "operationId": "stop_run_runs__run_id__stop_post",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/playbooks": {
+      "get": {
+        "tags": [
+          "Playbooks"
+        ],
+        "summary": "List Playbooks",
+        "operationId": "list_playbooks_playbooks_get",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "App Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlaybookResponse"
+                  },
+                  "title": "Response List Playbooks Playbooks Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/playbooks/{playbook_id}": {
+      "get": {
+        "tags": [
+          "Playbooks"
+        ],
+        "summary": "Get Playbook",
+        "operationId": "get_playbook_playbooks__playbook_id__get",
+        "parameters": [
+          {
+            "name": "playbook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Playbook Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaybookResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Health Check",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/artifacts/{run_id}/steps/{step_seq}/screenshot.jpg": {
+      "get": {
+        "tags": [
+          "Artifacts"
+        ],
+        "summary": "Get Mock Screenshot",
+        "operationId": "get_mock_screenshot_artifacts__run_id__steps__step_seq__screenshot_jpg_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "step_seq",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Step Seq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Root",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AppResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "base_url": {
+            "type": "string",
+            "title": "Base Url"
+          },
+          "allowed_hosts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Allowed Hosts"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "prd_markdown": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prd Markdown"
+          },
+          "default_mode": {
+            "$ref": "#/components/schemas/RunMode"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "base_url",
+          "allowed_hosts",
+          "default_mode",
+          "created_at"
+        ],
+        "title": "AppResponse"
+      },
+      "CreateAppRequest": {
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "base_url": {
+            "type": "string",
+            "title": "Base Url"
+          },
+          "allowed_hosts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Allowed Hosts"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "prd_markdown": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prd Markdown"
+          },
+          "default_mode": {
+            "$ref": "#/components/schemas/RunMode",
+            "default": "hybrid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slug",
+          "name",
+          "base_url"
+        ],
+        "title": "CreateAppRequest"
+      },
+      "CreateRunRequest": {
+        "properties": {
+          "app_id": {
+            "type": "string",
+            "title": "App Id"
+          },
+          "playbook_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Playbook Id"
+          },
+          "playbook_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Playbook Version Id"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/RunMode",
+            "default": "hybrid"
+          },
+          "trigger": {
+            "type": "string",
+            "title": "Trigger",
+            "default": "manual"
+          },
+          "step_budget": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Step Budget"
+          },
+          "time_budget_s": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Time Budget S"
+          }
+        },
+        "type": "object",
+        "required": [
+          "app_id"
+        ],
+        "title": "CreateRunRequest"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "jev_reachable": {
+            "type": "boolean",
+            "title": "Jev Reachable"
+          },
+          "bedrock_reachable": {
+            "type": "boolean",
+            "title": "Bedrock Reachable"
+          },
+          "postgres_reachable": {
+            "type": "boolean",
+            "title": "Postgres Reachable"
+          },
+          "storage_reachable": {
+            "type": "boolean",
+            "title": "Storage Reachable"
+          },
+          "active_model": {
+            "type": "string",
+            "title": "Active Model"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "jev_reachable",
+          "bedrock_reachable",
+          "postgres_reachable",
+          "storage_reachable",
+          "active_model"
+        ],
+        "title": "HealthResponse"
+      },
+      "PlaybookResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "app_id": {
+            "type": "string",
+            "title": "App Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "current_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Version Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "flows": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Flows"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "app_id",
+          "name",
+          "status"
+        ],
+        "title": "PlaybookResponse"
+      },
+      "RunMode": {
+        "type": "string",
+        "enum": [
+          "hybrid",
+          "baseline",
+          "stub"
+        ],
+        "title": "RunMode"
+      },
+      "RunResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "app_id": {
+            "type": "string",
+            "title": "App Id"
+          },
+          "playbook_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Playbook Version Id"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/RunMode"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "trigger": {
+            "type": "string",
+            "title": "Trigger"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/RunTotals"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "app_id",
+          "mode",
+          "status",
+          "trigger"
+        ],
+        "title": "RunResponse"
+      },
+      "RunTotals": {
+        "properties": {
+          "total_steps": {
+            "type": "integer",
+            "title": "Total Steps",
+            "default": 0
+          },
+          "duration_ms": {
+            "type": "number",
+            "title": "Duration Ms",
+            "default": 0.0
+          },
+          "jev_decisions": {
+            "type": "integer",
+            "title": "Jev Decisions",
+            "default": 0
+          },
+          "claude_decisions": {
+            "type": "integer",
+            "title": "Claude Decisions",
+            "default": 0
+          },
+          "total_cost_usd": {
+            "type": "number",
+            "title": "Total Cost Usd",
+            "default": 0.0
+          },
+          "avg_decision_latency_ms": {
+            "type": "number",
+            "title": "Avg Decision Latency Ms",
+            "default": 0.0
+          },
+          "findings_count": {
+            "type": "integer",
+            "title": "Findings Count",
+            "default": 0
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "pending"
+          }
+        },
+        "type": "object",
+        "title": "RunTotals"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
