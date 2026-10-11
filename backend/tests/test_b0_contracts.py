@@ -42,6 +42,6 @@ async def test_list_apps(mem_sessions, monkeypatch):
 @pytest.mark.asyncio
 async def test_list_runs():
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-        response = await ac.get("/runs")
+        response = await ac.get("/apps/demo-shop/runs")
         assert response.status_code == 200
         assert isinstance(response.json(), list)

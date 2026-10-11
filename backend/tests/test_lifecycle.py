@@ -19,7 +19,7 @@ from qagent.storage import upload_queue as uq
 
 ALL_TABLES = [m.Run, m.FlowRun, m.Step, m.StepTiming, m.Decision, m.FindingRecord, m.EvidenceLink, m.CheckResult,
               m.NetworkCallRecord, m.Artifact, m.SpanRecord, m.LogEntryRecord, m.EventRecord, m.Report, m.Issue,
-              m.Playbook, m.PlaybookVersion, m.PlaybookItem, m.ItemLink]
+              m.Playbook, m.PlaybookVersion, m.PlaybookItem, m.ItemLink, m.ModelCall]
 
 
 @pytest_asyncio.fixture

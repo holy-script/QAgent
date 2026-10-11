@@ -39,17 +39,11 @@ def _version_out(v: PlaybookVersion) -> PlaybookVersionResponse:
     )
 
 
-@router.get("/playbooks", response_model=List[PlaybookResponse])
-async def list_playbooks(app_id: Optional[str] = None, session: AsyncSession = Depends(get_session)):
-    stmt = select(Playbook)
-    if app_id:
-        stmt = stmt.where(Playbook.app_id == app_id)
-    return [_out(p, await _current_version(session, p)) for p in (await session.execute(stmt)).scalars().all()]
-
-
 @router.get("/apps/{app_id}/playbooks", response_model=List[PlaybookResponse])
 async def list_app_playbooks(app_id: str, session: AsyncSession = Depends(get_session)):
-    return await list_playbooks(await resolve_app_id(session, app_id), session)
+    app_id = await resolve_app_id(session, app_id)
+    stmt = select(Playbook).where(Playbook.app_id == app_id)
+    return [_out(p, await _current_version(session, p)) for p in (await session.execute(stmt)).scalars().all()]
 
 
 @router.post("/playbooks/validate", response_model=PlaybookValidationResponse)
@@ -114,11 +108,6 @@ async def add_playbook_version(playbook_id: str, payload: CreatePlaybookRequest,
     if pb is None:
         raise HTTPException(status_code=404, detail="Playbook not found")
     return await _upload(pb.app_id, payload.model_copy(update={"name": pb.name}), session)
-
-
-@router.post("/playbooks", response_model=PlaybookUploadResponse, status_code=201)
-async def upload_playbook(payload: CreatePlaybookRequest, session: AsyncSession = Depends(get_session)):
-    return await _upload(payload.app_id, payload, session)
 
 
 @router.post("/playbooks/normalize", response_model=NormalizeResponse)

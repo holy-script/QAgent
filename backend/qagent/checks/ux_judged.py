@@ -1,8 +1,9 @@
-from dataclasses import dataclass
+import time
+from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional
 
 from qagent.config import settings
-from qagent.decision.claude import BedrockClient
+from qagent.decision.claude import BedrockClient, usage_cost
 from qagent.decision.fewshot import example_ids, render_examples
 from qagent.decision.jev import JevDecider
 
@@ -31,6 +32,18 @@ class Verdict:
     confidence: float
     reasoning: str = ""
     few_shot_ids: Optional[List[str]] = None
+    model_version: str = ""
+    latency_ms: float = 0.0
+    input_tokens: int = 0
+    output_tokens: int = 0
+    cost_usd: float = 0.0
+
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, d: Dict[str, Any]) -> "Verdict":
+        return cls(**{k: v for k, v in d.items() if k in cls.__dataclass_fields__})
 
 
 class Judge:
@@ -63,7 +76,9 @@ class Judge:
             json=payload,
         )
         p = float(data["answers"]["answer"]["noul"])
-        return Verdict(p >= 0.5, p, "jev", abs(p - 0.5) * 2)
+        usage = data.get("usage", {})
+        return Verdict(p >= 0.5, p, "jev", abs(p - 0.5) * 2, model_version=self.jev.model,
+                       input_tokens=usage.get("input_tokens", 0), output_tokens=usage.get("output_tokens", 0))
 
     async def _claude(self, question: str, page_text: str, hints: List[str], examples: List[Dict[str, Any]],
                       screenshots: List[bytes]) -> Verdict:
@@ -79,15 +94,25 @@ class Judge:
         a = out["input"]
         yes = bool(a["answer"])
         conf = max(0.0, min(1.0, float(a.get("confidence", 0.5))))
+        usage = out.get("usage", {})
         return Verdict(yes, conf if yes else 1 - conf, "claude", conf, a.get("reasoning", ""),
-                       few_shot_ids=example_ids(examples))
+                       few_shot_ids=example_ids(examples), model_version=self.claude.model_id,
+                       input_tokens=usage.get("inputTokens", 0), output_tokens=usage.get("outputTokens", 0),
+                       cost_usd=usage_cost(usage))
 
     async def ask(self, question: str, page_text: str, screenshots: Optional[List[bytes]] = None,
                   hints: Optional[List[str]] = None, examples: Optional[List[Dict[str, Any]]] = None) -> Verdict:
         hints, examples, screenshots = hints or [], examples or [], screenshots or []
+        started = time.perf_counter()
         first: Optional[Verdict] = None
         if self.jev:
             first = await self._jev(question, page_text, hints)
             if first.confidence >= settings.gate_auto_min or not self.claude:
+                first.latency_ms = (time.perf_counter() - started) * 1000.0
                 return first
-        return await self._claude(question, page_text, hints, examples, screenshots)
+        verdict = await self._claude(question, page_text, hints, examples, screenshots)
+        if first:  # the escalation paid for both answers
+            verdict.input_tokens += first.input_tokens
+            verdict.output_tokens += first.output_tokens
+        verdict.latency_ms = (time.perf_counter() - started) * 1000.0
+        return verdict

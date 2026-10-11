@@ -8,6 +8,7 @@ from sqlmodel import delete, select
 
 from qagent.config import settings
 from qagent.decision.claude import BedrockClient
+from qagent.decision.ledger import LedgerClient
 from qagent.domain import models as m
 from qagent.domain.events import QAgentEventType
 from qagent.domain.schemas import RunMode
@@ -85,6 +86,47 @@ def _store_report(session: AsyncSession, run: m.Run, report: m.Report, content: 
     report.html_artifact_id = _add_artifact(session, run, f"{base}.html", html, "text/html", "report_html").id
 
 
+REPORT_PURPOSES = ("report", "bug_narrative")
+
+
+async def _with_ledger(session: AsyncSession, session_factory, run: m.Run,
+                       claude: Optional[BedrockClient]) -> Optional[LedgerClient]:
+    """Wraps Claude so every report call is recorded (and costed). A replayed run serves the source run's answers."""
+    if claude is None:
+        return None
+    # Regenerating replaces the earlier report calls of this run.
+    await session.execute(delete(m.ModelCall).where(m.ModelCall.run_id == run.id, m.ModelCall.purpose.in_(REPORT_PURPOSES)))
+    await session.commit()
+    tape = None
+    if run.replay_of_run_id:
+        rows = (await session.execute(select(m.ModelCall).where(
+            m.ModelCall.run_id == run.replay_of_run_id, m.ModelCall.purpose.in_(REPORT_PURPOSES)))).scalars().all()
+        tape = {c.input_hash: c.response for c in rows if c.input_hash and c.response and not c.replayed}
+
+    async def record(call: Dict[str, Any]) -> None:
+        async with session_factory() as s:
+            s.add(m.ModelCall(run_id=run.id, **call))
+            await s.commit()
+
+    return LedgerClient(claude, record, tape)
+
+
+async def _roll_up_report_cost(session_factory, run_id: str) -> None:
+    """Adds what the report calls cost to the run's total (kept separate so regenerating never double counts)."""
+    async with session_factory() as session:
+        run = await session.get(m.Run, run_id)
+        calls = (await session.execute(select(m.ModelCall).where(
+            m.ModelCall.run_id == run_id, m.ModelCall.purpose.in_(REPORT_PURPOSES)))).scalars().all()
+        if run is None:
+            return
+        totals = dict(run.totals or {})
+        base = totals.get("agent_cost_usd", totals.get("total_cost_usd", 0.0))
+        cost = sum(c.cost_usd for c in calls)
+        totals.update(agent_cost_usd=base, report_calls=len(calls), report_cost_usd=cost, total_cost_usd=base + cost)
+        run.totals = totals
+        await session.commit()
+
+
 async def generate_reports(session_factory: Callable[[], AsyncSession], run_id: str,
                            claude: Optional[BedrockClient] = None,
                            on_report: Optional[Callable[[Dict[str, str]], Any]] = None) -> Dict[str, Any]:
@@ -97,6 +139,7 @@ async def generate_reports(session_factory: Callable[[], AsyncSession], run_id: 
         run = await session.get(m.Run, run_id)
         if run is None:
             raise LookupError(f"run {run_id} not found")
+        claude = await _with_ledger(session, session_factory, run, claude)
         summary = await sync_issues(session, run)
         await session.commit()
         annotated = await annotate_findings(session, run)
@@ -135,6 +178,7 @@ async def generate_reports(session_factory: Callable[[], AsyncSession], run_id: 
                 confidence=rec.get("confidence", "medium"), effort=rec.get("effort", "m")))
         _store_report(session, run, run_report, content, "run")
         await session.commit()
+        await _roll_up_report_cost(session_factory, run_id)
         run_report_id = run_report.id
     if on_report:  # events are emitted after the transaction closes, never while it holds locks
         for ref in bug_refs:

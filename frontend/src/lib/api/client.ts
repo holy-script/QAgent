@@ -39,7 +39,7 @@ async function realPlaybook(id: string): Promise<Playbook> {
 }
 async function versionNames(appId: string): Promise<Map<string, string>> {
   const names = new Map<string, string>();
-  for (const pb of await http<any[]>(`/playbooks?app_id=${encodeURIComponent(appId)}`))
+  for (const pb of await http<any[]>(`/apps/${encodeURIComponent(appId)}/playbooks`))
     for (const v of await http<any[]>(`/playbooks/${pb.id}/versions`)) names.set(v.id, pb.name);
   return names;
 }

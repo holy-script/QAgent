@@ -8,6 +8,7 @@ class QAgentEventType(str, Enum):
     FLOW_STARTED = "flow.started"
     STEP_OBSERVED = "step.observed"
     DECISION_MADE = "decision.made"
+    MODEL_CALL = "model.call"
     GATE_TRIGGERED = "gate.triggered"
     ACTION_EXECUTED = "action.executed"
     NETWORK_CALL = "network.call"

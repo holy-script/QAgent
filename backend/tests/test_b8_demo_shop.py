@@ -56,3 +56,17 @@ def test_bug5_tax_before_discount(shop):
 def test_expired_coupon_rejected(shop):
     _, client = shop
     assert client.post("/api/coupon", json={"code": "EXPIRED10"}).status_code == 400
+
+
+def test_session_reset_clears_only_that_sessions_state(shop):
+    module, client = shop
+    other = type(client)(module.app)
+    client.post("/api/cart/add", json={"id": 1, "qty": 1})
+    other.post("/api/cart/add", json={"id": 1, "qty": 1})
+    for _ in range(2):
+        client.post("/api/pay"); other.post("/api/pay")
+    client.post("/__reset", params={"scope": "session"})
+    assert client.get("/api/cart").json()["count"] == 0
+    assert other.get("/api/cart").json()["count"] == 1
+    assert client.post("/api/pay").status_code == 200  # payment counter restarted (1st), other's 3rd would fail
+    assert other.post("/api/pay").status_code == 500

@@ -204,8 +204,8 @@ async def test_run_pipeline_end_to_end_issues_evidence_reports_and_resolution(cl
 
 @pytest.mark.asyncio
 async def test_stop_run_and_error_paths(client):
-    assert (await client.post("/runs", json={"app_id": "missing", "mode": "stub"})).status_code == 404
-    run_id = (await client.post("/runs", json={"app_id": "demo-shop", "mode": "stub"})).json()["id"]
+    assert (await client.post("/apps/missing/runs", json={"mode": "stub"})).status_code == 404
+    run_id = (await client.post("/apps/demo-shop/runs", json={"mode": "stub"})).json()["id"]
     assert (await client.post(f"/runs/{run_id}/stop")).status_code == 200
     run = await finish(client, run_id)
     assert run["status"] == "stopped"
@@ -255,7 +255,7 @@ async def test_app_crud_and_derived_names(client):
 
 @pytest.mark.asyncio
 async def test_replay_reproduces_run_from_tape(client):
-    src = (await client.post("/runs", json={"app_id": "demo-shop", "mode": "stub", "flow_keys": ["add-to-cart"],
+    src = (await client.post("/apps/demo-shop/runs", json={"mode": "stub", "flow_keys": ["add-to-cart"],
                                             "include_edge_cases": False})).json()["id"]
     src_run = await finish(client, src)
     replay = await client.post(f"/runs/{src}/replay", json={})

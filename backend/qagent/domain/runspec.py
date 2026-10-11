@@ -40,6 +40,7 @@ class RunSpec(BaseModel):
     gotchas: List[Dict[str, Any]] = Field(default_factory=list)
     reasoning_examples: List[Dict[str, Any]] = Field(default_factory=list)
     playbook_hash: str = ""
+    plan: bool = False                        # Claude writes per-step notes before each journey
     reset_path: Optional[str] = None          # POST once before the run to reset the target app
     inject_traceparent: bool = False
     redact_keys: List[str] = Field(default_factory=list)   # JSON keys masked in stored network bodies

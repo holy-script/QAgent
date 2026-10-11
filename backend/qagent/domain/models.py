@@ -133,6 +133,28 @@ class Decision(SQLModel, table=True):
     response: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
 
 
+class ModelCall(SQLModel, table=True):
+    """Every judge and report call a run makes (the step decisions live in `decisions`). Together they are the
+    run's tape: replay serves these back by `input_hash`, and `cost_usd` rolls up into the run's cost."""
+    __tablename__ = "model_calls"
+
+    id: str = Field(default_factory=gen_uuid, primary_key=True)
+    run_id: str = Field(index=True)
+    flow_run_id: Optional[str] = Field(default=None, index=True)
+    purpose: str = Field(index=True)  # judge | report | bug_narrative | planner
+    decider: str = ""                 # jev | claude
+    model_version: str = ""
+    label: str = ""                   # the question or task, for humans
+    input_hash: str = Field(default="", index=True)
+    response: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    latency_ms: float = 0.0
+    input_tokens: int = 0
+    output_tokens: int = 0
+    cost_usd: float = 0.0
+    replayed: bool = False
+    created_at: datetime = Field(default_factory=utc_now)
+
+
 class FindingRecord(SQLModel, table=True):
     __tablename__ = "findings"
 

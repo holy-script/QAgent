@@ -41,7 +41,7 @@ async def test_login_sets_an_http_only_cookie_that_unlocks_the_api(client):
     cookie = r.headers["set-cookie"].lower()
     assert "httponly" in cookie and "samesite=lax" in cookie and auth.COOKIE in cookie
     assert (await client.get("/auth/me")).json()["email"] == settings.auth_email
-    assert (await client.get("/runs")).status_code != 401
+    assert (await client.get("/apps/demo-shop/runs")).status_code != 401
 
 
 @pytest.mark.asyncio

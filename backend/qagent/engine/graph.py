@@ -27,6 +27,8 @@ from qagent.checks.resolver import BindingResolver
 from qagent.checks.ux_judged import Judge
 from qagent.config import settings
 from qagent.decision.base import Decider
+from qagent.decision.ledger import LedgerClient, TapedJudge, current_flow_run
+from qagent.decision.planner import plan_flow, step_hints
 from qagent.decision.fewshot import example_ids, select_examples
 from qagent.decision.tape import hash_request
 from qagent.domain.events import QAgentEventType
@@ -96,6 +98,7 @@ class FlowContext:
     steps_run: int = 0
     log_cursor: int = 0
     steps: Dict[int, StepInfo] = field(default_factory=dict)
+    plan_hints: Dict[int, str] = field(default_factory=dict)   # step number -> the planner's note
     settles: List[Dict[str, Any]] = field(default_factory=list)
     before_bytes: Optional[bytes] = None
 
@@ -156,6 +159,7 @@ class EngineRunner:
         escalator: Optional[Decider] = None,
         checkpointer: Optional[BaseCheckpointSaver] = None,
         judge: Optional[Judge] = None,
+        planner: Optional[Any] = None,
     ):
         self.spec = run_spec
         self.decider = decider
@@ -163,12 +167,21 @@ class EngineRunner:
         self.uploader = uploader
         self.headless = headless
         self.escalator = escalator
-        self.judge = judge
+        # Judge verdicts go on the tape and into the run's cost; a replay passes in a TapedJudge that serves them back.
+        self.judge = (judge if isinstance(judge, TapedJudge) else TapedJudge(judge)) if judge is not None else None
+        if self.judge:
+            self.judge.bind(self._record_model_call)
+        # A BedrockClient (live) or a LedgerClient (replay): planner calls go on the tape and into the cost.
+        self.planner = None
+        if planner is not None and run_spec.plan:
+            self.planner = planner if isinstance(planner, LedgerClient) else LedgerClient(planner, self._record_model_call)
+            self.planner.record = self._record_model_call
         self.checkpointer = checkpointer or InMemorySaver()
         self.findings_count = 0
         self.total_steps = 0
         self.decision_stats = {"jev": 0, "claude": 0, "other": 0, "latency_ms": 0.0, "cost_usd": 0.0, "count": 0,
-                               "escalations": 0}
+                               "escalations": 0,
+                               "judge_calls": 0, "judge_cost_usd": 0.0}
         self.model_versions: Dict[str, str] = {}
         self.browser_version: Optional[str] = None
         self.cancel_requested = False
@@ -184,6 +197,16 @@ class EngineRunner:
     def stop(self) -> None:
         self.cancel_requested = True
 
+    async def _record_model_call(self, call: Dict[str, Any]) -> None:
+        """Puts a judge verdict on the tape (a `model.call` event) and adds what it cost to the run."""
+        if call.get("purpose") == "judge":
+            self.decision_stats["judge_calls"] += 1
+            self.decision_stats["judge_cost_usd"] += call.get("cost_usd", 0.0)
+        elif call.get("purpose") == "planner":
+            self.decision_stats["planner_cost_usd"] = self.decision_stats.get("planner_cost_usd", 0.0) + call.get("cost_usd", 0.0)
+        self.decision_stats["cost_usd"] += call.get("cost_usd", 0.0)
+        await self.sink.emit(QAgentEventType.MODEL_CALL, call)
+
     # ---- run -------------------------------------------------------------------------
 
     async def _reset_target(self) -> None:
@@ -198,6 +221,19 @@ class EngineRunner:
                 await client.post(url)
         except Exception as exc:
             logger.warning("engine.reset_failed", error=type(exc).__name__)
+
+    async def _reset_for_flow(self, page) -> None:
+        """Clears this flow's own server-side state (its cart, counters) through its own browser session,
+        so parallel flows never reset each other and every flow starts from the same point."""
+        if not (self.spec.reset_path and settings.deterministic_browser):
+            return
+        url = urljoin(self.spec.base_url, self.spec.reset_path)
+        if (urlparse(url).hostname or "") not in self.spec.allowed_hosts:
+            return
+        try:
+            await page.request.post(url, params={"scope": "session"}, timeout=5000)
+        except Exception as exc:
+            logger.warning("engine.flow_reset_failed", error=type(exc).__name__)
 
     async def _target_environment(self) -> Dict[str, Any]:
         env: Dict[str, Any] = {"base_url": self.spec.base_url, "playbook_hash": self.spec.playbook_hash}
@@ -253,6 +289,9 @@ class EngineRunner:
             "jev_decisions": stats["jev"],
             "claude_decisions": stats["claude"],
             "total_cost_usd": stats["cost_usd"],
+            "judge_calls": stats["judge_calls"],
+            "judge_cost_usd": stats["judge_cost_usd"],
+            "planner_cost_usd": stats.get("planner_cost_usd", 0.0),
             "avg_decision_latency_ms": stats["latency_ms"] / stats["count"] if stats["count"] else 0.0,
             "findings_count": self.findings_count,
             "status": status,
@@ -418,6 +457,7 @@ class EngineRunner:
 
     async def _run_flow(self, flow: FlowSpec) -> str:
         ctx = FlowContext(flow, str(uuid.uuid4()), uuid.uuid4().hex)
+        current_flow_run.set(ctx.flow_run_id)
         flow_span = Span(f"flow:{flow.key}", "flow", ctx.trace_id, flow_key=flow.key)
         started = time.perf_counter()
         base = {"flow_key": flow.key, "flow_run_id": ctx.flow_run_id, "variant_of": flow.variant_of}
@@ -437,6 +477,7 @@ class EngineRunner:
             page = await sandbox.start()
             self.browser_version = self.browser_version or sandbox.browser.version
             recorder = NetworkRecorder(page, ctx.flow_run_id, sandbox=sandbox)
+            await self._reset_for_flow(page)
             await page.goto(self.spec.base_url, timeout=10000)
             recorder.drain()  # landing traffic is not part of any step
 
@@ -520,11 +561,21 @@ class EngineRunner:
     # -- nodes: each returns a partial state update --
 
     async def _plan(self, state: FlowState, config: RunnableConfig) -> FlowState:
-        """Validates the flow. (Claude-written step intents are not implemented: steps run as written.)"""
+        """Validates the flow. With planning on, Claude also writes a note per step (the steps are never rewritten)."""
         rt = _rt(config)
-        if not rt.ctx.flow.steps:
+        flow = rt.ctx.flow
+        if not flow.steps:
             rt.ctx.failure_reason = "flow has no steps"
             return {"done": True, "failure_reason": rt.ctx.failure_reason}
+        if self.planner:
+            try:
+                examples = select_examples(self.spec.reasoning_examples, "plan", f"{flow.key} {' '.join(flow.steps)}")
+                plan = await plan_flow(self.planner, flow.key, flow.steps, self.spec.base_url, flow.test_data, examples)
+                rt.ctx.plan_hints = step_hints(plan, len(flow.steps))
+                await self._log(rt.ctx, None, "info", "planner",
+                                f"plan: {plan.get('summary', '')} ({len(rt.ctx.plan_hints)} step notes)")
+            except Exception as exc:  # planning only helps; the journey runs as written without it
+                await self._log(rt.ctx, None, "warning", "planner", f"planning skipped ({type(exc).__name__})")
         return {}
 
     async def _begin_step(self, state: FlowState, config: RunnableConfig) -> FlowState:
@@ -605,14 +656,15 @@ class EngineRunner:
                 "candidates": [c.model_dump(mode="json") for c in candidates]}
 
     def _request(self, state: FlowState, candidates: List[CandidateAction], scope: Optional[str] = None,
-                 flow: Optional[FlowSpec] = None) -> DecisionRequest:
+                 flow: Optional[FlowSpec] = None, note: Optional[str] = None) -> DecisionRequest:
         examples: List[Dict[str, Any]] = []
+        flow_note = note
         if scope and flow:
             examples = select_examples(self.spec.reasoning_examples, scope, f"{flow.key} {state['intent']}")
         return DecisionRequest(
             step_seq=state["idx"], intent=state["intent"], url=state["url"], candidates=candidates,
             page_summary=state["title"], history=state["history"][-3:],
-            hints=self._hints_for(flow) if flow else [], examples=examples,
+            hints=(self._hints_for(flow) + ([flow_note] if flow_note else [])) if flow else [], examples=examples,
         )
 
     async def _decide(self, state: FlowState, config: RunnableConfig) -> FlowState:
@@ -622,7 +674,7 @@ class EngineRunner:
         if not candidates:
             return self._fail(rt, f"step {state['idx']}: no interactive elements on {state['url']}")
 
-        req = self._request(state, candidates, flow=rt.ctx.flow)
+        req = self._request(state, candidates, flow=rt.ctx.flow, note=rt.ctx.plan_hints.get(state["idx"]))
         input_hash = hash_request(req)
         t = time.perf_counter()
         decision: DecisionResult = await self._decide_chain.ainvoke(req, config)
@@ -684,7 +736,8 @@ class EngineRunner:
         """Medium or low confidence: a stronger model re-decides this step and its answer replaces Jev's."""
         rt = _rt(config)
         candidates = [CandidateAction.model_validate(c) for c in state["candidates"]]
-        req = self._request(state, candidates, scope="escalation", flow=rt.ctx.flow)
+        req = self._request(state, candidates, scope="escalation", flow=rt.ctx.flow,
+                            note=rt.ctx.plan_hints.get(state["idx"]))
         try:
             escalated: DecisionResult = await self._escalate_chain.ainvoke(req, config)
         except Exception as exc:
@@ -902,7 +955,11 @@ class EngineRunner:
                         continue
                     await judge_inputs()
                     examples = select_examples(self.spec.reasoning_examples, "judge", f"{flow.key} {rule['question']}")
-                    outcome = await expectations.run_judged_rule(self.judge, rule, page_text, shots, hints, examples)
+                    try:
+                        outcome = await expectations.run_judged_rule(self.judge, rule, page_text, shots, hints, examples)
+                    except Exception as exc:
+                        await self._log(ctx, seq, "warning", "checks", f"{key} could not be judged: {type(exc).__name__}")
+                        continue
                 else:
                     await self._log(ctx, seq, "warning", "checks", f"{key}: check type '{check}' is not supported")
                     continue

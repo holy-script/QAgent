@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 from urllib.parse import urlparse
@@ -6,6 +7,13 @@ from playwright.async_api import Browser, BrowserContext, Page, Playwright, asyn
 
 from qagent.browser.launcher import launch_chromium
 from qagent.config import settings
+
+
+ANIMATIONS_OFF = """(() => {
+  const css = '*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important;caret-color:transparent!important}';
+  const add = () => { const s = document.createElement('style'); s.textContent = css; (document.head || document.documentElement).appendChild(s); };
+  if (document.documentElement) add(); else document.addEventListener('DOMContentLoaded', add);
+})();"""
 
 
 class BrowserSandbox:
@@ -72,11 +80,17 @@ class BrowserSandbox:
         self.browser = await self._launch()
 
         context_args: Dict[str, Any] = {"viewport": {"width": 1280, "height": 800}}
+        if settings.deterministic_browser:
+            context_args.update(reduced_motion="reduce", locale="en-US", timezone_id="UTC")
         if self.artifact_dir:
             self.artifact_dir.mkdir(parents=True, exist_ok=True)
             context_args["record_har_path"] = str(self.har_path)
         self.context = await self.browser.new_context(**context_args)
         await self.context.route("**/*", self._guard)
+        if settings.deterministic_browser:
+            # Date.now()/new Date() read the same instant on every run; timers still fire so the app keeps working.
+            await self.context.clock.set_fixed_time(datetime.fromisoformat(settings.fixed_clock_iso))
+            await self.context.add_init_script(ANIMATIONS_OFF)
         await self.context.tracing.start(screenshots=True, snapshots=True, sources=False)
 
         self.page = await self.context.new_page()

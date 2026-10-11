@@ -44,6 +44,7 @@ async def purge_runs(session: AsyncSession, run_ids: List[str]) -> Dict[str, int
         await rm(m.Step, "steps", m.Step.id.in_(step_ids))
     await rm(m.CheckResult, "check_results", m.CheckResult.run_id.in_(run_ids))
     await rm(m.Artifact, "artifacts", m.Artifact.run_id.in_(run_ids))
+    await rm(m.ModelCall, "model_calls", m.ModelCall.run_id.in_(run_ids))
     await rm(m.SpanRecord, "spans", m.SpanRecord.run_id.in_(run_ids))
     await rm(m.LogEntryRecord, "log_entries", m.LogEntryRecord.run_id.in_(run_ids))
     await rm(m.EventRecord, "events", m.EventRecord.run_id.in_(run_ids))

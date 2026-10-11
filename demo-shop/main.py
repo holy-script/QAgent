@@ -7,7 +7,7 @@ Bug 4  spinner never clears after applying a coupon                 (settle time
 Bug 5  tax applied before discount, giving a wrong total            (formula check)
 
 All bugs are on by default. Override with DEMO_BUGS="1,3" at startup, or at
-runtime with POST /__bugs {"1": false}. POST /__reset clears cart + payment counter.
+runtime with POST /__bugs {"1": false}. POST /__reset clears all carts + payment counters (?scope=session: just the caller's).
 """
 import os
 import re
@@ -56,10 +56,12 @@ class State:
 
     def reset(self) -> None:
         self.sessions: Dict[str, dict] = {}
-        self.payment_requests = 0
+
+    def reset_session(self) -> None:
+        self.sessions.pop(current_sid.get(), None)
 
     def _session(self) -> dict:
-        return self.sessions.setdefault(current_sid.get(), {"cart": {}, "coupon": ""})
+        return self.sessions.setdefault(current_sid.get(), {"cart": {}, "coupon": "", "payments": 0})
 
     @property
     def cart(self) -> Dict[int, int]:
@@ -196,8 +198,9 @@ async def api_checkout(payload: dict):
 
 @app.post("/api/pay")
 async def api_pay(payload: dict | None = None):
-    state.payment_requests += 1
-    if state.bugs[3] and state.payment_requests % 3 == 0:  # BUG 3: every 3rd payment fails
+    session = state._session()
+    session["payments"] += 1
+    if state.bugs[3] and session["payments"] % 3 == 0:  # BUG 3: every 3rd payment fails
         return JSONResponse({"error": "Payment gateway error"}, status_code=500)
     return {"ok": True, "charged": cart_snapshot()["total"]}
 
@@ -208,7 +211,11 @@ async def get_traces():
 
 
 @app.post("/__reset")
-async def reset():
+async def reset(scope: str = "all"):
+    """`scope=session` clears only the caller's cart and payment counter (used before each flow)."""
+    if scope == "session":
+        state.reset_session()
+        return {"ok": True, "bugs": state.bugs}
     state.reset()
     traces.clear()
     return {"ok": True, "bugs": state.bugs}

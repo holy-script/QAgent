@@ -170,6 +170,13 @@ class RunTotals(BaseModel):
     avg_decision_latency_ms: float = 0.0
     findings_count: int = 0
     status: str = "pending"
+    # Where the cost went: step decisions + judge + planner make up the agent's cost; reports are added after.
+    agent_cost_usd: float = 0.0
+    judge_calls: int = 0
+    judge_cost_usd: float = 0.0
+    planner_cost_usd: float = 0.0
+    report_calls: int = 0
+    report_cost_usd: float = 0.0
 
 
 # --- Request/Response API Schemas ---
@@ -210,6 +217,7 @@ class CreateRunRequest(BaseModel):
     time_budget_s: Optional[int] = None
     flow_keys: Optional[List[str]] = Field(default=None, description="Run only these flows (default: all)")
     include_edge_cases: bool = Field(default=True, description="Also run edge-case variants of the selected flows")
+    plan: bool = Field(default=False, description="Let Claude write a short note for each step before a journey runs")
 
 
 class RunResponse(BaseModel):
@@ -222,6 +230,25 @@ class RunResponse(BaseModel):
     started_at: Optional[str] = None
     finished_at: Optional[str] = None
     totals: RunTotals = Field(default_factory=RunTotals)
+
+
+class TapeEntry(BaseModel):
+    """One model call on a run's tape: a step decision, a judgement, a plan, or a report call."""
+    kind: str                       # decision | judge | planner | report | bug_narrative
+    phase: int                      # 0 plan, 1 steps, 2 judgements, 3 reports (the order things happen in)
+    flow_key: Optional[str] = None
+    step_seq: Optional[int] = None
+    decider: str = ""
+    model_version: str = ""
+    label: str = ""
+    outcome: str = ""               # e.g. the chosen element, or "true"/"false", or "plan written"
+    confidence: Optional[float] = None
+    branch: Optional[str] = None    # AUTO | ESCALATE (decisions)
+    latency_ms: float = 0.0
+    input_tokens: int = 0
+    output_tokens: int = 0
+    cost_usd: float = 0.0
+    replayed: bool = False
 
 
 class FlowRunResponse(BaseModel):

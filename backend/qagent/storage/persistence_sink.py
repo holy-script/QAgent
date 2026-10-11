@@ -14,6 +14,7 @@ from qagent.domain.models import (
     FindingRecord,
     FlowRun,
     LogEntryRecord,
+    ModelCall,
     NetworkCallRecord,
     Run,
     SpanRecord,
@@ -128,6 +129,11 @@ class PersistenceSink:
                 run.finished_at = now
                 run.totals = p.get("totals", {})
                 run.environment = {**(run.environment or {}), **p.get("environment", {})}
+
+        elif t == QAgentEventType.MODEL_CALL:
+            session.add(ModelCall(run_id=self.run_id, created_at=now, **{k: p[k] for k in (
+                "flow_run_id", "purpose", "decider", "model_version", "label", "input_hash", "response", "latency_ms",
+                "input_tokens", "output_tokens", "cost_usd", "replayed") if k in p}))
 
         elif t == QAgentEventType.RUN_ERROR:
             run = await session.get(Run, self.run_id)

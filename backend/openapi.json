@@ -538,110 +538,6 @@
         }
       }
     },
-    "/runs": {
-      "get": {
-        "tags": [
-          "Runs"
-        ],
-        "summary": "List Runs",
-        "operationId": "list_runs_runs_get",
-        "parameters": [
-          {
-            "name": "app_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "App Id"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 200,
-              "minimum": 1,
-              "default": 50,
-              "title": "Limit"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/RunResponse"
-                  },
-                  "title": "Response List Runs Runs Get"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Runs"
-        ],
-        "summary": "Create Run",
-        "operationId": "create_run_runs_post",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateRunRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "202": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RunResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/runs/{run_id}/replay": {
       "post": {
         "tags": [
@@ -1439,28 +1335,22 @@
         }
       }
     },
-    "/playbooks": {
+    "/runs/{run_id}/tape": {
       "get": {
         "tags": [
-          "Playbooks"
+          "Runs"
         ],
-        "summary": "List Playbooks",
-        "operationId": "list_playbooks_playbooks_get",
+        "summary": "Run Tape",
+        "description": "Every model call of the run in the order it happened: plans, step decisions, judgements, report calls.",
+        "operationId": "run_tape_runs__run_id__tape_get",
         "parameters": [
           {
-            "name": "app_id",
-            "in": "query",
-            "required": false,
+            "name": "run_id",
+            "in": "path",
+            "required": true,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "App Id"
+              "type": "string",
+              "title": "Run Id"
             }
           }
         ],
@@ -1472,48 +1362,9 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/PlaybookResponse"
+                    "$ref": "#/components/schemas/TapeEntry"
                   },
-                  "title": "Response List Playbooks Playbooks Get"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Playbooks"
-        ],
-        "summary": "Upload Playbook",
-        "operationId": "upload_playbook_playbooks_post",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreatePlaybookRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PlaybookUploadResponse"
+                  "title": "Response Run Tape Runs  Run Id  Tape Get"
                 }
               }
             }
@@ -3217,6 +3068,12 @@
             "title": "Include Edge Cases",
             "description": "Also run edge-case variants of the selected flows",
             "default": true
+          },
+          "plan": {
+            "type": "boolean",
+            "title": "Plan",
+            "description": "Let Claude write a short note for each step before a journey runs",
+            "default": false
           }
         },
         "type": "object",
@@ -4801,6 +4658,36 @@
             "type": "string",
             "title": "Status",
             "default": "pending"
+          },
+          "agent_cost_usd": {
+            "type": "number",
+            "title": "Agent Cost Usd",
+            "default": 0.0
+          },
+          "judge_calls": {
+            "type": "integer",
+            "title": "Judge Calls",
+            "default": 0
+          },
+          "judge_cost_usd": {
+            "type": "number",
+            "title": "Judge Cost Usd",
+            "default": 0.0
+          },
+          "planner_cost_usd": {
+            "type": "number",
+            "title": "Planner Cost Usd",
+            "default": 0.0
+          },
+          "report_calls": {
+            "type": "integer",
+            "title": "Report Calls",
+            "default": 0
+          },
+          "report_cost_usd": {
+            "type": "number",
+            "title": "Report Cost Usd",
+            "default": 0.0
           }
         },
         "type": "object",
@@ -5024,6 +4911,114 @@
         },
         "type": "object",
         "title": "StepTimings"
+      },
+      "TapeEntry": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "phase": {
+            "type": "integer",
+            "title": "Phase"
+          },
+          "flow_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flow Key"
+          },
+          "step_seq": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Step Seq"
+          },
+          "decider": {
+            "type": "string",
+            "title": "Decider",
+            "default": ""
+          },
+          "model_version": {
+            "type": "string",
+            "title": "Model Version",
+            "default": ""
+          },
+          "label": {
+            "type": "string",
+            "title": "Label",
+            "default": ""
+          },
+          "outcome": {
+            "type": "string",
+            "title": "Outcome",
+            "default": ""
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "branch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Branch"
+          },
+          "latency_ms": {
+            "type": "number",
+            "title": "Latency Ms",
+            "default": 0.0
+          },
+          "input_tokens": {
+            "type": "integer",
+            "title": "Input Tokens",
+            "default": 0
+          },
+          "output_tokens": {
+            "type": "integer",
+            "title": "Output Tokens",
+            "default": 0
+          },
+          "cost_usd": {
+            "type": "number",
+            "title": "Cost Usd",
+            "default": 0.0
+          },
+          "replayed": {
+            "type": "boolean",
+            "title": "Replayed",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "phase"
+        ],
+        "title": "TapeEntry",
+        "description": "One model call on a run's tape: a step decision, a judgement, a plan, or a report call."
       },
       "TraceabilityResponse": {
         "properties": {

@@ -4,6 +4,77 @@
  */
 
 export interface paths {
+    "/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Login */
+        post: operations["login_auth_login_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Logout */
+        post: operations["logout_auth_logout_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Me */
+        get: operations["me_auth_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Health Check
+         * @description Postgres is pinged for real; Jev, Bedrock and object storage report whether they are configured.
+         */
+        get: operations["health_check_health_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/dev/events": {
         parameters: {
             query?: never;
@@ -77,7 +148,10 @@ export interface paths {
         get: operations["get_app_apps__app_id__get"];
         put?: never;
         post?: never;
-        /** Delete App */
+        /**
+         * Delete App
+         * @description Deletes the app with its test plans, runs, bugs, reports and stored screenshots/files. Cannot be undone.
+         */
         delete: operations["delete_app_apps__app_id__delete"];
         options?: never;
         head?: never;
@@ -126,24 +200,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/runs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List Runs */
-        get: operations["list_runs_runs_get"];
-        put?: never;
-        /** Create Run */
-        post: operations["create_run_runs_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/runs/{run_id}/replay": {
         parameters: {
             query?: never;
@@ -175,7 +231,11 @@ export interface paths {
         get: operations["get_run_runs__run_id__get"];
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Delete Run
+         * @description Deletes one run with its steps, findings, evidence, reports and stored files. Bugs it was the only proof of go too.
+         */
+        delete: operations["delete_run_runs__run_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -363,18 +423,20 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/playbooks": {
+    "/runs/{run_id}/tape": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List Playbooks */
-        get: operations["list_playbooks_playbooks_get"];
+        /**
+         * Run Tape
+         * @description Every model call of the run in the order it happened: plans, step decisions, judgements, report calls.
+         */
+        get: operations["run_tape_runs__run_id__tape_get"];
         put?: never;
-        /** Upload Playbook */
-        post: operations["upload_playbook_playbooks_post"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -506,26 +568,6 @@ export interface paths {
         };
         /** Get Version Markdown */
         get: operations["get_version_markdown_playbook_versions__version_id__markdown_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/health": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Health Check
-         * @description Postgres is pinged for real; Jev, Bedrock and object storage report whether they are configured.
-         */
-        get: operations["health_check_health_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1017,6 +1059,12 @@ export interface components {
              * @default true
              */
             include_edge_cases: boolean;
+            /**
+             * Plan
+             * @description Let Claude write a short note for each step before a journey runs
+             * @default false
+             */
+            plan: boolean;
         };
         /** DecisionResult */
         DecisionResult: {
@@ -1340,6 +1388,13 @@ export interface components {
             };
             /** Ts */
             ts: string;
+        };
+        /** LoginRequest */
+        LoginRequest: {
+            /** Email */
+            email: string;
+            /** Password */
+            password: string;
         };
         /** NetworkCall */
         NetworkCall: {
@@ -1676,6 +1731,41 @@ export interface components {
              * @default pending
              */
             status: string;
+            /**
+             * Agent Cost Usd
+             * @default 0
+             */
+            agent_cost_usd: number;
+            /**
+             * Judge Calls
+             * @default 0
+             */
+            judge_calls: number;
+            /**
+             * Judge Cost Usd
+             * @default 0
+             */
+            judge_cost_usd: number;
+            /**
+             * Planner Cost Usd
+             * @default 0
+             */
+            planner_cost_usd: number;
+            /**
+             * Report Calls
+             * @default 0
+             */
+            report_calls: number;
+            /**
+             * Report Cost Usd
+             * @default 0
+             */
+            report_cost_usd: number;
+        };
+        /** SessionResponse */
+        SessionResponse: {
+            /** Email */
+            email: string;
         };
         /** SpanResponse */
         SpanResponse: {
@@ -1777,6 +1867,69 @@ export interface components {
              */
             total_ms: number;
         };
+        /**
+         * TapeEntry
+         * @description One model call on a run's tape: a step decision, a judgement, a plan, or a report call.
+         */
+        TapeEntry: {
+            /** Kind */
+            kind: string;
+            /** Phase */
+            phase: number;
+            /** Flow Key */
+            flow_key?: string | null;
+            /** Step Seq */
+            step_seq?: number | null;
+            /**
+             * Decider
+             * @default
+             */
+            decider: string;
+            /**
+             * Model Version
+             * @default
+             */
+            model_version: string;
+            /**
+             * Label
+             * @default
+             */
+            label: string;
+            /**
+             * Outcome
+             * @default
+             */
+            outcome: string;
+            /** Confidence */
+            confidence?: number | null;
+            /** Branch */
+            branch?: string | null;
+            /**
+             * Latency Ms
+             * @default 0
+             */
+            latency_ms: number;
+            /**
+             * Input Tokens
+             * @default 0
+             */
+            input_tokens: number;
+            /**
+             * Output Tokens
+             * @default 0
+             */
+            output_tokens: number;
+            /**
+             * Cost Usd
+             * @default 0
+             */
+            cost_usd: number;
+            /**
+             * Replayed
+             * @default false
+             */
+            replayed: boolean;
+        };
         /** TraceabilityResponse */
         TraceabilityResponse: {
             /** Version Id */
@@ -1836,6 +1989,97 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    login_auth_login_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    logout_auth_logout_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    me_auth_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionResponse"];
+                };
+            };
+        };
+    };
+    health_check_health_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HealthResponse"];
+                };
+            };
+        };
+    };
     list_fixture_events_dev_events_get: {
         parameters: {
             query?: never;
@@ -1986,11 +2230,13 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description Successful Response */
-            204: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
             /** @description Validation Error */
             422: {
@@ -2138,71 +2384,6 @@ export interface operations {
             };
         };
     };
-    list_runs_runs_get: {
-        parameters: {
-            query?: {
-                app_id?: string | null;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RunResponse"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    create_run_runs_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateRunRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RunResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     replay_run_runs__run_id__replay_post: {
         parameters: {
             query?: never;
@@ -2256,6 +2437,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RunResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_run_runs__run_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
@@ -2601,13 +2813,13 @@ export interface operations {
             };
         };
     };
-    list_playbooks_playbooks_get: {
+    run_tape_runs__run_id__tape_get: {
         parameters: {
-            query?: {
-                app_id?: string | null;
-            };
+            query?: never;
             header?: never;
-            path?: never;
+            path: {
+                run_id: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
@@ -2618,40 +2830,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PlaybookResponse"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    upload_playbook_playbooks_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreatePlaybookRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PlaybookUploadResponse"];
+                    "application/json": components["schemas"]["TapeEntry"][];
                 };
             };
             /** @description Validation Error */
@@ -2954,26 +3133,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    health_check_health_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HealthResponse"];
                 };
             };
         };

@@ -13,6 +13,11 @@ from qagent.domain.schemas import ConfidenceTier, DecisionRequest, DecisionResul
 INPUT_USD_PER_M = 3.0
 OUTPUT_USD_PER_M = 15.0
 
+def usage_cost(usage: Dict[str, Any]) -> float:
+    """USD for one Bedrock call from its token usage."""
+    return usage.get("inputTokens", 0) * INPUT_USD_PER_M / 1e6 + usage.get("outputTokens", 0) * OUTPUT_USD_PER_M / 1e6
+
+
 CHOOSE_TOOL = {
     "toolSpec": {
         "name": "choose_action",
