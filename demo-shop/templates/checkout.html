@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Checkout - Demo Shop{% endblock %}
+{% block content %}
+<h1>Checkout</h1>
+<p>Amount due: $<span data-testid="checkout-total">{{ "%.2f"|format(cart.total) }}</span></p>
+<input type="text" id="postal" name="postal_code" placeholder="Postal code">
+<button data-testid="submit-address" onclick="submitAddress()">Save address</button>
+<p class="error" data-testid="postal-error" id="postal-error"></p>
+<p data-testid="address-saved" id="address-saved"></p>
+<button data-testid="pay-btn" onclick="pay()">Pay now</button>
+<p data-testid="pay-status" id="pay-status"></p>
+{% endblock %}
+{% block scripts %}
+<script>
+  async function submitAddress() {
+    const r = await api('/api/checkout', {postal_code: document.getElementById('postal').value});
+    document.getElementById('postal-error').textContent = r.status === 200 ? '' : r.data.error;
+    document.getElementById('address-saved').textContent = r.status === 200 ? 'Address saved' : '';
+  }
+  async function pay() {
+    const r = await api('/api/pay', {});
+    document.getElementById('pay-status').textContent = r.status === 200 ? 'Payment successful' : 'Payment failed';
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Products - Demo Shop{% endblock %}
+{% block content %}
+<h1>Products</h1>
+{% for p in products %}
+<div class="product">
+  <span>{{ p.name }} - ${{ "%.2f"|format(p.price) }}</span>
+  <button data-testid="add-btn-{{ p.id }}" onclick="add({{ p.id }})">Add to Cart</button>
+</div>
+{% endfor %}
+{% endblock %}
+{% block scripts %}
+<script>
+  async function add(id) {
+    const r = await api('/api/cart/add', {id, qty: 1});
+    if (r.status === 200) setBadge(r.data.badge);
+  }
+</script>
+{% endblock %}

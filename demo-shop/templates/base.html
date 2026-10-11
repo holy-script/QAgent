@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}Demo Shop{% endblock %}</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; color: #1a1a1a; }
+    header { display: flex; gap: 16px; padding: 12px 24px; background: #111; align-items: center; }
+    header a { color: #fff; text-decoration: none; }
+    main { padding: 24px; max-width: 720px; }
+    .badge { background: #e11d48; color: #fff; border-radius: 10px; padding: 1px 8px; font-size: 12px; }
+    .product, .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 3px solid #ccc; border-top-color: #111;
+               border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error { color: #b91c1c; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/products" data-testid="nav-products">Products</a>
+    <a href="/cart" data-testid="nav-cart">Cart <span class="badge" data-testid="cart-badge" id="cart-badge">{{ badge }}</span></a>
+    <a href="/checkout" data-testid="nav-checkout">Checkout</a>
+  </header>
+  <main>{% block content %}{% endblock %}</main>
+  <script>
+    async function api(path, body) {
+      const res = await fetch(path, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body || {})});
+      return {status: res.status, data: await res.json()};
+    }
+    function setBadge(n) { document.getElementById('cart-badge').textContent = n; }
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
