@@ -4,11 +4,11 @@
 <h1>Your cart</h1>
 <p data-testid="cart-summary">Cart shows {{ cart.count }} items</p>
 {% for i in cart["items"] %}
-<div class="row" data-testid="cart-row"><span>{{ i.name }} x {{ i.qty }}</span><span>${{ "%.2f"|format(i.price * i.qty) }}</span></div>
+<div class="row" data-testid="cart-row"><span>{{ i.name }} x {{ i.qty }}</span><span data-testid="line-price">${{ "%.2f"|format(i.price * i.qty) }}</span></div>
 {% endfor %}
-<p>Subtotal: $<span data-testid="cart-subtotal">{{ "%.2f"|format(cart.subtotal) }}</span></p>
-<p>Discount: $<span data-testid="cart-discount">{{ "%.2f"|format(cart.discount) }}</span></p>
-<p>Total: $<span data-testid="cart-total">{{ "%.2f"|format(cart.total) }}</span></p>
+<p>Subtotal: <span data-testid="cart-subtotal">${{ "%.2f"|format(cart.subtotal) }}</span></p>
+<p>Discount: <span data-testid="cart-discount">${{ "%.2f"|format(cart.discount) }}</span></p>
+<p>Total: <span data-testid="cart-total">${{ "%.2f"|format(cart.total) }}</span></p>
 <input type="text" id="coupon" name="coupon" placeholder="Coupon Code">
 <button data-testid="apply-coupon" onclick="applyCoupon()">Apply Coupon</button>
 <span class="spinner" data-testid="spinner" id="spinner" hidden></span>
@@ -28,8 +28,8 @@
       return;
     }
     if (r.data.hang) return;  // BUG 4: spinner is never cleared and totals never refresh
-    document.querySelector('[data-testid=cart-total]').textContent = r.data.total.toFixed(2);
-    document.querySelector('[data-testid=cart-discount]').textContent = r.data.discount.toFixed(2);
+    document.querySelector('[data-testid=cart-total]').textContent = '$' + r.data.total.toFixed(2);
+    document.querySelector('[data-testid=cart-discount]').textContent = '$' + r.data.discount.toFixed(2);
     spinner.hidden = true;
   }
 </script>

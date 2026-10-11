@@ -14,6 +14,7 @@ import re
 import uuid
 from contextvars import ContextVar
 from pathlib import Path
+from collections import deque
 from typing import Dict
 
 from fastapi import FastAPI, Request
@@ -40,6 +41,10 @@ def _default_bugs() -> Dict[int, bool]:
 
 
 current_sid: ContextVar[str] = ContextVar("current_sid", default="")
+
+
+# W3C traceparent headers seen on API requests, so a QAgent trace id can be matched to server-side activity.
+traces: deque = deque(maxlen=200)
 
 
 class State:
@@ -111,6 +116,10 @@ async def session_cookie(request: Request, call_next):
     new = sid is None
     sid = sid or uuid.uuid4().hex
     current_sid.set(sid)
+    tp = request.headers.get("traceparent")
+    if tp and request.url.path.startswith("/api/"):
+        traces.append({"method": request.method, "path": request.url.path, "traceparent": tp})
+        print(f"traceparent {tp} {request.method} {request.url.path}", flush=True)
     response = await call_next(request)
     if new:
         response.set_cookie("sid", sid, httponly=True, samesite="lax")
@@ -193,9 +202,15 @@ async def api_pay(payload: dict | None = None):
     return {"ok": True, "charged": cart_snapshot()["total"]}
 
 
+@app.get("/__traces")
+async def get_traces():
+    return {"traces": list(traces)}
+
+
 @app.post("/__reset")
 async def reset():
     state.reset()
+    traces.clear()
     return {"ok": True, "bugs": state.bugs}
 
 
