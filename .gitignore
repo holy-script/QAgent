@@ -40,3 +40,7 @@ runs/
 .vscode/
 *.swp
 *.swo
+
+# Local artifact fallback
+backend/.artifacts/
+.artifacts/

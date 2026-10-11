@@ -125,7 +125,7 @@
           "required": true
         },
         "responses": {
-          "200": {
+          "201": {
             "description": "Successful Response",
             "content": {
               "application/json": {
@@ -213,6 +213,18 @@
               ],
               "title": "App Id"
             }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
           }
         ],
         "responses": {
@@ -259,7 +271,60 @@
           }
         },
         "responses": {
-          "200": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{run_id}/replay": {
+      "post": {
+        "tags": [
+          "Runs"
+        ],
+        "summary": "Replay Run",
+        "description": "Re-runs a finished run deterministically from its decision tape; `overrides` tweak gating and budgets.",
+        "operationId": "replay_run_runs__run_id__replay_post",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplayRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
             "description": "Successful Response",
             "content": {
               "application/json": {
@@ -366,6 +431,364 @@
         }
       }
     },
+    "/runs/{run_id}/events": {
+      "get": {
+        "tags": [
+          "Runs"
+        ],
+        "summary": "Run Events",
+        "description": "SSE stream of run events. Resumes from `after` or the standard Last-Event-ID header.",
+        "operationId": "run_events_runs__run_id__events_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Resume after this event seq",
+              "default": 0,
+              "title": "After"
+            },
+            "description": "Resume after this event seq"
+          },
+          {
+            "name": "last-event-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Last-Event-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{run_id}/flows": {
+      "get": {
+        "tags": [
+          "Runs"
+        ],
+        "summary": "Run Flows",
+        "operationId": "run_flows_runs__run_id__flows_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FlowRunResponse"
+                  },
+                  "title": "Response Run Flows Runs  Run Id  Flows Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{run_id}/findings": {
+      "get": {
+        "tags": [
+          "Runs"
+        ],
+        "summary": "Run Findings",
+        "operationId": "run_findings_runs__run_id__findings_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Finding"
+                  },
+                  "title": "Response Run Findings Runs  Run Id  Findings Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{run_id}/network": {
+      "get": {
+        "tags": [
+          "Runs"
+        ],
+        "summary": "Run Network",
+        "operationId": "run_network_runs__run_id__network_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "only_api",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Only Api"
+            }
+          },
+          {
+            "name": "flow_key",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Flow Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NetworkCall"
+                  },
+                  "title": "Response Run Network Runs  Run Id  Network Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{run_id}/spans": {
+      "get": {
+        "tags": [
+          "Runs"
+        ],
+        "summary": "Run Spans",
+        "operationId": "run_spans_runs__run_id__spans_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SpanResponse"
+                  },
+                  "title": "Response Run Spans Runs  Run Id  Spans Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{run_id}/logs": {
+      "get": {
+        "tags": [
+          "Runs"
+        ],
+        "summary": "Run Logs",
+        "operationId": "run_logs_runs__run_id__logs_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Level"
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Source"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LogEntryResponse"
+                  },
+                  "title": "Response Run Logs Runs  Run Id  Logs Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/playbooks": {
       "get": {
         "tags": [
@@ -402,6 +825,88 @@
                     "$ref": "#/components/schemas/PlaybookResponse"
                   },
                   "title": "Response List Playbooks Playbooks Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Playbooks"
+        ],
+        "summary": "Upload Playbook",
+        "description": "Parses and stores a Markdown playbook. Re-uploading under the same name adds a new\nversion unless the content hash is unchanged.",
+        "operationId": "upload_playbook_playbooks_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlaybookRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaybookResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/playbooks/normalize": {
+      "post": {
+        "tags": [
+          "Playbooks"
+        ],
+        "summary": "Normalize",
+        "description": "Claude rewrites a freeform test description into canonical playbook Markdown (nothing is saved).",
+        "operationId": "normalize_playbooks_normalize_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NormalizeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NormalizeResponse"
                 }
               }
             }
@@ -461,12 +966,99 @@
         }
       }
     },
+    "/playbooks/{playbook_id}/versions": {
+      "get": {
+        "tags": [
+          "Playbooks"
+        ],
+        "summary": "List Versions",
+        "operationId": "list_versions_playbooks__playbook_id__versions_get",
+        "parameters": [
+          {
+            "name": "playbook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Playbook Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlaybookVersionResponse"
+                  },
+                  "title": "Response List Versions Playbooks  Playbook Id  Versions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/playbooks/versions/{version_id}/markdown": {
+      "get": {
+        "tags": [
+          "Playbooks"
+        ],
+        "summary": "Get Version Markdown",
+        "operationId": "get_version_markdown_playbooks_versions__version_id__markdown_get",
+        "parameters": [
+          {
+            "name": "version_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Version Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "tags": [
           "Health"
         ],
         "summary": "Health Check",
+        "description": "Postgres is pinged for real; Jev, Bedrock and object storage report whether they are configured.",
         "operationId": "health_check_health_get",
         "responses": {
           "200": {
@@ -482,13 +1074,73 @@
         }
       }
     },
+    "/artifacts/{run_id}/flows/{flow_key}/{path}": {
+      "get": {
+        "tags": [
+          "Artifacts"
+        ],
+        "summary": "Get Flow Artifact",
+        "description": "Serves e.g. steps/3/screenshot.jpg, steps/3/dom.html, network/{call}/response.json, trace.zip.",
+        "operationId": "get_flow_artifact_artifacts__run_id__flows__flow_key___path__get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "flow_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Flow Key"
+            }
+          },
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/artifacts/{run_id}/steps/{step_seq}/screenshot.jpg": {
       "get": {
         "tags": [
           "Artifacts"
         ],
-        "summary": "Get Mock Screenshot",
-        "operationId": "get_mock_screenshot_artifacts__run_id__steps__step_seq__screenshot_jpg_get",
+        "summary": "Get Screenshot",
+        "description": "Shorthand for the first flow's screenshot; use the flow-qualified route when flows run in parallel.",
+        "operationId": "get_screenshot_artifacts__run_id__steps__step_seq__screenshot_jpg_get",
         "parameters": [
           {
             "name": "run_id",
@@ -617,6 +1269,15 @@
         ],
         "title": "AppResponse"
       },
+      "ConfidenceTier": {
+        "type": "string",
+        "enum": [
+          "AUTO",
+          "ESCALATE",
+          "STOP"
+        ],
+        "title": "ConfidenceTier"
+      },
       "CreateAppRequest": {
         "properties": {
           "slug": {
@@ -672,6 +1333,35 @@
           "base_url"
         ],
         "title": "CreateAppRequest"
+      },
+      "CreatePlaybookRequest": {
+        "properties": {
+          "app_id": {
+            "type": "string",
+            "title": "App Id"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "raw_markdown": {
+            "type": "string",
+            "title": "Raw Markdown"
+          }
+        },
+        "type": "object",
+        "required": [
+          "app_id",
+          "raw_markdown"
+        ],
+        "title": "CreatePlaybookRequest"
       },
       "CreateRunRequest": {
         "properties": {
@@ -739,6 +1429,205 @@
         ],
         "title": "CreateRunRequest"
       },
+      "DecisionResult": {
+        "properties": {
+          "decider": {
+            "type": "string",
+            "title": "Decider",
+            "description": "jev, claude, stub, or replay"
+          },
+          "model_version": {
+            "type": "string",
+            "title": "Model Version"
+          },
+          "selected_action_id": {
+            "type": "integer",
+            "title": "Selected Action Id"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "tier": {
+            "$ref": "#/components/schemas/ConfidenceTier"
+          },
+          "reasoning": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reasoning"
+          },
+          "probabilities": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Probabilities"
+          },
+          "latency_ms": {
+            "type": "number",
+            "title": "Latency Ms",
+            "default": 0.0
+          },
+          "input_tokens": {
+            "type": "integer",
+            "title": "Input Tokens",
+            "default": 0
+          },
+          "output_tokens": {
+            "type": "integer",
+            "title": "Output Tokens",
+            "default": 0
+          },
+          "cost_usd": {
+            "type": "number",
+            "title": "Cost Usd",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "decider",
+          "model_version",
+          "selected_action_id",
+          "confidence",
+          "tier"
+        ],
+        "title": "DecisionResult"
+      },
+      "Finding": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "flow_run_id": {
+            "type": "string",
+            "title": "Flow Run Id"
+          },
+          "step_seq": {
+            "type": "integer",
+            "title": "Step Seq"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/FindingSeverity"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/FindingKind"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "expected": {
+            "type": "string",
+            "title": "Expected"
+          },
+          "actual": {
+            "type": "string",
+            "title": "Actual"
+          },
+          "evidence": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Evidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "flow_run_id",
+          "step_seq",
+          "severity",
+          "kind",
+          "title",
+          "expected",
+          "actual"
+        ],
+        "title": "Finding"
+      },
+      "FindingKind": {
+        "type": "string",
+        "enum": [
+          "formula",
+          "dom",
+          "network",
+          "timing"
+        ],
+        "title": "FindingKind"
+      },
+      "FindingSeverity": {
+        "type": "string",
+        "enum": [
+          "critical",
+          "high",
+          "medium",
+          "low",
+          "info"
+        ],
+        "title": "FindingSeverity"
+      },
+      "FlowRunResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "flow_key": {
+            "type": "string",
+            "title": "Flow Key"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "step_count": {
+            "type": "integer",
+            "title": "Step Count",
+            "default": 0
+          },
+          "duration_ms": {
+            "type": "number",
+            "title": "Duration Ms",
+            "default": 0.0
+          },
+          "failure_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failure Reason"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/StepSummary"
+            },
+            "type": "array",
+            "title": "Steps"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "run_id",
+          "flow_key",
+          "status"
+        ],
+        "title": "FlowRunResponse"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -790,6 +1679,203 @@
         ],
         "title": "HealthResponse"
       },
+      "LogEntryResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "flow_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flow Run Id"
+          },
+          "step_seq": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Step Seq"
+          },
+          "level": {
+            "type": "string",
+            "title": "Level"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Data"
+          },
+          "ts": {
+            "type": "string",
+            "title": "Ts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "run_id",
+          "level",
+          "source",
+          "message",
+          "ts"
+        ],
+        "title": "LogEntryResponse"
+      },
+      "NetworkCall": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "flow_run_id": {
+            "type": "string",
+            "title": "Flow Run Id"
+          },
+          "step_seq": {
+            "type": "integer",
+            "title": "Step Seq"
+          },
+          "method": {
+            "type": "string",
+            "title": "Method"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status"
+          },
+          "duration_ms": {
+            "type": "number",
+            "title": "Duration Ms"
+          },
+          "req_size": {
+            "type": "integer",
+            "title": "Req Size",
+            "default": 0
+          },
+          "resp_size": {
+            "type": "integer",
+            "title": "Resp Size",
+            "default": 0
+          },
+          "is_api": {
+            "type": "boolean",
+            "title": "Is Api",
+            "default": false
+          },
+          "req_body_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Req Body Url"
+          },
+          "resp_body_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resp Body Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "flow_run_id",
+          "step_seq",
+          "method",
+          "url",
+          "status",
+          "duration_ms"
+        ],
+        "title": "NetworkCall"
+      },
+      "NormalizeRequest": {
+        "properties": {
+          "raw_text": {
+            "type": "string",
+            "title": "Raw Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "raw_text"
+        ],
+        "title": "NormalizeRequest"
+      },
+      "NormalizeResponse": {
+        "properties": {
+          "markdown": {
+            "type": "string",
+            "title": "Markdown"
+          },
+          "flows": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Flows"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "markdown"
+        ],
+        "title": "NormalizeResponse"
+      },
       "PlaybookResponse": {
         "properties": {
           "id": {
@@ -836,6 +1922,58 @@
           "status"
         ],
         "title": "PlaybookResponse"
+      },
+      "PlaybookVersionResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "playbook_id": {
+            "type": "string",
+            "title": "Playbook Id"
+          },
+          "version_no": {
+            "type": "integer",
+            "title": "Version No"
+          },
+          "content_hash": {
+            "type": "string",
+            "title": "Content Hash"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "playbook_id",
+          "version_no",
+          "content_hash",
+          "created_at"
+        ],
+        "title": "PlaybookVersionResponse"
+      },
+      "ReplayRequest": {
+        "properties": {
+          "overrides": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Overrides",
+            "description": "gate_auto_min, gate_escalate_min, step_budget, time_budget_s, live_fallback"
+          }
+        },
+        "type": "object",
+        "title": "ReplayRequest"
       },
       "RunMode": {
         "type": "string",
@@ -959,6 +2097,212 @@
         },
         "type": "object",
         "title": "RunTotals"
+      },
+      "SpanResponse": {
+        "properties": {
+          "trace_id": {
+            "type": "string",
+            "title": "Trace Id"
+          },
+          "span_id": {
+            "type": "string",
+            "title": "Span Id"
+          },
+          "parent_span_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Span Id"
+          },
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "start_ns": {
+            "type": "integer",
+            "title": "Start Ns"
+          },
+          "end_ns": {
+            "type": "integer",
+            "title": "End Ns"
+          },
+          "attributes": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Attributes"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "ok"
+          }
+        },
+        "type": "object",
+        "required": [
+          "trace_id",
+          "span_id",
+          "run_id",
+          "name",
+          "kind",
+          "start_ns",
+          "end_ns"
+        ],
+        "title": "SpanResponse"
+      },
+      "StepSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "flow_run_id": {
+            "type": "string",
+            "title": "Flow Run Id"
+          },
+          "seq": {
+            "type": "integer",
+            "title": "Seq"
+          },
+          "intent": {
+            "type": "string",
+            "title": "Intent"
+          },
+          "action_id": {
+            "type": "integer",
+            "title": "Action Id"
+          },
+          "action_label": {
+            "type": "string",
+            "title": "Action Label"
+          },
+          "page_tag": {
+            "type": "string",
+            "title": "Page Tag"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "timings": {
+            "$ref": "#/components/schemas/StepTimings"
+          },
+          "screenshot_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Screenshot Url"
+          },
+          "dom_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dom Url"
+          },
+          "decision": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DecisionResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/Finding"
+            },
+            "type": "array",
+            "title": "Findings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "flow_run_id",
+          "seq",
+          "intent",
+          "action_id",
+          "action_label",
+          "page_tag",
+          "url",
+          "status",
+          "timings"
+        ],
+        "title": "StepSummary"
+      },
+      "StepTimings": {
+        "properties": {
+          "observe_ms": {
+            "type": "number",
+            "title": "Observe Ms",
+            "default": 0.0
+          },
+          "extract_ms": {
+            "type": "number",
+            "title": "Extract Ms",
+            "default": 0.0
+          },
+          "decide_ms": {
+            "type": "number",
+            "title": "Decide Ms",
+            "default": 0.0
+          },
+          "gate_ms": {
+            "type": "number",
+            "title": "Gate Ms",
+            "default": 0.0
+          },
+          "act_ms": {
+            "type": "number",
+            "title": "Act Ms",
+            "default": 0.0
+          },
+          "settle_ms": {
+            "type": "number",
+            "title": "Settle Ms",
+            "default": 0.0
+          },
+          "verify_ms": {
+            "type": "number",
+            "title": "Verify Ms",
+            "default": 0.0
+          },
+          "total_ms": {
+            "type": "number",
+            "title": "Total Ms",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "title": "StepTimings"
       },
       "ValidationError": {
         "properties": {

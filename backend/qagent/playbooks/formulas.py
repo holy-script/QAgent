@@ -1,15 +1,31 @@
-from typing import Any, Dict, Optional
-from simpleeval import SimpleEval, NameNotDefined
+from typing import Any, Dict
+from simpleeval import EvalWithCompoundTypes
 
 
-def evaluate_formula(expression: str, context: Dict[str, Any]) -> bool:
+class AttrDict(dict):
+    """Dict that also exposes keys as attributes, so formulas can say `i.price`."""
+
+    def __getattr__(self, name: str) -> Any:
+        try:
+            return self[name]
+        except KeyError:
+            raise AttributeError(name)
+
+
+def wrap_attr(value: Any) -> Any:
+    if isinstance(value, dict):
+        return AttrDict({k: wrap_attr(v) for k, v in value.items()})
+    if isinstance(value, list):
+        return [wrap_attr(v) for v in value]
+    return value
+
+
+def evaluate_formula_strict(expression: str, context: Dict[str, Any]) -> bool:
     """
-    Evaluates a deterministic Python-like formula expression using simpleeval.
-    Never uses an LLM for formulas.
-    Returns True if assertion/formula holds, False otherwise.
+    Evaluates a deterministic Python-like formula using simpleeval (never an LLM).
+    Raises if the expression is invalid or references an unbound name.
     """
-    evaluator = SimpleEval(names=context)
-    # Add safe helper builtins like round, sum, min, max, len, abs
+    evaluator = EvalWithCompoundTypes(names={k: wrap_attr(v) for k, v in context.items()})
     evaluator.functions = {
         "round": round,
         "sum": sum,
@@ -18,9 +34,12 @@ def evaluate_formula(expression: str, context: Dict[str, Any]) -> bool:
         "len": len,
         "abs": abs,
     }
-    
+    return bool(evaluator.eval(expression))
+
+
+def evaluate_formula(expression: str, context: Dict[str, Any]) -> bool:
+    """Returns True if the formula holds; any evaluation error counts as False."""
     try:
-        result = evaluator.eval(expression)
-        return bool(result)
-    except Exception as e:
+        return evaluate_formula_strict(expression, context)
+    except Exception:
         return False

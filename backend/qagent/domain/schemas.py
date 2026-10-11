@@ -233,3 +233,63 @@ class HealthResponse(BaseModel):
     postgres_reachable: bool
     storage_reachable: bool
     active_model: str
+
+
+# --- Playbook upload, observability DTOs (added in B7; additive to the frozen B0 contract) ---
+
+class CreatePlaybookRequest(BaseModel):
+    app_id: str
+    name: Optional[str] = None
+    raw_markdown: str
+
+
+class PlaybookVersionResponse(BaseModel):
+    id: str
+    playbook_id: str
+    version_no: int
+    content_hash: str
+    warnings: List[str] = Field(default_factory=list)
+    created_at: str
+
+
+class SpanResponse(BaseModel):
+    trace_id: str
+    span_id: str
+    parent_span_id: Optional[str] = None
+    run_id: str
+    name: str
+    kind: str
+    start_ns: int
+    end_ns: int
+    attributes: Dict[str, Any] = Field(default_factory=dict)
+    status: str = "ok"
+
+
+class LogEntryResponse(BaseModel):
+    id: str
+    run_id: str
+    flow_run_id: Optional[str] = None
+    step_seq: Optional[int] = None
+    level: str
+    source: str
+    message: str
+    data: Dict[str, Any] = Field(default_factory=dict)
+    ts: str
+
+
+class NormalizeRequest(BaseModel):
+    raw_text: str
+
+
+class NormalizeResponse(BaseModel):
+    markdown: str
+    flows: List[Dict[str, Any]] = Field(default_factory=list)
+    warnings: List[str] = Field(default_factory=list)
+    notes: Optional[str] = None
+
+
+class ReplayRequest(BaseModel):
+    overrides: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="gate_auto_min, gate_escalate_min, step_budget, time_budget_s, live_fallback",
+    )

@@ -27,11 +27,13 @@ class Settings(BaseSettings):
     neon_s3_region: str = Field(default="ap-southeast-1", alias="NEON_S3_REGION")
     neon_s3_bucket: str = Field(default="qagent-artifacts", alias="NEON_S3_BUCKET")
 
+    local_artifact_dir: str = Field(default=".artifacts", alias="LOCAL_ARTIFACT_DIR")
+
     # Jev (TypeSafe AI)
     typesafe_api_key: Optional[str] = Field(default=None, alias="TYPESAFE_API_KEY")
     jev_api_token: Optional[str] = Field(default=None, alias="JEV_API_TOKEN")
     typesafe_base_url: str = Field(default="https://api.typesafe.ai", alias="TYPESAFE_BASE_URL")
-    jev_model: str = Field(default="jev-1.13.0", alias="JEV_MODEL")
+    jev_model: str = Field(default="jev-latest", alias="JEV_MODEL")
     jev_max_concurrency: int = Field(default=4, alias="JEV_MAX_CONCURRENCY")
 
     # Claude on Bedrock
@@ -55,6 +57,13 @@ class Settings(BaseSettings):
     flow_time_budget_s: int = Field(default=90, alias="FLOW_TIME_BUDGET_S")
     flow_max_parallel: int = Field(default=3, alias="FLOW_MAX_PARALLEL")
     network_body_cap_kb: int = Field(default=256, alias="NETWORK_BODY_CAP_KB")
+    step_sla_ms: float = Field(default=2000.0, alias="STEP_SLA_MS")
+    settle_timeout_ms: int = Field(default=3000, alias="SETTLE_TIMEOUT_MS")
+
+    # Browser: leave channel unset to use bundled Chromium; the sandbox falls back
+    # to installed Google Chrome when the bundled build is missing.
+    browser_channel: Optional[str] = Field(default=None, alias="QAGENT_BROWSER_CHANNEL")
+    browser_headless: bool = Field(default=True, alias="QAGENT_HEADLESS")
 
     # Demo & Local Dev
     demo_shop_url: str = Field(default="http://localhost:8001", alias="DEMO_SHOP_URL")

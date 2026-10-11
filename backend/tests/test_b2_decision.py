@@ -1,3 +1,4 @@
+import json
 import pytest
 import respx
 import httpx
@@ -54,11 +55,12 @@ async def test_jev_decider_with_mock_and_retry(sample_request):
         side_effect=[
             httpx.Response(429, json={"error": "rate limited"}),
             httpx.Response(200, json={
-                "choice": 2,
-                "confidence": 0.88,
-                "model": "jev-1.13.0",
-                "probabilities": {"2": 0.88, "1": 0.12},
-                "usage": {"prompt_tokens": 120, "completion_tokens": 8}
+                "model": "jev-latest",
+                "answers": {"action": {
+                    "type": "choice", "choice": "2", "confidence": 0.88,
+                    "probabilities": {"2": 0.88, "1": 0.12},
+                }},
+                "usage": {"input_tokens": 120, "output_tokens": 8},
             })
         ]
     )
@@ -67,6 +69,9 @@ async def test_jev_decider_with_mock_and_retry(sample_request):
     res = await decider.decide(sample_request)
 
     assert route.call_count == 2
+    body = json.loads(route.calls[-1].request.content)
+    assert body["questions"]["action"]["type"] == "choice"
+    assert set(body["questions"]["action"]["criteria"]) == {"1", "2"}
     assert res.selected_action_id == 2
     assert res.confidence == 0.88
     assert res.tier == ConfidenceTier.AUTO

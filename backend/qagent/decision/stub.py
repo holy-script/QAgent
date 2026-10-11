@@ -1,6 +1,10 @@
+import re
 from typing import Dict, Any, Optional
 from qagent.decision.base import Decider
 from qagent.domain.schemas import DecisionRequest, DecisionResult, ConfidenceTier
+
+
+_STOPWORDS = {"the", "and", "click", "open", "press", "tap", "item", "items", "into", "with", "field"}
 
 
 class StubDecider:
@@ -15,16 +19,14 @@ class StubDecider:
         if self.forced_action_id is not None:
             action_id = self.forced_action_id
         elif request.candidates:
-            # Pick first available or match intent keyword
-            intent_lower = request.intent.lower()
-            matched = False
+            # Best word overlap between the intent and the candidate label wins; ties go to the first.
+            words = {w for w in re.findall(r"[a-z0-9]+", request.intent.lower()) if len(w) >= 3} - _STOPWORDS
+            best_score = 0
+            action_id = request.candidates[0].id
             for cand in request.candidates:
-                if any(word in cand.label.lower() for word in intent_lower.split() if len(word) > 3):
-                    action_id = cand.id
-                    matched = True
-                    break
-            if not matched:
-                action_id = request.candidates[0].id
+                score = len(words & set(re.findall(r"[a-z0-9]+", cand.label.lower())))
+                if score > best_score:
+                    best_score, action_id = score, cand.id
 
         tier = ConfidenceTier.AUTO if self.confidence >= 0.75 else ConfidenceTier.ESCALATE
 

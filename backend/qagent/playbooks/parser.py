@@ -20,6 +20,7 @@ def parse_playbook_markdown(content: str) -> Dict[str, Any]:
 
     current_flow: Dict[str, Any] = {}
     current_section = ""
+    current_formula: Dict[str, Any] | None = None
 
     lines = content.splitlines()
     for line in lines:
@@ -42,6 +43,7 @@ def parse_playbook_markdown(content: str) -> Dict[str, Any]:
                 "edge_cases": []
             }
             current_section = ""
+            current_formula = None
         elif line_strip.startswith("Severity:"):
             if current_flow:
                 current_flow["severity"] = line_strip.replace("Severity:", "").strip().lower()
@@ -66,10 +68,25 @@ def parse_playbook_markdown(content: str) -> Dict[str, Any]:
                 if len(kv) == 2:
                     current_flow["test_data"][kv[0].strip()] = kv[1].strip()
             elif current_section == "formulas" and line_strip.startswith("- "):
-                # e.g. - cart_total: `total == ...`
+                indented = len(line) - len(line.lstrip()) >= 2
                 match = re.match(r"^-\s*([a-zA-Z0-9_]+):\s*`([^`]+)`", line_strip)
-                if match:
-                    current_flow["formulas"][match.group(1)] = match.group(2)
+                if match and not indented:
+                    # e.g. - cart_total: `total == ...`
+                    current_formula = current_flow["formulas"].setdefault(
+                        match.group(1),
+                        {"expr": match.group(2), "kind": "formula", "source": "both", "bindings": {}},
+                    )
+                elif indented and current_formula is not None:
+                    # sub-bullets: source / kind / bindings (name=api:/path.field, ui:css, const:value)
+                    key, _, val = line_strip[2:].partition(":")
+                    key, val = key.strip().lower(), val.strip()
+                    if key == "bindings":
+                        for pair in val.split(","):
+                            name, _, spec = pair.partition("=")
+                            if name.strip() and spec.strip():
+                                current_formula["bindings"][name.strip()] = spec.strip()
+                    elif key in ("source", "kind"):
+                        current_formula[key] = val.lower()
             elif current_section == "edge_cases" and line_strip.startswith("- "):
                 current_flow["edge_cases"].append(line_strip[2:].strip())
 

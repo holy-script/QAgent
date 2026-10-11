@@ -49,6 +49,20 @@ EXTRACTOR_JS = """
             }
         });
     }
+    // Identical labels (e.g. three "Add to Cart" buttons) are ambiguous to a model: add the
+    // surrounding row's text so each candidate is distinguishable.
+    const counts = {};
+    candidates.forEach(c => counts[c.label] = (counts[c.label] || 0) + 1);
+    const els = Array.from(document.querySelectorAll(interactableSelectors));
+    candidates.forEach(c => {
+        if (!c.label || counts[c.label] < 2) return;
+        const el = els.find(e => {
+            const r = e.getBoundingClientRect();
+            return r.x === c.bounding_box.x && r.y === c.bounding_box.y;
+        });
+        const ctx = el && el.parentElement ? el.parentElement.innerText.replace(c.label, '').trim().split('\\n')[0] : '';
+        if (ctx) c.label = (c.label + ' - ' + ctx).substring(0, 80);
+    });
     return candidates;
 }
 """

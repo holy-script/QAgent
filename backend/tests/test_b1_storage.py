@@ -34,13 +34,16 @@ async def test_upload_queue_processes_items():
             kind="dom",
         )
         
-        # Allow queue worker to process
-        await asyncio.sleep(0.1)
-        
-        async with async_session_factory() as session:
-            stmt = select(Artifact).where(Artifact.run_id == "run-test-001")
-            result = await session.execute(stmt)
-            artifacts = list(result.scalars().all())
+        # Allow queue worker to process across remote network latency
+        for _ in range(20):
+            await asyncio.sleep(0.1)
+            async with async_session_factory() as session:
+                stmt = select(Artifact).where(Artifact.run_id == "run-test-001")
+                result = await session.execute(stmt)
+                artifacts = list(result.scalars().all())
+                if artifacts:
+                    break
+
             assert len(artifacts) >= 1
             assert artifacts[0].object_key == key
             assert artifacts[0].size_bytes == len(data)

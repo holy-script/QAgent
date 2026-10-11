@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 import uuid
 from sqlmodel import SQLModel, Field
-from sqlalchemy import Column, JSON
+from sqlalchemy import BigInteger, Column, JSON
 
 
 def utc_now() -> datetime:
@@ -183,8 +183,8 @@ class SpanRecord(SQLModel, table=True):
     run_id: str = Field(index=True)
     name: str
     kind: str
-    start_ns: int
-    end_ns: int
+    start_ns: int = Field(sa_column=Column(BigInteger, nullable=False))  # epoch ns overflows int4
+    end_ns: int = Field(sa_column=Column(BigInteger, nullable=False))
     attributes: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     status: str = "ok"
 

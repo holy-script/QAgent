@@ -35,29 +35,33 @@ class JevDecider:
             # Fallback if no API key present in test environments
             return self._fallback_decision(request)
 
-        # Build prompt payload for Jev
-        candidates_text = "\n".join(
-            f"[{c.id}] <{c.tag}> {c.label} (action: {c.action_type})"
-            for c in request.candidates
-        )
-        prompt = (
-            f"Given the user intent: '{request.intent}'\n"
-            f"Current URL: {request.url}\n"
-            f"Available elements:\n{candidates_text}\n"
-            f"Select the single best candidate ID (integer) to advance the flow."
-        )
-
+        # TypeSafe System One API: `state` is the content, `questions` are named; a "choice"
+        # question returns the chosen criteria key, a confidence and per-choice probabilities.
+        payload = {
+            "model": self.model,
+            "state": {
+                "test_step": request.intent,
+                "page_url": request.url,
+                "page_summary": request.page_summary or "",
+                "previous_steps": [
+                    f"{h.get('intent')} -> {h.get('action')}" for h in request.history[-3:]
+                ],
+            },
+            "questions": {
+                "action": {
+                    "type": "choice",
+                    "instructions": "Which page element performs the test step?",
+                    "criteria": {
+                        str(c.id): f"<{c.tag}> {c.label} (action: {c.action_type})"
+                        for c in request.candidates
+                    },
+                }
+            },
+        }
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
         }
-        payload = {
-            "model": self.model,
-            "prompt": prompt,
-            "temperature": 0.0,
-            "choices": [c.id for c in request.candidates],
-        }
-
         start_time = time.perf_counter()
 
         async with self.semaphore:
@@ -69,10 +73,14 @@ class JevDecider:
 
         latency_ms = (time.perf_counter() - start_time) * 1000.0
 
-        choice = response_data.get("choice") or (request.candidates[0].id if request.candidates else 1)
-        confidence = float(response_data.get("confidence", 0.90))
-        model_version = response_data.get("model", self.model)
-        probs = response_data.get("probabilities", {choice: confidence})
+        answer = response_data["answers"]["action"]
+        valid = {c.id for c in request.candidates}
+        choice = int(answer["choice"])
+        confidence = float(answer.get("confidence", 0.0))
+        if choice not in valid:
+            choice, confidence = (request.candidates[0].id if request.candidates else 0), 0.0
+        probs = {int(k): float(v) for k, v in answer.get("probabilities", {}).items() if int(k) in valid}
+        usage = response_data.get("usage", {})
 
         tier = ConfidenceTier.AUTO
         if confidence < settings.gate_escalate_min:
@@ -82,16 +90,16 @@ class JevDecider:
 
         return DecisionResult(
             decider="jev",
-            model_version=model_version,
+            model_version=response_data.get("model", self.model),
             selected_action_id=choice,
             confidence=confidence,
             tier=tier,
-            reasoning=response_data.get("reasoning", "Jev selected optimal element"),
-            probabilities=probs,
+            reasoning=None,
+            probabilities=probs or {choice: confidence},
             latency_ms=latency_ms,
-            input_tokens=response_data.get("usage", {}).get("prompt_tokens", 80),
-            output_tokens=response_data.get("usage", {}).get("completion_tokens", 10),
-            cost_usd=0.0004,
+            input_tokens=usage.get("input_tokens", 0),
+            output_tokens=usage.get("output_tokens", 0),
+            cost_usd=0.0,  # TypeSafe does not publish per-token pricing; output tokens are free
         )
 
     async def _post_with_retry(self, url: str, headers: Dict[str, str], json: Dict[str, Any]) -> Dict[str, Any]:
