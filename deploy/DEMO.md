@@ -35,3 +35,6 @@ If something goes wrong live: refresh; `make doctor`; as a fallback `make dev-mo
 - **Cookies across sites**: the sign-in cookie only works if the web app and API share a registrable domain (for example `app.example.com` on Vercel and `api.example.com` on the backend). Set on the backend: `CORS_ORIGINS=https://app.example.com`, `AUTH_COOKIE_SECURE=true`, `AUTH_SECRET=<random>`. On different domains (`*.vercel.app` and `*.fastapicloud.dev`) browsers block the cookie; set `AUTH_COOKIE_SAMESITE=none` and expect Safari and Chrome's third-party cookie rules to break sign-in sometimes.
 - **Vercel**: Root Directory `frontend`; `frontend/vercel.json` sets the install command (`--legacy-peer-deps`). Environment variable `NEXT_PUBLIC_API_URL=https://api.example.com` (set before building).
 - **Long runs and streaming**: the browser connects straight to the API for live events, so Vercel's function time limits do not apply to them.
+
+## Hugging Face Spaces (single container, 16 GB, no card)
+See `deploy/HUGGINGFACE.md`.

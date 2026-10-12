@@ -125,10 +125,10 @@ test("the home dashboard shows totals, charts, app health and the period switch"
   const dash = page.getByRole("region", { name: "Dashboard" });
   await expect(dash.getByText("Test runs").first()).toBeVisible();
   await expect(dash.getByText("Open bugs").first()).toBeVisible();
-  await expect(dash.getByRole("img", { name: /Runs per day over the last 30 days/ })).toBeVisible();
+  await expect(dash.getByRole("group", { name: /Runs per day over the last 30 days/ })).toBeVisible();
   await expect(dash.getByRole("heading", { name: "App health" })).toBeVisible();
   await dash.getByRole("button", { name: "7 days" }).click();
-  await expect(dash.getByRole("img", { name: /over the last 7 days/ })).toBeVisible();
+  await expect(dash.getByRole("group", { name: /Runs per day over the last 7 days/ })).toBeVisible();
   await dash.getByRole("link", { name: /Demo Shop/ }).first().click();
   await expect(page).toHaveURL(/apps\/demo-shop/);
 });
@@ -165,8 +165,10 @@ test.describe("guided tours", () => {
     await page.goto(APP);
     await page.getByRole("button", { name: "Take a tour of this page" }).click();
     await expect(popover(page).getByText("An app's workspace")).toBeVisible();
-    for (let i = 0; i < 20 && (await popover(page).getByRole("button", { name: "Done" }).count()) === 0; i++) {
-      await popover(page).getByRole("button", { name: "Next" }).click();
+    for (let i = 0; i < 20; i++) {
+      const button = popover(page).getByRole("button", { name: /^(Next|Done)$/ });
+      if ((await button.innerText()) === "Done") break;
+      await button.click();
     }
     await expect(popover(page).getByText("Run a test")).toBeVisible();
     await popover(page).getByRole("button", { name: "Done" }).click();

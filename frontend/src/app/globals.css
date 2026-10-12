@@ -20,7 +20,7 @@
   --popover-foreground: #0d2b42;
   --primary: #c9922a;
   --primary-foreground: #1b1405; /* dark text on gold: white on #C9922A is only 2.9:1 */
-  --secondary: #eef4f8;
+  --secondary: #e2edf5;
   --secondary-foreground: #0f3351;
   --muted: #f3efe6;
   --muted-foreground: #566c7e;
@@ -44,6 +44,12 @@
   --violet-soft: rgb(109 74 168 / 0.09);
   --code: #f5f1e8;
   --primary-text: #8a5f12; /* gold dark enough for text on white */
+  --hero-from: #21648f;
+  --hero-via: #1a4f72;
+  --hero-to: #0d2d44;
+  --glow: rgb(120 190 235 / 0.34);
+  --shadow-card: 0 1px 2px rgb(13 43 66 / 0.06), 0 8px 22px -12px rgb(13 43 66 / 0.18);
+  --chip: #d3e4f0;
 
   --chart-1: #1a4f72;
   --chart-2: #c9922a;
@@ -92,6 +98,12 @@
   --violet-soft: rgb(183 156 240 / 0.15);
   --code: #08141f;
   --primary-text: #e8b84b;
+  --hero-from: #1a4f75;
+  --hero-via: #123a59;
+  --hero-to: #08192a;
+  --glow: rgb(96 165 215 / 0.26);
+  --shadow-card: 0 1px 0 rgb(255 255 255 / 0.03) inset, 0 10px 26px -14px rgb(0 0 0 / 0.55);
+  --chip: #21425e;
 
   --chart-1: #8db6d0;
   --chart-2: #e8b84b;
@@ -138,6 +150,7 @@
   --color-violet: var(--violet);
   --color-violet-soft: var(--violet-soft);
   --color-code: var(--code);
+  --color-chip: var(--chip);
   --color-primary-text: var(--primary-text);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
@@ -166,7 +179,9 @@
 
 @layer base {
   * { @apply border-border outline-ring/50; }
-  body { @apply bg-background text-foreground; font-family: var(--font-sans), system-ui, sans-serif; }
+  body { @apply bg-background text-foreground; font-family: var(--font-sans), system-ui, sans-serif;
+    background-image: radial-gradient(900px 340px at 88% -90px, color-mix(in oklab, var(--brand) 11%, transparent), transparent 70%), radial-gradient(760px 300px at 4% -70px, color-mix(in oklab, var(--primary) 10%, transparent), transparent 70%);
+    background-repeat: no-repeat; }
   html { @apply font-sans; }
 }
 
@@ -195,3 +210,9 @@
 .driver-popover.qagent-tour button { text-shadow: none; font-family: inherit; border-radius: 0.5rem; border: 1px solid var(--border); background: var(--card); color: var(--foreground); padding: 0.35rem 0.8rem; font-size: 0.8rem; }
 .driver-popover.qagent-tour .driver-popover-next-btn, .driver-popover.qagent-tour .driver-popover-done-btn { background: var(--primary); color: var(--primary-foreground); border-color: transparent; }
 .driver-popover.qagent-tour .driver-popover-close-btn { color: var(--muted-foreground); border: none; background: transparent; }
+
+/* Rich surfaces: the blue hero/header band, and a token override so controls inside it read white-on-blue */
+.bg-hero { background: radial-gradient(520px 240px at 92% -10%, var(--glow), transparent 70%), linear-gradient(135deg, var(--hero-from), var(--hero-via) 52%, var(--hero-to)); color: #fff; }
+.on-blue { --foreground: #fff; --muted-foreground: rgb(255 255 255 / 0.8); --card: rgb(255 255 255 / 0.12); --muted: rgb(255 255 255 / 0.14); --border: rgb(255 255 255 / 0.26); --accent: rgb(255 255 255 / 0.18); --accent-foreground: #fff; --ring: #f3d58a; color: #fff; }
+.card-lift { transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+.card-lift:hover { transform: translateY(-2px); border-color: color-mix(in oklab, var(--brand) 45%, var(--border)); }

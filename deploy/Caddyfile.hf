@@ -1,0 +1,12 @@
+:7860 {
+	encode zstd gzip
+	handle /api/* {
+		# flush_interval -1: live run events (SSE) must not be buffered
+		reverse_proxy 127.0.0.1:8000 {
+			flush_interval -1
+		}
+	}
+	handle {
+		reverse_proxy 127.0.0.1:3000
+	}
+}

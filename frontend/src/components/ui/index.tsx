@@ -27,7 +27,7 @@ export const LinkButton = ({ variant = "ghost", className, ...p }: ComponentProp
 );
 
 export const Card = ({ className, ...p }: ComponentProps<"div">) => (
-  <div {...p} className={cn("rounded-xl border bg-card text-card-foreground shadow-xs", className)} />
+  <div {...p} className={cn("rounded-xl border bg-card text-card-foreground shadow-(--shadow-card)", className)} />
 );
 
 const TONES = {
@@ -73,12 +73,20 @@ export function InfoTip({ children, className }: { children: ReactNode; classNam
   );
 }
 
-export function Metric({ label, value, hint, tone, info }: { label: string; value: ReactNode; hint?: ReactNode; tone?: Tone; info?: ReactNode }) {
+const EDGE: Record<string, string> = { bad: "border-l-bad", ok: "border-l-ok", accent: "border-l-brand", warn: "border-l-warn", violet: "border-l-violet" };
+const CHIP: Record<string, string> = { bad: "bg-bad-soft text-bad", ok: "bg-ok-soft text-ok", warn: "bg-warn-soft text-warn", violet: "bg-violet-soft text-violet" };
+export function Metric({ label, value, hint, tone, info, icon: Icon, extra }: { label: string; value: ReactNode; hint?: ReactNode; tone?: Tone; info?: ReactNode; icon?: ComponentType<{ className?: string }>; extra?: ReactNode }) {
   return (
-    <Card className="px-4 py-3">
-      <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">{label}{info && <InfoTip>{info}</InfoTip>}</div>
-      <div className={cn("mt-1 text-2xl font-semibold tabular-nums", tone === "bad" && "text-bad", tone === "ok" && "text-ok", tone === "accent" && "text-brand")}>{value}</div>
-      {hint && <div className="mt-0.5 text-xs text-muted-foreground">{hint}</div>}
+    <Card className={cn("relative overflow-hidden border-l-[3px] bg-gradient-to-br from-card to-secondary/60 px-4 py-3", EDGE[tone ?? "accent"] ?? "border-l-brand/60")}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">{label}{info && <InfoTip>{info}</InfoTip>}</div>
+          <div className={cn("mt-1 text-2xl font-semibold tabular-nums", tone === "bad" && "text-bad", tone === "ok" && "text-ok", tone === "accent" && "text-brand")}>{value}</div>
+          {hint && <div className="mt-0.5 text-xs text-muted-foreground">{hint}</div>}
+        </div>
+        {Icon && <span className={cn("grid size-9 shrink-0 place-items-center rounded-lg bg-chip text-brand", tone && CHIP[tone])}><Icon className="size-[18px]" /></span>}
+      </div>
+      {extra}
     </Card>
   );
 }
@@ -122,7 +130,7 @@ export function Tabs({ tabs, className }: { tabs: NavItem[]; className?: string 
         return (
           <Link key={t.href} href={t.href} aria-current={on ? "page" : undefined} data-tour={t.tour}
             className={cn("-mb-px flex items-center gap-2 whitespace-nowrap border-b-2 px-3.5 py-2.5 text-sm transition-colors",
-              on ? "border-brand font-medium text-foreground" : "border-transparent text-muted-foreground hover:text-foreground")}>
+              on ? "border-primary font-medium text-foreground" : "border-transparent text-muted-foreground hover:text-foreground")}>
             {t.label}
             {t.count != null && t.count > 0 && <span className="rounded-full bg-muted px-1.5 text-xs tabular-nums text-muted-foreground">{t.count}</span>}
           </Link>
@@ -142,8 +150,8 @@ export function SideNav({ items, className }: { items: NavItem[]; className?: st
         const Icon = t.icon;
         return (
           <Link key={t.href} href={t.href} aria-current={on ? "page" : undefined} data-tour={t.tour}
-            className={cn("flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors", on ? "bg-brand/10 font-medium text-brand" : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground")}>
-            {Icon && <Icon className="size-4 shrink-0" />}
+            className={cn("relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors", on ? "bg-card font-medium text-foreground shadow-sm before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-primary" : "text-muted-foreground hover:bg-card/70 hover:text-foreground")}>
+            {Icon && <Icon className={cn("size-4 shrink-0", on && "text-brand")} />}
             <span className="flex-1">{t.label}</span>
             {t.count != null && t.count > 0 && <span className="rounded-full bg-muted px-1.5 text-xs tabular-nums text-muted-foreground">{t.count}</span>}
           </Link>
@@ -187,7 +195,7 @@ export function SimpleTable({ head, children, className }: { head: string[]; chi
   return (
     <div className={cn("overflow-hidden rounded-xl border bg-card", className)}>
       <Table>
-        <TableHeader className="bg-muted/60">
+        <TableHeader className="bg-secondary">
           <TableRow className="hover:bg-transparent">{head.map((h) => <TableHead key={h} className="h-10 px-4 text-xs font-medium text-muted-foreground">{h}</TableHead>)}</TableRow>
         </TableHeader>
         <TableBody>{children}</TableBody>

@@ -39,12 +39,15 @@ function AppShell({ children }: { children: ReactNode }) {
     // On wide screens the sections move to a side list, so the page gets the full height and more width.
     <div className="lg:grid lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-8">
       <aside className="hidden lg:block">
-        <div className="sticky top-20 space-y-4">
-          <div>
-            <h1 className="truncate text-lg font-semibold tracking-tight">{app.name}</h1>
-            <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground"><Globe className="size-3 shrink-0" /><span className="truncate">{app.base_url}</span></div>
+        <div className="sticky top-20 overflow-hidden rounded-2xl border bg-gradient-to-b from-secondary to-card shadow-(--shadow-card)">
+          <div className="bg-hero on-blue flex items-center gap-3 px-4 py-4">
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary text-sm font-bold text-primary-foreground shadow">{app.name.slice(0, 2).toUpperCase()}</span>
+            <div className="min-w-0">
+              <h1 className="truncate text-base font-semibold leading-tight">{app.name}</h1>
+              <div className="mt-0.5 flex items-center gap-1 text-[11px] text-white/80"><Globe className="size-3 shrink-0" /><span className="truncate">{app.base_url}</span></div>
+            </div>
           </div>
-          <SideNav items={items} />
+          <div className="p-2"><SideNav items={items} /></div>
         </div>
       </aside>
       <div className="min-w-0 space-y-5">
@@ -56,9 +59,12 @@ function AppShell({ children }: { children: ReactNode }) {
           </Link>
         )}
         <div className="space-y-4 lg:hidden">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">{app.name}</h1>
-            <div className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground"><Globe className="size-3.5" />{app.base_url}</div>
+          <div className="bg-hero on-blue flex items-center gap-3 rounded-2xl px-4 py-4 shadow-(--shadow-card)">
+            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary text-sm font-bold text-primary-foreground shadow">{app.name.slice(0, 2).toUpperCase()}</span>
+            <div className="min-w-0">
+              <h1 className="truncate text-xl font-semibold tracking-tight">{app.name}</h1>
+              <div className="flex items-center gap-1.5 text-sm text-white/80"><Globe className="size-3.5 shrink-0" /><span className="truncate">{app.base_url}</span></div>
+            </div>
           </div>
           <Tabs tabs={items} />
         </div>

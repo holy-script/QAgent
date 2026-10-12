@@ -24,14 +24,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <head><script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} /></head>
       <body className="flex min-h-full flex-col">
         <Providers>
-          <header className="sticky top-0 z-30 border-b bg-background/85 backdrop-blur">
+          <header className="bg-hero on-blue sticky top-0 z-30 shadow-md">
             <div className="mx-auto flex h-14 max-w-[110rem] items-center gap-4 px-4 sm:px-6 2xl:px-10">
               <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-                <span className="grid size-7 place-items-center rounded-lg bg-primary text-primary-foreground"><Activity className="size-4" /></span>
-                QAgent
+                <span className="grid size-8 place-items-center rounded-lg bg-primary text-primary-foreground shadow"><Activity className="size-[18px]" /></span>
+                <span className="text-base">QAgent</span>
               </Link>
-              <span className="ml-auto flex items-center gap-3 text-xs text-muted-foreground">
-                <Link href="/help" className="hover:text-foreground" data-tour="help">How it works</Link>
+              <span className="ml-auto flex items-center gap-3 text-xs text-white/85">
+                <Link href="/help" className="hover:text-white hover:underline" data-tour="help">How it works</Link>
                 <TourButton />
                 <kbd className="hidden rounded-md border bg-card px-1.5 py-0.5 font-sans sm:inline" data-tour="search">Ctrl K to search</kbd>
                 <span className="hidden sm:inline">{USE_MOCK ? "Demo data" : "Connected"}</span>
