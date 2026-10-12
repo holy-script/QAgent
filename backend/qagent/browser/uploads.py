@@ -57,12 +57,31 @@ def split_names(value: Any) -> List[str]:
     return [n.strip() for n in str(value).split(",") if n.strip()]
 
 
+def _resolve(name: str, available: List[str], label: str) -> str:
+    """One name from the journey's test data -> a file that exists. A real file name is kept as asked (so a missing one is
+    reported by name). A description such as 'attached CSV file' or 'the dirty data file' is matched to the app's files by
+    type words (csv, pdf...) and then by the words it shares with a file name, and failing that by what the field accepts."""
+    lowered = {a.lower(): a for a in available}
+    if name.lower() in lowered:
+        return lowered[name.lower()]
+    if re.search(r"\.[A-Za-z0-9]{1,5}$", name):
+        return name
+    words = re.findall(r"[a-z0-9]+", name.lower())
+    ext_words = {w for w in words if w in _TYPES}
+    pool = [a for a in available if not ext_words or a.rsplit(".", 1)[-1].lower() in ext_words] or available
+    # the app's own files come first in `available`; among them prefer the one sharing the most words with the description
+    best = max(pool, key=lambda a: (sum(w in re.findall(r"[a-z0-9]+", a.lower()) for w in words if w not in ext_words), -pool.index(a)))
+    return best
+
+
 def choose_files(intent: str, label: str, test_data: Dict[str, Any], available: List[str]) -> List[str]:
     """Names of the files to upload for this step, or [] when nothing is available. Unknown names are returned as
     asked, so the caller can report exactly which file is missing."""
-    for key in ("file", "files", "upload", "attachment"):
-        if key in test_data and str(test_data[key]).strip():
-            return split_names(test_data[key])
+    keys = [k for k in ("file", "files", "upload", "attachment") if k in test_data]
+    keys += [k for k in test_data if k not in keys and re.search(r"file|upload|attach|csv|document", str(k), re.I)]
+    for key in keys:
+        if str(test_data[key]).strip():
+            return [_resolve(n, available, label) for n in split_names(test_data[key])]
     lowered = {a.lower(): a for a in available}
     quoted = _QUOTED.findall(intent)
     if quoted:

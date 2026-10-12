@@ -1237,7 +1237,7 @@ class EngineRunner:
                         outcome = await expectations.run_expectation_live(
                             self.judge, flow.key, n, text, severity, flow.covers, page_text, shots, hints, examples, page,
                             journey=flow.goal or "; ".join(flow.steps), console_logs=rt.sandbox.console_logs,
-                            state_js=PAGE_STATE_JS)
+                            state_js=PAGE_STATE_JS, network_calls=rt.recorder.calls)
                     except Exception as exc:
                         await self._log(ctx, seq, "warning", "checks",
                                         f"expectation {n} could not be judged: {type(exc).__name__}")

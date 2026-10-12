@@ -32,6 +32,13 @@ def test_which_file_a_step_uploads():
     assert pick("Choose the document", label="Resume (file upload, accepts .pdf)") == ["invoice.pdf"]  # field's accept list
     assert pick("Choose an image", label="Avatar (file upload, accepts image/*)") == ["sample.png"]
     assert pick("Attach something") == ["sample.png"]                                                # first available
+    # a description instead of a file name is matched to the app's files by type and shared words
+    files = ["genentech_portfolio_trx_dirty_v5.csv", "ocrevus_trx_data.csv", "sample.png", "sample.csv"]
+    by = lambda value, key="file": uploads.choose_files("Upload the file", "Choose file (file upload, accepts .csv)", {key: value}, files)  # noqa: E731
+    assert by("attached CSV file") == ["genentech_portfolio_trx_dirty_v5.csv"]                        # the app's own csv comes first
+    assert by("the ocrevus data file") == ["ocrevus_trx_data.csv"]
+    assert by("the dirty CSV", key="csv_file") == ["genentech_portfolio_trx_dirty_v5.csv"]
+    assert by("ocrevus_trx_data.csv") == ["ocrevus_trx_data.csv"] and by("missing.csv") == ["missing.csv"]  # real names stay as asked
     assert pick("Attach something", data={}) and uploads.choose_files("x", "", {}, []) == []
 
 

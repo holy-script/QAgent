@@ -92,7 +92,8 @@ def _prompt(statement: str, journey: str, hints: List[str], seen: Dict[str, Any]
 
 async def verify_live(client: Any, page: Page, statement: str, journey: str = "", hints: Optional[List[str]] = None,
                       examples: Optional[List[Dict[str, Any]]] = None, console_logs: Optional[List[Dict[str, Any]]] = None,
-                      state_js: Optional[str] = None, max_actions: Optional[int] = None) -> Optional[Verdict]:
+                      state_js: Optional[str] = None, max_actions: Optional[int] = None,
+                      network_calls: Optional[List[Dict[str, Any]]] = None) -> Optional[Verdict]:
     """A Verdict from working on the live page, or None when the evidence stays inconclusive."""
     hints = hints or []
     limit = settings.verify_max_actions if max_actions is None else max_actions
@@ -103,6 +104,9 @@ async def verify_live(client: Any, page: Page, statement: str, journey: str = ""
     started = time.perf_counter()
     start_url, moved = page.url, 0
     executor = BrowserExecutor(page)
+    downloads: List[str] = []
+    on_download = lambda d: downloads.append(d.suggested_filename)  # noqa: E731
+    page.on("download", on_download)
     trail: List[str] = []
     in_tok = out_tok = 0
     cost = 0.0
@@ -126,7 +130,8 @@ async def verify_live(client: Any, page: Page, statement: str, journey: str = ""
                     verdict = Verdict(v == "true", conf if v == "true" else 1 - conf, "claude", conf,
                                       f"[checked on the live page] {why}", model_version=client.model_id)
                 break
-            cursor = len(console_logs or [])
+            cursor, net_cursor = len(console_logs or []), len(network_calls or [])
+            downloads.clear()
             note = ""
             if action == "back":
                 try:
@@ -164,11 +169,21 @@ async def verify_live(client: Any, page: Page, statement: str, journey: str = ""
                         extra.append("page shows: " + " | ".join(alerts)[:200])
                 except Exception:
                     pass
+            await page.wait_for_timeout(300)   # a download or request started by the action may land just after it
+            if downloads:
+                extra.append("a file download started: " + ", ".join(downloads[:3]))
+            requests = [f"{c['method']} {c['status']} {c['url'].split('?')[0][-70:]}" for c in (network_calls or [])[net_cursor:]
+                        if c.get("is_api") or c["status"] >= 400]
+            if requests:
+                extra.append("requests: " + "; ".join(requests[:5]))
+            elif network_calls is not None and action in ("click",):
+                extra.append("no server requests were made")
             errors = [e["text"][:100] for e in (console_logs or [])[cursor:] if e.get("type") in ("error", "pageerror")]
             if errors:
                 extra.append("console errors: " + "; ".join(errors[:3]))
             trail.append(f"- {note}" + (f" ({'; '.join(extra)})" if extra else "") + (f" [you said: {why}]" if why else ""))
     finally:
+        page.remove_listener("download", on_download)
         for _ in range(min(moved, 5)):   # leave the page where the journey ended, for the next expectation
             if page.url == start_url:
                 break

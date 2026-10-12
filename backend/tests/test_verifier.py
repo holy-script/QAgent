@@ -128,3 +128,14 @@ async def test_the_live_verdict_is_on_the_tape_and_a_repeat_costs_nothing():
             await TapedJudge(None, tape={}).verify("other", "page text", page)
     finally:
         await sb.stop()
+
+
+@pytest.mark.asyncio
+async def test_the_verifier_is_told_when_a_click_made_no_server_requests():
+    sb, page = await on_page()
+    try:
+        client = Script([click(1), answer("false", "nothing was requested")])
+        await verify_live(client, page, "The link loads data", network_calls=[])
+        assert "no server requests were made" in client.prompts[1]
+    finally:
+        await sb.stop()

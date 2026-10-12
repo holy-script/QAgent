@@ -66,14 +66,14 @@ class TapedJudge:
 
     async def verify(self, question: str, page_text: str, page: Any, journey: str = "", hints: Optional[List[str]] = None,
                      examples: Optional[List[Dict[str, Any]]] = None, console_logs: Optional[List[Dict[str, Any]]] = None,
-                     state_js: Optional[str] = None) -> Optional[Verdict]:
+                     state_js: Optional[str] = None, network_calls: Optional[List[Dict[str, Any]]] = None) -> Optional[Verdict]:
         """Live verification (see checks/verifier.py), on the tape like any judgement: a repeat serves the recorded verdict."""
         key = judge_hash("verify: " + question, page_text, hints or [])
         recorded = self.tape.get(key) if self.tape is not None else None
         if recorded is not None:
             verdict, replayed = (Verdict.from_dict(recorded) if recorded.get("inconclusive") is not True else None), True
         elif getattr(self.inner, "can_verify", False):
-            verdict, replayed = await self.inner.verify(question, page_text, page, journey, hints, examples, console_logs, state_js), False
+            verdict, replayed = await self.inner.verify(question, page_text, page, journey, hints, examples, console_logs, state_js, network_calls), False
             if self.tape is not None:
                 self.divergent += 1
         else:
