@@ -44,7 +44,9 @@ SYSTEM = (
     "opens, updates), try it on a few representative elements and look at what happened. Do not answer 'inconclusive' just "
     "because a screenshot is static: you can act. Answer 'false' only when what you saw contradicts the statement (nothing "
     "happened, an error appeared, the wrong page opened); answer 'true' when your evidence supports it; use 'inconclusive' only "
-    "when you tried and still cannot tell. Avoid destructive actions (deleting, paying, submitting real data). You have a "
+    "when you tried and still cannot tell. Avoid destructive actions (deleting, paying, submitting real data) and do not repeat "
+    "actions that change the journey's state (Fix, Upload, Commit, Generate): the steps already done are listed, so judge statements "
+    "about an earlier moment (such as before the fix) from that list and the page now, or answer inconclusive. You have a "
     "limited number of actions, so be efficient and answer as soon as the evidence is clear."
 )
 

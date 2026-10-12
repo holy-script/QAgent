@@ -21,6 +21,9 @@ ANIMATIONS_OFF = """(() => {
 SSO_HOST_SUFFIXES = ("microsoftonline.com", "microsoft.com", "live.com", "msauth.net", "msftauth.net", "msauth.com")
 
 
+FONT_HOSTS = ("fonts.googleapis.com", "fonts.gstatic.com")
+
+
 class BrowserSandbox:
     """
     Playwright sandbox for one flow: isolated context, trace, HAR, console log,
@@ -69,9 +72,11 @@ class BrowserSandbox:
         if parsed.scheme in ("data", "about", "blob"):
             return True
         host = parsed.hostname or ""
+        if host in FONT_HOSTS:
+            return True   # web fonts only change how the page looks
         if self.session_mode and any(host == s or host.endswith("." + s) for s in SSO_HOST_SUFFIXES):
             return True
-        return host in self.allowed_hosts
+        return any(host == a or (a.startswith("*.") and host.endswith(a[1:])) for a in self.allowed_hosts)
 
     async def _guard(self, route) -> None:
         if self._host_allowed(route.request.url):

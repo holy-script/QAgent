@@ -169,8 +169,7 @@ On the Upload screen (after choosing a 12 month horizon), upload the file named 
 After choosing a 12 month horizon, load the built-in sample dataset on the Upload screen, confirm the column mapping so validation runs, then use Fix with AI and read the result.
 
 #### Expect
-- Before the fix, validation shows 5/6 pass because duplicates were found
-- After the fix, the summary shows the row count going down (939 to 931) and the re-validation shows 6/6
+- The fix summary shows the row count going down from 939 to 931 rows and the re-validation list shows 6/6 pass
 - Proceed to Analysis is enabled after the fix
 
 ### Flow: short-history-blocked

@@ -58,3 +58,10 @@ async def test_a_dropdown_is_found_chosen_and_the_page_actions_run():
         assert await run_utility(page, "@wait") == "Waited for the page to settle"
     finally:
         await sb.stop()
+
+
+def test_allowed_hosts_accept_a_domain_wildcard_and_web_fonts():
+    sb = BrowserSandbox(headless=True, allowed_hosts=["app.example.com", "*.sslip.io"])
+    assert sb._host_allowed("https://app.example.com/x") and sb._host_allowed("https://abc.1.2.3.4.sslip.io/api")
+    assert sb._host_allowed("https://fonts.gstatic.com/f.woff2") and not sb._host_allowed("https://evil.example.org/")
+    assert not sb._host_allowed("https://sslip.io/") and sb._host_allowed("data:text/plain,hi")

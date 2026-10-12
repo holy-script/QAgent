@@ -152,6 +152,8 @@ class FlowContext:
     log_cursor: int = 0
     steps: Dict[int, StepInfo] = field(default_factory=dict)
     plan_hints: Dict[int, str] = field(default_factory=dict)
+    done: List[str] = field(default_factory=list)   # the steps already done, for the final live checks
+    blocked_seen: int = 0              # how many blocked requests were already reported
     last_note: str = ""                # what the page showed after the previous step, for clearer failure messages   # step number -> the planner's note
     settles: List[Dict[str, Any]] = field(default_factory=list)
     before_bytes: Optional[bytes] = None
@@ -1095,7 +1097,14 @@ class EngineRunner:
         timings["verify_ms"] = (time.perf_counter() - t) * 1000.0
 
         observed = await self._observe_result(rt, state, info)
+        # The allow-list keeps the tester on the app, but an app often talks to its own API on another host. Say so, once per host.
+        hosts = {urlparse(u).hostname or u for u in rt.sandbox.blocked_requests[ctx.blocked_seen:]}
+        ctx.blocked_seen = len(rt.sandbox.blocked_requests)
+        for host in sorted(hosts):
+            await self._log(ctx, seq, "warning", "network", f"requests to '{host}' were blocked because it is not in this app's allowed hosts; "
+                                                         f"if the app needs it, add it in the app's settings (a '*.' prefix allows a whole domain)")
         failed_now = state["step_status"] in ("failed", "blocked")
+        ctx.done.append(f"{state['intent']} [{state['step_status']}]" + (f" -> {state.get('label')}" if state.get("label") else ""))
         history = state["history"] + [{"seq": seq, "intent": state["intent"], "action": state.get("label", ""),
                                        "status": state["step_status"],
                                        **({"error": (ctx.failure_reason or "")[:160]} if failed_now else {})}]
@@ -1255,7 +1264,7 @@ class EngineRunner:
                     try:
                         outcome = await expectations.run_expectation_live(
                             self.judge, flow.key, n, text, severity, flow.covers, page_text, shots, hints, examples, page,
-                            journey=flow.goal or "; ".join(flow.steps), console_logs=rt.sandbox.console_logs,
+                            journey=(flow.goal or "; ".join(flow.steps)) + ("\nSteps already done: " + " | ".join(ctx.done[-25:]) if ctx.done else ""), console_logs=rt.sandbox.console_logs,
                             state_js=PAGE_STATE_JS, network_calls=rt.recorder.calls)
                     except Exception as exc:
                         await self._log(ctx, seq, "warning", "checks",
