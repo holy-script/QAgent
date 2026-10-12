@@ -50,7 +50,7 @@ SYSTEM = (
     "happened, an error appeared, the wrong page opened); answer 'true' when your evidence supports it; use 'inconclusive' only "
     "when you tried and still cannot tell. Avoid destructive actions (deleting, paying, submitting real data) and do not repeat "
     "actions that change the journey's state (Fix, Upload, Commit, Generate): the steps already done are listed, so judge statements "
-    "about an earlier moment (such as before the fix) from that list and the page now, or answer inconclusive. You have a "
+    "about an earlier moment (such as before the fix) from that list and the page now, or answer inconclusive. When the statement is about an earlier screen (Upload, Explore, Method...), the text listed under 'Earlier screens' is the evidence for it: facts shown there count, and you must not call the statement false just because the page you are on now is a different screen. You have a "
     "limited number of actions, so be efficient and answer as soon as the evidence is clear."
 )
 

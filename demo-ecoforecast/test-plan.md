@@ -126,7 +126,7 @@ Pick a 12 month horizon, upload the clean data file from the test data, confirm 
 #### Expect
 - Validation shows 6/6 pass and the footer says 6 ecosystems and 52 months
 - On Explore the Great Lakes card shows an increase of about 45.6% and the Pacific West card about 35.8%
-- The benchmark finishes with status ready and the Model Evaluation Matrix lists the four fitted methods (Holt-Winters, SARIMA, Linear Trend + Seasonality, ETS) with WAPE scores
+- The benchmark finishes with status ready and the Model Evaluation Matrix includes Holt-Winters, SARIMA, Linear Trend + Seasonality and ETS, each with a WAPE score
 - The Forecast screen shows the method ETS, a national baseline of 6,786 and a projected horizon of about 6,889, a net growth of about 1.5%
 - The Chart, Data Table and Treemap views can all be opened
 
@@ -191,7 +191,7 @@ After choosing a 12 month horizon, upload the file from the test data, confirm t
 - severity: medium
 
 #### Goal
-Reach the Method screen with the clean data file from the test data and a 12 month horizon, wait for the benchmark, then in the custom month-on-month table click Reset All (0%), look at the Custom Trend Curve row of the Model Evaluation Matrix, then click Set Baseline (+2%) and look at that row again.
+Reach the Method screen with the clean data file from the test data and a 12 month horizon, wait for the benchmark, then in the custom month-on-month table click Reset All (0%) and look at the Custom Trend Curve row of the Model Evaluation Matrix.
 
 #### Expect
 - With a flat 0% curve the Custom Trend Curve is ranked below the data-driven methods and is not labelled Best Fit
