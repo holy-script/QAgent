@@ -1,7 +1,7 @@
 import asyncio
 import hashlib
 import re
-from typing import List
+from typing import List, Optional
 from urllib.parse import urlparse
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -19,7 +19,7 @@ from qagent.storage.purge import purge_app
 from qagent.storage.retention import apply_retention, expired_runs
 from qagent.domain import models as m
 from qagent.domain.schemas import (
-    AppFileResponse, PrdExtractResponse, AppResponse, AppSummaryResponse, CreateAppRequest, RetentionResult, RetentionStatus, RunResponse,
+    AppFileResponse, NormalizeResponse, PrdExtractResponse, PrdPlanRequest, AppResponse, AppSummaryResponse, CreateAppRequest, RetentionResult, RetentionStatus, RunResponse,
     UpdateAppRequest,
 )
 
@@ -110,6 +110,26 @@ async def delete_app(app_id: str, session: AsyncSession = Depends(get_session),
 def _file_out(f: m.AppFile) -> AppFileResponse:
     return AppFileResponse(id=f.id, name=f.name, content_type=f.content_type, size_bytes=f.size_bytes,
                            created_at=iso(f.created_at) or "")
+
+
+@router.post("/{app_id}/prd/plan", response_model=NormalizeResponse)
+async def plan_from_product_document(app_id: str, payload: Optional[PrdPlanRequest] = None,
+                                     session: AsyncSession = Depends(get_session)):
+    """Claude turns the app's product document (or `prd` from the request) into a high-level test plan of goal-driven
+    journeys. Nothing is saved; the author reviews and saves it like any other plan."""
+    from qagent.playbooks.from_prd import plan_from_prd
+    app = await _find(session, app_id)
+    prd = ((payload.prd if payload else None) or app.prd_markdown or "").strip()
+    if not prd:
+        raise HTTPException(status_code=422, detail="Add a product document in Settings first")
+    if not settings.bedrock_api_key:
+        raise HTTPException(status_code=503, detail="BEDROCK_API_KEY is not configured")
+    try:
+        result = await plan_from_prd(prd, app.base_url)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"could not write the test plan: {type(exc).__name__}")
+    return NormalizeResponse(markdown=result["markdown"], flows=result["parsed"]["flows"],
+                             warnings=result["warnings"], notes=result.get("notes"))
 
 
 @router.get("/{app_id}/files", response_model=List[AppFileResponse])

@@ -121,6 +121,11 @@ class RunManager:
             ModelCall.run_id == run_id, ModelCall.purpose == "planner"))).scalars().all()
         return {c.input_hash: c.response for c in rows if c.input_hash and c.response and not c.replayed}
 
+    async def _load_director_tape(self, session: AsyncSession, run_id: str) -> Dict[str, Dict[str, Any]]:
+        rows = (await session.execute(select(ModelCall).where(
+            ModelCall.run_id == run_id, ModelCall.purpose == "director"))).scalars().all()
+        return {c.input_hash: c.response for c in rows if c.input_hash and c.response and not c.replayed}
+
     async def _load_judge_tape(self, session: AsyncSession, run_id: str) -> Dict[str, Dict[str, Any]]:
         """Recorded judge verdicts of a finished run (input hash -> verdict)."""
         rows = (await session.execute(select(ModelCall).where(
@@ -143,6 +148,7 @@ class RunManager:
             tape = await self._load_tape(session, source_run_id)
             judge_tape = await self._load_judge_tape(session, source_run_id)
             plan_tape = await self._load_plan_tape(session, source_run_id)
+            director_tape = await self._load_director_tape(session, source_run_id)
         if not tape:
             raise RunStartError("source run has no recorded decisions to replay", 409)
 
@@ -157,12 +163,13 @@ class RunManager:
         return await self.start_run(
             req, decider=ReplayDecider(tape, fallback=fallback), replay_of=source_run_id, overrides=overrides,
             judge=TapedJudge(fallback_judge, tape=judge_tape) if (judge_tape or fallback_judge) else None,
-            plan_tape=plan_tape,
+            plan_tape=plan_tape, director_tape=director_tape, live_fallback=bool(overrides.get("live_fallback")),
         )
 
     async def start_run(self, req: CreateRunRequest, decider: Optional[Decider] = None,
                         replay_of: Optional[str] = None, overrides: Optional[Dict[str, Any]] = None,
-                        judge: Optional[Judge] = None, plan_tape: Optional[Dict[str, Dict[str, Any]]] = None) -> Run:
+                        judge: Optional[Judge] = None, plan_tape: Optional[Dict[str, Dict[str, Any]]] = None,
+                        director_tape: Optional[Dict[str, Dict[str, Any]]] = None, live_fallback: bool = False) -> Run:
         decider = decider or self.decider_factory(req.mode)
         overrides = overrides or {}
 
@@ -225,7 +232,8 @@ class RunManager:
                               escalator=None if replay_of else self.escalator_factory(req.mode),
                               checkpointer=self._checkpointer,
                               judge=judge if replay_of else self.judge_factory(req.mode),
-                              planner=self._planner_for(req, replay_of, plan_tape))
+                              planner=self._planner_for(req, replay_of, plan_tape),
+                              director=self._director_for(req, replay_of, director_tape, live_fallback))
         task = asyncio.create_task(self._execute(run_id, runner, sink))
         self.active[run_id] = ActiveRun(runner, sink, task)
         return run
@@ -236,6 +244,15 @@ class RunManager:
             return None
         if replay_of:
             return LedgerClient(BedrockClient(), self._noop_record, tape or {}) if tape else None
+        return BedrockClient() if settings.bedrock_api_key else None
+
+    def _director_for(self, req: CreateRunRequest, replay_of: Optional[str], tape: Optional[Dict[str, Any]], live_fallback: bool):
+        """Claude chooses the steps of goal-driven journeys. A repeat answers from the recording and never spends money
+        on a call that is not on it (unless live fallback was asked for)."""
+        if req.mode == RunMode.STUB:
+            return None
+        if replay_of:
+            return LedgerClient(BedrockClient(), self._noop_record, tape or {}, strict=not live_fallback)
         return BedrockClient() if settings.bedrock_api_key else None
 
     @staticmethod

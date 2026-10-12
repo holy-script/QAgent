@@ -23,7 +23,7 @@ export const GUIDE_STEPS: GuideStep[] = [
     spotlight: "If your app has a file upload, add the files a test may attach here. QAgent already has small samples (png, pdf, txt, csv, json). Not needed? Skip this step." },
   { id: "plan", title: "Create a test plan", path: (s) => `/apps/${s}/playbooks/new`, target: "new-plan",
     why: "List the journeys to try (add to cart, pay) and what should be true afterwards.",
-    spotlight: "Start from the sample, upload a file, paste or dictate rough notes and press “Rewrite my notes as a test plan”. Then Save and review." },
+    spotlight: "Fastest: press “Create from product document” and AI writes high-level journeys (a goal and what should be true) from the document you added. Or start from the sample, upload a file, or dictate rough notes and press “Rewrite my notes as a test plan”. Then Save and review." },
   { id: "run", title: "Run your first test", path: (s) => `/apps/${s}`, target: "run-launcher",
     why: "QAgent opens a real browser and works through your plan. It takes about a minute.",
     spotlight: "Pick the test plan, keep Smart mode, and press Run now. You can watch it live." },

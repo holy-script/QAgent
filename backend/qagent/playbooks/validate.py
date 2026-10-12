@@ -130,8 +130,8 @@ def validate_playbook(parsed: Dict[str, Any], previous: Optional[Dict[str, Any]]
         if not r.get("acceptance"):
             warnings.append(f"{r['key']}: requirement has no acceptance criteria")
     for fl in parsed["flows"]:
-        if not fl["steps"]:
-            errors.append(f"flow {fl['key']}: has no steps")
+        if not fl["steps"] and not fl.get("goal"):
+            errors.append(f"flow {fl['key']}: needs a goal or steps")
     for ec in parsed["edge_cases"]:
         if not ec.get("expect"):
             errors.append(f"{ec['key']}: edge case needs an 'expect' line")
@@ -143,7 +143,7 @@ def validate_playbook(parsed: Dict[str, Any], previous: Optional[Dict[str, Any]]
     # unknown fields and sections
     for item in parsed["items"]:
         extra = set(item["body"]) - KNOWN_FIELDS.get(item["category"], set()) \
-            - ({"steps", "expect", "test_data"} if item["category"] == "flow" else set())
+            - ({"steps", "expect", "test_data", "goal"} if item["category"] == "flow" else set())
         warnings += [f"{item['key']}: unknown field '{f}'" for f in sorted(extra)]
     warnings += [f"unknown section '{s}'" for s in parsed["unknown_sections"]]
 

@@ -85,7 +85,8 @@ export default function ReviewPlaybook() {
             {v.parsed.flows.map((f) => (
               <Card key={f.key} className="space-y-3 p-4 text-sm">
                 <div className="flex items-center gap-2"><span className="font-medium">{f.key}</span><SeverityBadge severity={f.severity} /></div>
-                <List title="Steps" items={f.steps} ordered />
+                {f.goal && <div><div className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">Goal (the AI chooses the steps)</div><p>{f.goal}</p></div>}
+                {f.steps.length > 0 && <List title={f.goal ? "Suggested route" : "Steps"} items={f.steps} ordered />}
                 <List title="Should be true afterwards" items={f.expect} />
                 {f.formulas.map((fo) => (
                   <div key={fo.name}><div className="text-xs text-muted-foreground">Calculation to check · {fo.name}</div><code className="mt-1 block rounded bg-muted p-2 text-xs">{fo.expr}</code></div>

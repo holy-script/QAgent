@@ -65,7 +65,36 @@ describe("validation errors block, warnings do not (same cases as the backend te
   });
   it("reports malformed headings and empty journeys", () => {
     expect(validateMarkdown("## Flows\n### Checkout\n").errors[0]).toContain("must be 'Flow: <key>'");
-    expect(validateMarkdown("## Flows\n### Flow: a\n- severity: high\n").errors).toContain("flow a: has no steps");
+    expect(validateMarkdown("## Flows\n### Flow: a\n- severity: high\n").errors).toContain("flow a: needs a goal or steps");
     expect(validateMarkdown("## Requirements\n### F-1: wrong prefix\n").errors[0]).toContain("needs an ID like REQ-1");
+  });
+});
+
+import { itemMarkdown, itemToValues } from "@/lib/playbook-md";
+import { mockPlanFromPrd } from "@/lib/refine-mock";
+
+describe("goal-driven journeys", () => {
+  const md = "## Requirements\n### REQ-1: Sign in works\n- acceptance: A user can sign in.\n- priority: high\n\n## Flows\n### Flow: sign-in\n- covers: REQ-1\n- severity: high\n\n#### Goal\nSign in and reach the dashboard.\n\n#### Expect\n- The dashboard is shown\n\n#### Test data\n- username: admin\n";
+  it("accepts a goal instead of steps, and still rejects a journey with neither", () => {
+    const ok = validateMarkdown(md);
+    expect(ok.errors).toEqual([]);
+    expect(ok.flows[0]).toMatchObject({ goal: "Sign in and reach the dashboard.", steps: [] });
+    expect(validateMarkdown(md.replace("#### Goal\nSign in and reach the dashboard.\n\n", "")).errors).toContain("flow sign-in: needs a goal or steps");
+    expect(ok.warnings.filter((w) => w.includes("unknown field"))).toEqual([]);
+  });
+  it("writes and re-reads a goal in the guided form", () => {
+    const text = itemMarkdown("flow", "", { title: "sign-in", severity: "high", covers: "REQ-1", checks: "", goal: "Sign in and reach the dashboard.", steps: "", expect: "The dashboard is shown", test_data: "" }, "");
+    expect(text).toContain("#### Goal\nSign in and reach the dashboard.");
+    expect(text).not.toContain("#### Steps");
+    const back = itemToValues("flow", { key: "sign-in", title: "sign-in", body: { goal: "Sign in and reach the dashboard.", steps: [], expect: ["x"], test_data: {} } });
+    expect(back.goal).toBe("Sign in and reach the dashboard.");
+  });
+  it("the demo-mode plan from a product document is a valid plan made of goals", () => {
+    const plan = mockPlanFromPrd("Users sign in. Users set up a forecast. They export results.", "http://localhost:8001");
+    const v = validateMarkdown(plan.markdown);
+    expect(v.errors).toEqual([]);
+    expect(v.flows).toHaveLength(3);
+    expect((v.flows as { goal?: string; steps: string[] }[]).every((f) => !!f.goal && f.steps.length === 0)).toBe(true);
+    expect(plan.markdown).not.toContain("#### Steps");
   });
 });

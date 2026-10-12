@@ -199,6 +199,27 @@ export interface paths {
         patch: operations["update_app_apps__app_id__patch"];
         trace?: never;
     };
+    "/apps/{app_id}/prd/plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Plan From Product Document
+         * @description Claude turns the app's product document (or `prd` from the request) into a high-level test plan of goal-driven
+         *     journeys. Nothing is saved; the author reviews and saves it like any other plan.
+         */
+        post: operations["plan_from_product_document_apps__app_id__prd_plan_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/apps/{app_id}/files": {
         parameters: {
             query?: never;
@@ -1940,6 +1961,14 @@ export interface components {
              */
             markdown: string;
         };
+        /** PrdPlanRequest */
+        PrdPlanRequest: {
+            /**
+             * Prd
+             * @description Use this text instead of the app's saved product document
+             */
+            prd?: string | null;
+        };
         /** RefineRequest */
         RefineRequest: {
             /** Text */
@@ -2133,6 +2162,16 @@ export interface components {
              * @default 0
              */
             planner_cost_usd: number;
+            /**
+             * Director Calls
+             * @default 0
+             */
+            director_calls: number;
+            /**
+             * Director Cost Usd
+             * @default 0
+             */
+            director_cost_usd: number;
             /**
              * Report Calls
              * @default 0
@@ -2724,6 +2763,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AppResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    plan_from_product_document_apps__app_id__prd_plan_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                app_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PrdPlanRequest"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NormalizeResponse"];
                 };
             };
             /** @description Validation Error */

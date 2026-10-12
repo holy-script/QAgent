@@ -466,6 +466,66 @@
         }
       }
     },
+    "/apps/{app_id}/prd/plan": {
+      "post": {
+        "tags": [
+          "Apps"
+        ],
+        "summary": "Plan From Product Document",
+        "description": "Claude turns the app's product document (or `prd` from the request) into a high-level test plan of goal-driven\njourneys. Nothing is saved; the author reviews and saves it like any other plan.",
+        "operationId": "plan_from_product_document_apps__app_id__prd_plan_post",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "App Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/PrdPlanRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NormalizeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/apps/{app_id}/files": {
       "get": {
         "tags": [
@@ -5134,6 +5194,25 @@
         "type": "object",
         "title": "PrdExtractResponse"
       },
+      "PrdPlanRequest": {
+        "properties": {
+          "prd": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prd",
+            "description": "Use this text instead of the app's saved product document"
+          }
+        },
+        "type": "object",
+        "title": "PrdPlanRequest"
+      },
       "RefineRequest": {
         "properties": {
           "text": {
@@ -5535,6 +5614,16 @@
           "planner_cost_usd": {
             "type": "number",
             "title": "Planner Cost Usd",
+            "default": 0.0
+          },
+          "director_calls": {
+            "type": "integer",
+            "title": "Director Calls",
+            "default": 0
+          },
+          "director_cost_usd": {
+            "type": "number",
+            "title": "Director Cost Usd",
             "default": 0.0
           },
           "report_calls": {

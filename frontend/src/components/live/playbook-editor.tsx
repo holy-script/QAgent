@@ -127,7 +127,7 @@ function Summary({ item }: { item: { category: string; body: Record<string, any>
   const bits: [string, string][] = [];
   const add = (k: string, val: unknown) => { if (val && (!Array.isArray(val) || val.length)) bits.push([k, Array.isArray(val) ? val.join(", ") : typeof val === "object" ? Object.entries(val as object).map(([a, c]) => `${a}=${c}`).join(", ") : String(val)]); };
   for (const k of ["prd_ref", "acceptance", "priority", "severity", "covers", "checks", "verifies", "rule", "check", "targets", "pattern", "max_ms", "question", "note", "wait_for", "ignore_console", "applies_to", "expect", "test_data", "scope", "context"]) add(k, b[k]);
-  if (item.category === "flow") { add("steps", `${b.steps?.length ?? 0}`); add("expectations", `${b.expect?.length ?? 0}`); }
+  if (item.category === "flow") { add("goal", b.goal); if (b.steps?.length) add("steps", `${b.steps.length}`); add("expectations", `${b.expect?.length ?? 0}`); }
   if (item.category === "reasoning_example") add("strategy", `${b.strategy?.length ?? 0} steps`);
   return <dl className="grid grid-cols-[7rem_1fr] gap-x-3 gap-y-0.5 text-xs">{bits.map(([k, val]) => <><dt key={k} className="text-muted-foreground">{k}</dt><dd key={k + "v"} className="break-words font-mono">{val}</dd></>)}</dl>;
 }

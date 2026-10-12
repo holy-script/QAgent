@@ -5,7 +5,7 @@ from qagent.domain.runspec import FlowSpec
 
 def flow_from_parsed(f: Dict[str, Any]) -> FlowSpec:
     return FlowSpec(
-        key=f["key"], severity=f.get("severity", "high"), steps=list(f.get("steps", [])),
+        key=f["key"], severity=f.get("severity", "high"), goal=f.get("goal"), steps=list(f.get("steps", [])),
         expect=list(f.get("expect", [])), test_data=dict(f.get("test_data", {})),
         covers=list(f.get("covers", [])), checks=list(f.get("checks", [])),
     )

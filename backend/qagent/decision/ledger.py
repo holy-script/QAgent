@@ -61,15 +61,16 @@ class TapedJudge:
         return verdict
 
 
-PURPOSE = {"bug_narrative": "bug_narrative", "plan_flow": "planner"}  # any other tool is a report call
+PURPOSE = {"bug_narrative": "bug_narrative", "plan_flow": "planner", "next_step": "director"}  # any other tool is a report call
 
 
 class LedgerClient:
     """BedrockClient look-alike that records every call as a ModelCall row and, on replay, serves recorded answers."""
 
     def __init__(self, inner: BedrockClient, record: Callable[[Dict[str, Any]], Awaitable[None]],
-                 tape: Optional[Dict[str, Dict[str, Any]]] = None):
-        self.inner, self.record, self.tape = inner, record, tape
+                 tape: Optional[Dict[str, Dict[str, Any]]] = None, strict: bool = False):
+        """`strict`: with a tape, a call that is not on it is an error instead of a live call (a repeat must not spend money)."""
+        self.inner, self.record, self.tape, self.strict = inner, record, tape, strict
 
     @property
     def model_id(self) -> str:
@@ -85,6 +86,8 @@ class LedgerClient:
                                "model_version": self.model_id, "label": name, "input_hash": key,
                                "response": hit, "replayed": True, "flow_run_id": current_flow_run.get()})
             return {"input": hit, "usage": {}}
+        if self.strict and self.tape is not None:
+            raise LookupError("this model call is not on the tape")
         started = time.perf_counter()
         out = await self.inner.converse_tool(system, user, tool, max_tokens, images)
         usage = out.get("usage", {})

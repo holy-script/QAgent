@@ -68,7 +68,7 @@ def _parse_fields(lines: List[str], category: str) -> Dict[str, Any]:
 
 
 def _parse_flow_body(lines: List[str]) -> Dict[str, Any]:
-    """Flow body: '- field: value' lines, then '#### Steps / Expect / Test data' subsections."""
+    """Flow body: '- field: value' lines, then '#### Goal / Steps / Expect / Test data' subsections."""
     flow: Dict[str, Any] = {"steps": [], "expect": [], "test_data": {}}
     head: List[str] = []
     section: Optional[str] = None
@@ -83,6 +83,8 @@ def _parse_flow_body(lines: List[str]) -> Dict[str, Any]:
             m = re.match(r"^\d+[.)]\s*(.+)$", s)
             if m:
                 flow["steps"].append(m.group(1).strip())
+        elif section == "goal" and s:
+            flow["goal"] = (flow.get("goal", "") + " " + s).strip()
         elif section == "expect" and s.startswith("- "):
             flow["expect"].append(s[2:].strip())
         elif section == "test data" and s.startswith("- "):

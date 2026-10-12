@@ -1,7 +1,7 @@
 import type { App, AppInput, FlowHistory, Mode, Playbook, PlaybookVersion, RetentionStatus, Run, TestFile, SseEnvelope } from "./types";
 import { buildRunEvents, makeRun, seedApps, seedPlaybooks, seedRuns, versionFrom } from "./fixtures";
 import { validateMarkdown } from "../playbook-validate";
-import { mockRefine, type RefineKind } from "../refine-mock";
+import { mockPlanFromPrd, mockRefine, type RefineKind } from "../refine-mock";
 import { toApp, toFlowHistory, toPlaybook, toRun } from "./adapter";
 
 /** Unset → in-browser mock backed by fixtures (F0–F5). Set → real API (F6). */
@@ -235,6 +235,13 @@ export const api = {
   async refineText(text: string, kind: RefineKind): Promise<{ text: string; notes: string | null }> {
     if (!USE_MOCK) return http(`/text/refine`, { method: "POST", body: JSON.stringify({ text, kind }) });
     return delay(mockRefine(text, kind));
+  },
+  /** A high-level test plan (goal-driven journeys) written from the app's product document. Nothing is saved. */
+  async planFromPrd(slug: string): Promise<{ markdown: string; warnings: string[]; notes: string | null }> {
+    if (!USE_MOCK) return http(`/apps/${slug}/prd/plan`, { method: "POST", body: JSON.stringify({}) });
+    const a = db.apps.find((x) => x.slug === slug);
+    if (!a?.prd_markdown?.trim()) throw new ApiError(422, "Add a product document in Settings first");
+    return delay(mockPlanFromPrd(a.prd_markdown, a.base_url));
   },
   async listFiles(slug: string): Promise<TestFile[]> {
     if (!USE_MOCK) return http<TestFile[]>(`/apps/${slug}/files`);

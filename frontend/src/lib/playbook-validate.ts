@@ -19,7 +19,7 @@ const KNOWN: Record<string, string[]> = {
   requirement: ["prd_ref", "acceptance", "priority"], formula: ["rule", "source", "bindings", "tolerance", "verifies"],
   ux_rule: ["check", "targets", "pattern", "max_ms", "question", "severity", "covers", "ignore", "impact"],
   gotcha: ["note", "wait_for", "ignore_console", "applies_to"], edge_case: ["applies_to", "expect", "covers", "checks", "test_data"],
-  flow: ["covers", "checks", "severity", "steps", "expect", "test_data"], reasoning_example: ["scope", "context", "challenge", "strategy"],
+  flow: ["covers", "checks", "severity", "goal", "steps", "expect", "test_data"], reasoning_example: ["scope", "context", "challenge", "strategy"],
 };
 
 const split = (v: string) => v.split(",").map((s) => s.trim()).filter(Boolean);
@@ -51,6 +51,7 @@ function flowBody(lines: string[]): Record<string, unknown> {
     const s = line.trim();
     if (s.startsWith("####")) { section = s.replace(/^#+/, "").trim().toLowerCase(); continue; }
     if (section === null) head.push(line);
+    else if (section === "goal" && s) flow.goal = (((flow.goal as string) ?? "") + " " + s).trim();
     else if (section === "steps") { const m = s.match(/^\d+[.)]\s*(.+)$/); if (m) (flow.steps as string[]).push(m[1].trim()); }
     else if (section === "expect" && s.startsWith("- ")) (flow.expect as string[]).push(s.slice(2).trim());
     else if (section === "test data" && s.startsWith("- ")) { const [k, ...v] = s.slice(2).split(":"); if (k.trim() && v.join(":").trim()) (flow.test_data as Record<string, string>)[k.trim()] = v.join(":").trim(); }
@@ -120,7 +121,7 @@ export function validateMarkdown(md: string, previous?: { flows: Record<string, 
     if (check === "consistent_value" && arr(u, "targets").length < 2) errors.push(`${u.key}: consistent_value needs at least two targets`);
     if (check === "format" && str(u, "pattern")) { try { new RegExp(str(u, "pattern")); } catch { errors.push(`${u.key}: pattern does not compile`); } }
   });
-  of("flow").forEach((f) => { if (!arr(f, "steps").length) errors.push(`flow ${f.key}: has no steps`); });
+  of("flow").forEach((f) => { if (!arr(f, "steps").length && !str(f, "goal")) errors.push(`flow ${f.key}: needs a goal or steps`); });
   of("edge_case").forEach((e) => { if (!str(e, "expect")) errors.push(`${e.key}: edge case needs an 'expect' line`); });
   of("requirement").forEach((r) => { if (!str(r, "acceptance")) warnings.push(`${r.key}: requirement has no acceptance criteria`); });
 
@@ -159,7 +160,7 @@ export function toParsedFlows(v: Validation): ParsedFlow[] {
   return v.flows.map((f) => {
     const flow = f as Record<string, unknown> & { key: string };
     return {
-      key: flow.key, severity: (flow.severity as Severity) ?? "high", steps: (flow.steps as string[]) ?? [], expect: (flow.expect as string[]) ?? [],
+      key: flow.key, severity: (flow.severity as Severity) ?? "high", goal: (flow.goal as string) || undefined, steps: (flow.steps as string[]) ?? [], expect: (flow.expect as string[]) ?? [],
       test_data: Object.fromEntries(Object.entries((flow.test_data as Record<string, string>) ?? {})),
       formulas: ((flow.checks as string[]) ?? []).flatMap((k) => formulas.filter((x) => x.key === k)).map((x) => ({
         name: `${x.key} ${x.title}`.trim(), expr: String(x.body.rule ?? ""), source: "both" as const, bindings: (x.body.bindings as Record<string, string>) ?? {},

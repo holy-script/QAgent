@@ -34,6 +34,8 @@ export interface ParsedFormula {
 export interface ParsedFlow {
   key: string;
   severity: Severity;
+  /** A high-level journey: the AI works out the steps itself. */
+  goal?: string;
   steps: string[];
   expect: string[];
   test_data: Record<string, string>;

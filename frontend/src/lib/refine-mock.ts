@@ -22,3 +22,18 @@ export function mockRefine(text: string, kind: RefineKind): { text: string; note
   }
   return { text: s.join(" "), notes: null };
 }
+
+/** Demo-mode stand-in for "create a test plan from the product document": one goal-driven journey per sentence. */
+export function mockPlanFromPrd(prd: string, baseUrl: string): { markdown: string; warnings: string[]; notes: string } {
+  const lines = sentences(prd).slice(0, 6);
+  const slug = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").split("-").slice(0, 5).join("-") || "journey";
+  const keys = lines.map((l, i) => `${slug(l)}-${i + 1}`);
+  const md = [
+    "# Playbook: From the product document", `base_url: ${baseUrl}`, "",
+    "## Requirements", ...lines.flatMap((l, i) => [`### REQ-${i + 1}: ${l.replace(/\.$/, "")}`, `- acceptance: ${l}`, "- priority: high", ""]),
+    "## Edge cases", `### EC-1: Missing or invalid input`, `- applies_to: ${keys[0] ?? "journey"}`, "- expect: A clear error is shown and nothing is saved.", "- covers: REQ-1", "",
+    "## Flows",
+    ...lines.flatMap((l, i) => [`### Flow: ${keys[i]}`, `- covers: REQ-${i + 1}`, "- severity: high", "", "#### Goal", l, "", "#### Expect", `- ${l.replace(/\.$/, "")}`, ""]),
+  ].join("\n");
+  return { markdown: md, warnings: [], notes: "Demo mode: the real AI writes a thoughtful plan; this is a simple stand-in with one journey per sentence." };
+}

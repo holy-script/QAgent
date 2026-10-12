@@ -64,6 +64,8 @@ class Settings(BaseSettings):
     # Browser: leave channel unset to use bundled Chromium; the sandbox falls back
     # to installed Google Chrome when the bundled build is missing.
     browser_channel: Optional[str] = Field(default=None, alias="QAGENT_BROWSER_CHANNEL")
+    goal_step_budget: int = 40          # goal-driven journeys may take more steps than hand-written ones
+    goal_time_budget_s: int = 240
     deterministic_browser: bool = True  # fixed clock, no animations, reset the target before each flow
     fixed_clock_iso: str = "2026-01-15T10:00:00+00:00"
     browser_path: Optional[str] = Field(default=None, alias="QAGENT_BROWSER_PATH")

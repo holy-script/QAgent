@@ -40,7 +40,10 @@ base_url: <url>
 - checks: F-1, UX-1
 - severity: high
 
-#### Steps
+#### Goal                 (use INSTEAD of Steps for a high-level journey: the tester works out the clicks itself)
+One or two sentences: what the user is trying to accomplish.
+
+#### Steps               (optional when there is a Goal; a suggested route)
 1. Open /path            (navigation steps must be exactly 'Open /path' or 'Go to /path')
 2. Click <visible label> / Enter the <field> / Add <n> items to cart
 
@@ -73,7 +76,7 @@ async def normalize_playbook(raw: str, client: Optional[BedrockClient] = None) -
     if not parsed["flows"]:
         warnings.append("normalized output contains no flows")
     for flow in parsed["flows"]:
-        if not flow["steps"]:
+        if not flow["steps"] and not flow.get("goal"):
             warnings.append(f"flow '{flow['key']}' has no steps")
     return {
         "markdown": markdown,

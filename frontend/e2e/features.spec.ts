@@ -377,3 +377,31 @@ test.describe("deleting test plans", () => {
     await expect(page.getByText("No test runs yet")).toBeVisible();
   });
 });
+
+test.describe("high-level test plans from the product document", () => {
+  test("Create from product document writes goal-driven journeys, flags notes, and they save and display as goals", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(APP);
+    const sections = page.getByRole("navigation", { name: "Sections" });
+    await sections.getByRole("link", { name: "Settings" }).click();
+    await page.getByRole("textbox", { name: "Product document" }).fill("Users sign in and reach the dashboard. Users set up a forecast and see the results. Users export the forecast.");
+    await page.getByRole("button", { name: "Save settings" }).click();
+    await expect(page.getByText("Saved")).toBeVisible();
+
+    await sections.getByRole("link", { name: "Test plans" }).click();
+    await page.getByRole("link", { name: "Add a test plan" }).click();
+    await page.getByRole("button", { name: "Create from product document" }).click();
+    const editor = page.getByRole("textbox", { name: "Test plan text" });
+    await expect(editor).toContainText("#### Goal");
+    await expect(editor).not.toContainText("#### Steps");
+    await expect(page.getByText("Check before saving")).toBeVisible();
+    await page.getByRole("button", { name: "Save and review" }).click();
+    await expect(page.getByText("Goal (the AI chooses the steps)").first()).toBeVisible();
+  });
+
+  test("without a product document it says what to do first", async ({ page }) => {
+    await page.goto(`${APP}/playbooks/new`);
+    await page.getByRole("button", { name: "Create from product document" }).click();
+    await expect(page.getByRole("alert").filter({ hasText: "Add a product document in Settings first" })).toBeVisible();
+  });
+});

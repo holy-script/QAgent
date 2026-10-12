@@ -46,6 +46,7 @@ export default function Help() {
           <li>QAgent only visits your app and the extra sites you allow in Settings, so a run cannot wander off.</li>
           <li>Calculations such as totals are checked by plain code, never guessed by AI. AI is used to choose what to click, to judge things that have no fixed rule, and to write the reports.</li>
           <li>When an AI judges something, the report says so, and the problem is never rated more serious than medium unless a fixed rule also failed.</li>
+          <li>A journey can be written two ways: <b>steps</b> (exact clicks) or a <b>goal</b> (&ldquo;sign in and complete the setup&rdquo;), where the AI works out the clicks. Goals are quicker to write and survive small page changes. <b>Create from product document</b> writes goal-based journeys for you.</li>
           <li>Rather talk than type? Press <b>Dictate</b> next to a text box (Chrome, Edge or Safari), then <b>Tidy up with AI</b> to clean it up. You can undo it.</li>
           <li>Press <kbd className="rounded border bg-card px-1">Ctrl</kbd> + <kbd className="rounded border bg-card px-1">K</kbd> anywhere to jump to an app, a run or a bug.</li>
         </ul>

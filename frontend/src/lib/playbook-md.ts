@@ -36,7 +36,8 @@ export const FORMS: Record<Category, FieldSpec[]> = {
     { name: "severity", label: "Severity", kind: "select", options: SEV },
     { name: "covers", label: "Requirements it proves", kind: "text", placeholder: "REQ-1, REQ-2" },
     { name: "checks", label: "Calculations and rules to check", kind: "text", placeholder: "F-1, UX-1" },
-    { name: "steps", label: "Steps", kind: "lines", required: true, hint: "One per line, in plain words, e.g. “Add 2 items to cart”. “Open /products” opens a page directly." },
+    { name: "goal", label: "Goal (high-level)", kind: "area", hint: "What the user is trying to accomplish, in a sentence or two, e.g. “Sign in and complete the forecast setup.” The AI works out the clicks itself. Use this OR steps." },
+    { name: "steps", label: "Steps (optional with a goal)", kind: "lines", hint: "One per line, in plain words, e.g. “Add 2 items to cart”. “Open /products” opens a page directly. With a goal, steps are only a suggested route." },
     { name: "expect", label: "What should be true afterwards", kind: "lines" },
     { name: "test_data", label: "Values to type in", kind: "lines", hint: "name: value, one per line, e.g. coupon: SAVE10" },
   ],
@@ -92,7 +93,9 @@ function itemBlock(cat: Category, key: string, v: Record<string, string>): strin
     case "requirement":
       return `### ${key}: ${f("title")}\n${field("prd_ref")}${field("acceptance")}${field("priority")}`;
     case "flow": {
-      let md = `### Flow: ${f("title")}\n${field("covers")}${field("checks")}${field("severity")}\n#### Steps\n${lines(v.steps ?? "").map((s, i) => `${i + 1}. ${s.replace(/^\d+[.)]\s*/, "")}`).join("\n")}\n`;
+      let md = `### Flow: ${f("title")}\n${field("covers")}${field("checks")}${field("severity")}\n`;
+      if (f("goal")) md += `#### Goal\n${f("goal")}\n\n`;
+      if (f("steps")) md += `#### Steps\n${lines(v.steps ?? "").map((s, i) => `${i + 1}. ${s.replace(/^\d+[.)]\s*/, "")}`).join("\n")}\n`;
       if (f("expect")) md += `\n#### Expect\n${lines(v.expect).map((s) => `- ${s.replace(/^-\s*/, "")}`).join("\n")}\n`;
       if (f("test_data")) md += `\n#### Test data\n${lines(v.test_data).map((s) => `- ${s.replace(/^-\s*/, "")}`).join("\n")}\n`;
       return md;
@@ -175,7 +178,7 @@ export function itemToValues(cat: Category, item: { key: string; title: string; 
   const str = (k: string) => (b[k] == null ? "" : String(b[k]));
   switch (cat) {
     case "requirement": return { title: item.title, prd_ref: str("prd_ref"), acceptance: str("acceptance"), priority: str("priority") || "high" };
-    case "flow": return { title: item.key, severity: str("severity") || "high", covers: join(b.covers), checks: join(b.checks), steps: ((b.steps as string[]) ?? []).join("\n"), expect: ((b.expect as string[]) ?? []).join("\n"), test_data: pairs(b.test_data, ": ").join("\n") };
+    case "flow": return { title: item.key, severity: str("severity") || "high", covers: join(b.covers), checks: join(b.checks), goal: str("goal"), steps: ((b.steps as string[]) ?? []).join("\n"), expect: ((b.expect as string[]) ?? []).join("\n"), test_data: pairs(b.test_data, ": ").join("\n") };
     case "formula": return { title: item.title, rule: str("rule"), bindings: pairs(b.bindings, "=").join("\n"), tolerance: str("tolerance"), verifies: join(b.verifies) };
     case "ux_rule": return { title: item.title, check: str("check"), targets: join(b.targets), pattern: str("pattern"), max_ms: str("max_ms"), question: str("question"), severity: str("severity") || "medium" };
     case "gotcha": return { title: item.title, note: str("note"), wait_for: str("wait_for"), ignore_console: str("ignore_console") };

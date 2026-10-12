@@ -6,7 +6,8 @@ from qagent.domain.schemas import RunMode
 class FlowSpec(BaseModel):
     key: str                                  # "add-to-cart" or a variant such as "add-to-cart#EC-2"
     severity: str = "high"
-    steps: List[str] = Field(default_factory=list)
+    goal: Optional[str] = None                # a goal-driven journey: the AI chooses each step on the live page
+    steps: List[str] = Field(default_factory=list)   # (for a goal journey: an optional suggested route)
     expect: List[str] = Field(default_factory=list)
     test_data: Dict[str, Any] = Field(default_factory=dict)
     covers: List[str] = Field(default_factory=list)   # REQ- keys

@@ -29,6 +29,7 @@ from qagent.config import settings
 from qagent.browser import uploads
 from qagent.decision.base import Decider
 from qagent.decision.ledger import LedgerClient, TapedJudge, current_flow_run
+from qagent.decision.director import next_step as direct_next_step
 from qagent.decision.planner import plan_flow, step_hints
 from qagent.decision.fewshot import example_ids, select_examples
 from qagent.decision.tape import hash_request
@@ -162,6 +163,7 @@ class EngineRunner:
         checkpointer: Optional[BaseCheckpointSaver] = None,
         judge: Optional[Judge] = None,
         planner: Optional[Any] = None,
+        director: Optional[Any] = None,
     ):
         self.spec = run_spec
         self.decider = decider
@@ -178,6 +180,11 @@ class EngineRunner:
         if planner is not None and run_spec.plan:
             self.planner = planner if isinstance(planner, LedgerClient) else LedgerClient(planner, self._record_model_call)
             self.planner.record = self._record_model_call
+        # Goal-driven journeys: Claude chooses each next step from the live page (and it goes on the tape like any model call).
+        self.director = None
+        if director is not None:
+            self.director = director if isinstance(director, LedgerClient) else LedgerClient(director, self._record_model_call)
+            self.director.record = self._record_model_call
         self.checkpointer = checkpointer or InMemorySaver()
         self.findings_count = 0
         self.total_steps = 0
@@ -204,6 +211,9 @@ class EngineRunner:
         if call.get("purpose") == "judge":
             self.decision_stats["judge_calls"] += 1
             self.decision_stats["judge_cost_usd"] += call.get("cost_usd", 0.0)
+        elif call.get("purpose") == "director":
+            self.decision_stats["director_calls"] = self.decision_stats.get("director_calls", 0) + 1
+            self.decision_stats["director_cost_usd"] = self.decision_stats.get("director_cost_usd", 0.0) + call.get("cost_usd", 0.0)
         elif call.get("purpose") == "planner":
             self.decision_stats["planner_cost_usd"] = self.decision_stats.get("planner_cost_usd", 0.0) + call.get("cost_usd", 0.0)
         self.decision_stats["cost_usd"] += call.get("cost_usd", 0.0)
@@ -294,6 +304,8 @@ class EngineRunner:
             "judge_calls": stats["judge_calls"],
             "judge_cost_usd": stats["judge_cost_usd"],
             "planner_cost_usd": stats.get("planner_cost_usd", 0.0),
+            "director_calls": stats.get("director_calls", 0),
+            "director_cost_usd": stats.get("director_cost_usd", 0.0),
             "avg_decision_latency_ms": stats["latency_ms"] / stats["count"] if stats["count"] else 0.0,
             "findings_count": self.findings_count,
             "status": status,
@@ -487,7 +499,7 @@ class EngineRunner:
             config: RunnableConfig = {
                 "configurable": {"thread_id": ctx.flow_run_id, "rt": rt},
                 "callbacks": [handler],
-                "recursion_limit": max(25, (len(flow.steps) + 1) * NODES_PER_STEP + 10),
+                "recursion_limit": max(25, (max(len(flow.steps), self._step_limit(flow)) + 1) * NODES_PER_STEP + 10),
                 "run_name": f"flow:{flow.key}",
             }
             await self.graph.ainvoke(
@@ -566,10 +578,13 @@ class EngineRunner:
         """Validates the flow. With planning on, Claude also writes a note per step (the steps are never rewritten)."""
         rt = _rt(config)
         flow = rt.ctx.flow
-        if not flow.steps:
+        if not flow.steps and not flow.goal:
             rt.ctx.failure_reason = "flow has no steps"
             return {"done": True, "failure_reason": rt.ctx.failure_reason}
-        if self.planner:
+        if flow.goal and self.director is None:
+            rt.ctx.failure_reason = "this journey is described by a goal, so it needs AI to choose the steps: run it in Smart or Thorough mode"
+            return {"done": True, "failure_reason": rt.ctx.failure_reason}
+        if self.planner and not flow.goal:
             try:
                 examples = select_examples(self.spec.reasoning_examples, "plan", f"{flow.key} {' '.join(flow.steps)}")
                 plan = await plan_flow(self.planner, flow.key, flow.steps, self.spec.base_url, flow.test_data, examples)
@@ -580,24 +595,62 @@ class EngineRunner:
                 await self._log(rt.ctx, None, "warning", "planner", f"planning skipped ({type(exc).__name__})")
         return {}
 
+    def _step_limit(self, flow: FlowSpec) -> int:
+        return max(self.spec.step_budget, settings.goal_step_budget) if flow.goal else self.spec.step_budget
+
+    def _time_limit(self, flow: FlowSpec) -> int:
+        return max(self.spec.time_budget_s, settings.goal_time_budget_s) if flow.goal else self.spec.time_budget_s
+
+    async def _direct(self, rt: FlowRuntime, state: FlowState, idx: int) -> Dict[str, str]:
+        """Asks the director for the next step of a goal journey, from what the page shows right now."""
+        flow, page = rt.ctx.flow, rt.page
+        try:
+            raw = await page.evaluate(EXTRACTOR_JS)
+            candidates = [CandidateAction.model_validate(c) for c in raw[:40]]
+            text = await page.evaluate("document.body ? document.body.innerText : ''")
+            title = await page.title()
+        except Exception as exc:
+            return {"status": "blocked", "intent": "", "why": f"could not read the page ({type(exc).__name__})"}
+        examples = select_examples(self.spec.reasoning_examples, "plan", f"{flow.key} {flow.goal}")
+        return await direct_next_step(self.director, flow.goal or "", flow.expect, flow.steps, flow.test_data,
+                                      state.get("history", []), page.url, title, text, candidates, examples)
+
     async def _begin_step(self, state: FlowState, config: RunnableConfig) -> FlowState:
         rt = _rt(config)
         flow, ctx = rt.ctx.flow, rt.ctx
         idx = state["idx"] + 1
-        if idx > len(flow.steps):
+        if not flow.goal and idx > len(flow.steps):
             return {"done": True}
         if self.cancel_requested:
             ctx.failure_reason = "stopped by user"
-        elif idx > self.spec.step_budget:
-            ctx.failure_reason = f"step budget ({self.spec.step_budget}) exhausted"
-        elif time.perf_counter() - rt.started > self.spec.time_budget_s:
-            ctx.failure_reason = f"time budget ({self.spec.time_budget_s}s) exhausted"
+        elif idx > self._step_limit(flow):
+            ctx.failure_reason = f"step budget ({self._step_limit(flow)}) exhausted" + (" before the goal was reached" if flow.goal else "")
+        elif time.perf_counter() - rt.started > self._time_limit(flow):
+            ctx.failure_reason = f"time budget ({self._time_limit(flow)}s) exhausted"
         if ctx.failure_reason:
             return {"done": True, "failure_reason": ctx.failure_reason}
 
+        if flow.goal:
+            try:
+                nxt = await self._direct(rt, state, idx)
+            except Exception as exc:
+                ctx.failure_reason = f"could not decide the next step ({type(exc).__name__}: {str(exc).splitlines()[0][:120]})"
+                return {"done": True, "failure_reason": ctx.failure_reason}
+            await self._log(ctx, idx, "info", "director", f"{nxt['status']}: {nxt['intent'] or '-'} ({nxt['why']})")
+            if nxt["status"] == "done":
+                return {"done": True}
+            if nxt["status"] == "blocked":
+                ctx.failure_reason = f"blocked before the goal was reached: {nxt['why']}"
+                return {"done": True, "failure_reason": ctx.failure_reason}
+            recent = [h.get("intent") for h in state.get("history", [])[-2:]]
+            if len(recent) == 2 and recent[0] == recent[1] == nxt["intent"]:
+                ctx.failure_reason = f"going in circles: '{nxt['intent']}' was chosen three times in a row"
+                return {"done": True, "failure_reason": ctx.failure_reason}
+            intent = nxt["intent"]
+        else:
+            intent = flow.steps[idx - 1]
         ctx.steps_run = idx
         self.total_steps += 1
-        intent = flow.steps[idx - 1]
         step_id = str(uuid.uuid4())
         ctx.steps[idx] = StepInfo(step_id=step_id)
         rt.recorder.mark_step_start()

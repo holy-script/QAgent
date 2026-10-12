@@ -176,6 +176,8 @@ class RunTotals(BaseModel):
     judge_calls: int = 0
     judge_cost_usd: float = 0.0
     planner_cost_usd: float = 0.0
+    director_calls: int = 0
+    director_cost_usd: float = 0.0
     report_calls: int = 0
     report_cost_usd: float = 0.0
 
@@ -337,6 +339,10 @@ class RefineRequest(BaseModel):
 class RefineResponse(BaseModel):
     text: str
     notes: Optional[str] = None
+
+
+class PrdPlanRequest(BaseModel):
+    prd: Optional[str] = Field(default=None, max_length=200000, description="Use this text instead of the app's saved product document")
 
 
 class NormalizeResponse(BaseModel):

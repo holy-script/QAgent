@@ -9,7 +9,7 @@ describe("problem messages point at the right line", () => {
   const line = (n: number) => SAMPLE_PLAYBOOK.split("\n")[n - 1];
   it("finds the heading of the item a message is about", () => {
     expect(line(lineForMessage(SAMPLE_PLAYBOOK, "F-1: variable 'x' has no binding")!)).toBe("### F-1: cart_total");
-    expect(line(lineForMessage(SAMPLE_PLAYBOOK, "flow payment: has no steps")!)).toBe("### Flow: payment");
+    expect(line(lineForMessage(SAMPLE_PLAYBOOK, "flow payment: needs a goal or steps")!)).toBe("### Flow: payment");
     expect(line(lineForMessage(SAMPLE_PLAYBOOK, "EC-3: applies_to 'nowhere' does not exist")!)).toBe("### EC-3: Missing postal code");
   });
   it("returns null when it cannot tell", () => {
