@@ -116,6 +116,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Dashboard
+         * @description Everything the home dashboard shows, across all apps, for the last `days` days.
+         */
+        get: operations["dashboard_dashboard_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/apps": {
         parameters: {
             query?: never;
@@ -1178,6 +1198,177 @@ export interface components {
              * @default false
              */
             plan: boolean;
+        };
+        /** DashboardApp */
+        DashboardApp: {
+            /** Slug */
+            slug: string;
+            /** Name */
+            name: string;
+            /**
+             * Runs
+             * @default 0
+             */
+            runs: number;
+            /** Pass Rate */
+            pass_rate?: number | null;
+            /**
+             * Open Bugs
+             * @default 0
+             */
+            open_bugs: number;
+            /** Last Status */
+            last_status?: string | null;
+            /** Last Run At */
+            last_run_at?: string | null;
+            /**
+             * Recent Statuses
+             * @description Newest first, up to 12
+             */
+            recent_statuses?: string[];
+        };
+        /** DashboardBug */
+        DashboardBug: {
+            /** Id */
+            id: string;
+            /** App Slug */
+            app_slug: string;
+            /** App Name */
+            app_name: string;
+            /** Title */
+            title: string;
+            /** Severity */
+            severity: string;
+            /** Status */
+            status: string;
+            /**
+             * Occurrences
+             * @default 1
+             */
+            occurrences: number;
+        };
+        /** DashboardDay */
+        DashboardDay: {
+            /** Date */
+            date: string;
+            /**
+             * Passed
+             * @default 0
+             */
+            passed: number;
+            /**
+             * Failed
+             * @default 0
+             */
+            failed: number;
+            /**
+             * Findings
+             * @default 0
+             */
+            findings: number;
+            /**
+             * Cost Usd
+             * @default 0
+             */
+            cost_usd: number;
+        };
+        /** DashboardResponse */
+        DashboardResponse: {
+            /** Days */
+            days: number;
+            /**
+             * Apps
+             * @default 0
+             */
+            apps: number;
+            /**
+             * Runs
+             * @default 0
+             */
+            runs: number;
+            /**
+             * Passed
+             * @default 0
+             */
+            passed: number;
+            /**
+             * Failed
+             * @default 0
+             */
+            failed: number;
+            /**
+             * Running
+             * @default 0
+             */
+            running: number;
+            /** Pass Rate */
+            pass_rate?: number | null;
+            /**
+             * Cost Usd
+             * @default 0
+             */
+            cost_usd: number;
+            /**
+             * Avg Duration Ms
+             * @default 0
+             */
+            avg_duration_ms: number;
+            /**
+             * Avg Cost Usd
+             * @default 0
+             */
+            avg_cost_usd: number;
+            /**
+             * Open Bugs
+             * @default 0
+             */
+            open_bugs: number;
+            /** Bugs By Severity */
+            bugs_by_severity?: {
+                [key: string]: number;
+            };
+            /** Bugs By Status */
+            bugs_by_status?: {
+                [key: string]: number;
+            };
+            /** Series */
+            series?: components["schemas"]["DashboardDay"][];
+            /** Per App */
+            per_app?: components["schemas"]["DashboardApp"][];
+            /** Recent Runs */
+            recent_runs?: components["schemas"]["DashboardRun"][];
+            /** Top Bugs */
+            top_bugs?: components["schemas"]["DashboardBug"][];
+        };
+        /** DashboardRun */
+        DashboardRun: {
+            /** Id */
+            id: string;
+            /** App Slug */
+            app_slug: string;
+            /** App Name */
+            app_name: string;
+            /** Status */
+            status: string;
+            /** Mode */
+            mode: string;
+            /** Started At */
+            started_at?: string | null;
+            /**
+             * Findings
+             * @default 0
+             */
+            findings: number;
+            /**
+             * Cost Usd
+             * @default 0
+             */
+            cost_usd: number;
+            /**
+             * Duration Ms
+             * @default 0
+             */
+            duration_ms: number;
         };
         /** DecisionResult */
         DecisionResult: {
@@ -2276,6 +2467,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    dashboard_dashboard_get: {
+        parameters: {
+            query?: {
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DashboardResponse"];
                 };
             };
             /** @description Validation Error */

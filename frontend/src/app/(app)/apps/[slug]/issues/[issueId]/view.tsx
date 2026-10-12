@@ -38,7 +38,7 @@ export default function IssuePage() {
         </div>
         {report && (
           <div className="flex flex-wrap gap-2">
-            <Button onClick={copy}><ClipboardCopy className="size-4" />{copied ? "Copied" : "Copy for my issue tracker"}</Button>
+            <Button onClick={copy} data-tour="bug-copy"><ClipboardCopy className="size-4" />{copied ? "Copied" : "Copy for my issue tracker"}</Button>
             {(["md", "html", "pdf"] as const).map((f) => (
               <a key={f} href={exportUrl(f)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-lg border border-border bg-foreground/[0.03] px-3.5 py-2 text-sm hover:bg-foreground/[0.06]">
                 <Download className="size-4" />{f.toUpperCase()}
@@ -46,7 +46,7 @@ export default function IssuePage() {
             ))}
           </div>
         )}
-        {report ? <BugReportView content={report.content ?? {}} slug={slug} /> : (
+        {report ? <div data-tour="bug-report"><BugReportView content={report.content ?? {}} slug={slug} /></div> : (
           <Card className="p-5 text-sm text-muted-foreground">{reportError ? "No write-up has been generated for this bug yet." : "Loading report…"}</Card>
         )}
       </div>

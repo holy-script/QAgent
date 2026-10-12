@@ -17,7 +17,7 @@ export const seedApps = (): App[] => [
     name: "Demo Shop",
     base_url: "http://localhost:8001",
     allowed_hosts: ["localhost", "127.0.0.1"],
-    description: "FastAPI + Jinja storefront with five planted bugs.",
+    description: "FastAPI + Jinja storefront with six planted bugs.",
     prd_markdown: "",
     default_mode: "hybrid",
     gate_overrides: {},
@@ -108,7 +108,11 @@ const TIMINGS = (decide: number, settle = 120) => ({
   observe_ms: 35, extract_ms: 22, decide_ms: decide, gate_ms: 1, act_ms: 64, settle_ms: settle, verify_ms: 18,
 });
 
+/** Old demo runs from before the bugs were introduced: everything passes in them, so history shows green, then red. */
+export const CLEAN_RUNS = new Set(["run-h9", "run-h10", "run-b8"]);
+
 export function buildRunEvents(run: Run, specs = SPECS): SseEnvelope[] {
+  const clean = CLEAN_RUNS.has(run.id);
   const out: SseEnvelope[] = [];
   let t = 0, seq = 0;
   const push = (event: SseEnvelope["event"], dt = 250) => { t += dt; out.push({ seq: seq++, ts: t, event }); };
@@ -162,13 +166,13 @@ export function buildRunEvents(run: Run, specs = SPECS): SseEnvelope[] {
       const settle = s.settle ?? 120;
       push({ type: "step.acted", payload: { flow_key: flow, seq: seq1, timings: TIMINGS(latency, settle), wait_frames: s.spinner ? [shot("loading…", s.badge, cands, chosen.id, '<circle cx="640" cy="500" r="40" fill="none" stroke="#06b6d4" stroke-width="8" stroke-dasharray="60 200"/>')] : [] } }, 200);
       (s.net ?? []).forEach((c, k) => {
-        push({ type: "network.call", payload: { ...c, id: `n-${flow}-${seq1}-${k}`, flow_key: flow, step_seq: seq1 } }, 20);
+        push({ type: "network.call", payload: { ...c, status: clean && c.status >= 400 ? 200 : c.status, id: `n-${flow}-${seq1}-${k}`, flow_key: flow, step_seq: seq1 } }, 20);
       });
-      const ok = s.assert.every((a) => a[1]);
+      const ok = clean || s.assert.every((a) => a[1]);
       step.status = ok ? "ok" : "failed";
-      push({ type: "step.verified", payload: { flow_key: flow, seq: seq1, status: step.status, verified: s.assert.map(([assertion, passed, message]) => ({ assertion, passed, message })) } }, 150);
+      push({ type: "step.verified", payload: { flow_key: flow, seq: seq1, status: step.status, verified: s.assert.map(([assertion, passed, message]) => ({ assertion, passed: clean || passed, message: clean ? "" : message })) } }, 150);
       n.steps++;
-      const f = FINDINGS[`${flow}:${seq1}`];
+      const f = clean ? undefined : FINDINGS[`${flow}:${seq1}`];
       if (f) {
         n.find++;
         push({ type: "finding", payload: { ...f, id: `f-${flow}-${seq1}`, flow_key: flow, step_seq: seq1 } }, 10);
@@ -203,7 +207,11 @@ export function makeRun(id: string, mode: Mode, minsAgo = 0, pbv = "pbv-2"): Run
 
 /** Finished runs shown in history, derived from the same script so totals are consistent. */
 export function seedRuns(): Run[] {
-  return ([["run-h3", "hybrid", 12], ["run-b2", "baseline", 55], ["run-h1", "hybrid", 60 * 20]] as const).map(([id, mode, ago]) => {
+  const day = 60 * 24;
+  // Newest first. The three most recent runs are the ones the bugs and reports refer to; the older ones give the
+  // dashboard and the clean-up policy some history to show.
+  return ([["run-h3", "hybrid", 12], ["run-b2", "baseline", 55], ["run-h1", "hybrid", 60 * 20], ["run-h4", "hybrid", 2 * day], ["run-b5", "baseline", 4 * day],
+    ["run-h6", "hybrid", 6 * day], ["run-h7", "hybrid", 9 * day], ["run-b8", "baseline", 13 * day], ["run-h9", "hybrid", 18 * day], ["run-h10", "hybrid", 24 * day]] as const).map(([id, mode, ago]) => {
     const r = makeRun(id, mode, ago);
     const fin = buildRunEvents(r).at(-1)!.event;
     if (fin.type !== "run.finished") throw new Error("unreachable");

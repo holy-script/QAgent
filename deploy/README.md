@@ -15,3 +15,11 @@
 Why this shape: everything is on one address, so the sign-in cookie just works and live run events are not buffered or cut by a proxy.
 The backend runs one worker because live run events are kept in memory; scale up the machine, not the worker count.
 Updating: `git pull && docker compose up -d --build`. Migrations run automatically on start.
+
+## A free machine to run it on
+Chromium needs real memory, so a normal "free web hosting" tier is too small; you want a small virtual machine.
+- **Oracle Cloud "Always Free"** (best fit): an ARM VM with 2 OCPU / 12 GB (reports say the old 4 / 24 GB allowance is being reduced; check Oracle's Always Free page). Sign-up needs a card for identity checks and the ARM VMs are sometimes out of capacity in a region; retry another time or region. Everything in `docker-compose.yml` has ARM images (the Playwright base image, Node, Caddy, Python).
+- **Google Cloud e2-micro / AWS or Azure 12-month free tiers**: 1 GB of memory is too little for the browser plus the backend. Only workable with a swap file and one run at a time.
+- **Your own machine**: a spare laptop or Raspberry Pi 5 (8 GB) at home with a Cloudflare Tunnel gives the same result for nothing.
+
+On the VM: install Docker (`curl -fsSL https://get.docker.com | sh`), open ports 80 and 443 in the cloud firewall, clone the repo, then follow the steps above.

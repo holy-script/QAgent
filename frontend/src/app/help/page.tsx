@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Card } from "@/components/ui";
 import { GLOSSARY } from "@/lib/terms";
 
@@ -19,6 +20,14 @@ export default function Help() {
           <li><b>Read what it found.</b> Each problem has screenshots, the exact server calls and the numbers that did not match.</li>
           <li><b>Fix, then repeat.</b> Run again. Bugs that no longer appear are marked Fixed; any that return are marked Came back.</li>
         </ol>
+      </Card>
+      <Card className="p-5">
+        <h2 className="font-medium">Guided tours</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Short walk-throughs that point at the real screen. Open one here, or press <b>Tour</b> in the top bar on any page to get the tour for that page.</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Link href="/?tour=home" className="rounded-lg border px-3 py-1.5 text-sm hover:bg-foreground/5">Home and dashboard</Link>
+          <span className="self-center text-xs text-muted-foreground">Then open an app, a run, a test plan or a bug and press Tour for the rest.</span>
+        </div>
       </Card>
       <section className="space-y-3">
         <h2 className="font-medium">Words you will see</h2>

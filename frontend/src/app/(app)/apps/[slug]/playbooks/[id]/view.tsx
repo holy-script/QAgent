@@ -63,7 +63,7 @@ export default function ReviewPlaybook() {
         )}
 
         <div className="grid gap-4 xl:grid-cols-2">
-          <Card className={cn("overflow-hidden", draft !== null && !USE_MOCK && "xl:col-span-2")}>
+          <Card data-tour="editor" className={cn("overflow-hidden", draft !== null && !USE_MOCK && "xl:col-span-2")}>
             <div className="border-b border-border px-4 py-2 text-xs uppercase tracking-wide text-muted-foreground">{draft === null ? "The test plan, as text" : "Editing"}</div>
             {draft !== null && !USE_MOCK ? (
               <div className="p-3"><PlaybookEditor value={draft} onChange={setDraft} slug={slug} onValidation={setValidation} /></div>
@@ -93,7 +93,7 @@ export default function ReviewPlaybook() {
           </div>
         </div>
       </div>
-      <aside className="space-y-2">
+      <aside className="space-y-2" data-tour="versions">
         <div className="flex items-center gap-2 text-sm font-medium"><History className="size-4" />Earlier versions</div>
         {pb.versions.map((x: PlaybookVersion) => (
           <button key={x.id} onClick={() => { setSel(x.id); setDraft(null); }}

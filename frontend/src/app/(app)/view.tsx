@@ -1,4 +1,5 @@
 "use client";
+import { Dashboard } from "@/components/dashboard/dashboard";
 import { HowItWorks } from "@/components/how-it-works";
 import { ArrowRight, Globe, Plus } from "lucide-react";
 import Link from "next/link";
@@ -14,13 +15,13 @@ export default function Home() {
           <h1 className="text-2xl font-semibold tracking-tight">Your apps</h1>
           <p className="text-sm text-muted-foreground">QAgent tests websites the way a person would: it opens a real browser, clicks through your app, and tells you what is broken.</p>
         </div>
-        <LinkButton href="/apps/new" variant="primary"><Plus className="size-4" />Add an app</LinkButton>
+        <LinkButton href="/apps/new" variant="primary" data-tour="add-app"><Plus className="size-4" />Add an app</LinkButton>
       </div>
-      <HowItWorks />
+      <Dashboard />
       {isPending ? <Loading /> : error ? <ErrorState error={error} retry={refetch} /> : !data.length ? (
-        <Empty title="Nothing to test yet" hint="Add the address of a website or web app. You will then describe what to test and let QAgent run it." action={<LinkButton href="/apps/new" variant="primary">Add your first app</LinkButton>} />
+        <><HowItWorks /><Empty title="Nothing to test yet" hint="Add the address of a website or web app. You will then describe what to test and let QAgent run it." action={<LinkButton href="/apps/new" variant="primary">Add your first app</LinkButton>} /></>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4" data-tour="app-list">
           {data.map((a) => (
             <Link key={a.id} href={`/apps/${a.slug}`} className="group">
               <Card className="h-full p-5 transition group-hover:border-brand/50">

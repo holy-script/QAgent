@@ -6,7 +6,7 @@
 import { AlertTriangle, CircleHelp, Inbox, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ComponentProps, ReactNode } from "react";
+import type { ComponentProps, ComponentType, ReactNode } from "react";
 import { Badge as ShadBadge } from "@/components/ui/badge";
 import { Button as ShadButton, buttonVariants } from "@/components/ui/button";
 import { Tabs as ShadTabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -111,17 +111,40 @@ export function ErrorState({ error, retry }: { error: unknown; retry?: () => voi
 }
 
 /** Link-based section tabs (one URL per tab). */
-export function Tabs({ tabs }: { tabs: { href: string; label: string; count?: number; exact?: boolean }[] }) {
+export type NavItem = { href: string; label: string; count?: number; exact?: boolean; icon?: ComponentType<{ className?: string }>; tour?: string };
+
+export function Tabs({ tabs, className }: { tabs: NavItem[]; className?: string }) {
   const path = usePathname();
   return (
-    <nav className="flex gap-1 overflow-x-auto border-b" aria-label="Sections">
+    <nav className={cn("flex gap-1 overflow-x-auto border-b", className)} aria-label="Sections">
       {tabs.map((t) => {
         const on = t.exact ? path === t.href : path === t.href || path.startsWith(t.href + "/");
         return (
-          <Link key={t.href} href={t.href} aria-current={on ? "page" : undefined}
+          <Link key={t.href} href={t.href} aria-current={on ? "page" : undefined} data-tour={t.tour}
             className={cn("-mb-px flex items-center gap-2 whitespace-nowrap border-b-2 px-3.5 py-2.5 text-sm transition-colors",
               on ? "border-brand font-medium text-foreground" : "border-transparent text-muted-foreground hover:text-foreground")}>
             {t.label}
+            {t.count != null && t.count > 0 && <span className="rounded-full bg-muted px-1.5 text-xs tabular-nums text-muted-foreground">{t.count}</span>}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+/** The same sections as a vertical list, for wide screens (more room for the page itself). */
+export function SideNav({ items, className }: { items: NavItem[]; className?: string }) {
+  const path = usePathname();
+  return (
+    <nav className={cn("flex flex-col gap-0.5", className)} aria-label="Sections">
+      {items.map((t) => {
+        const on = t.exact ? path === t.href : path === t.href || path.startsWith(t.href + "/");
+        const Icon = t.icon;
+        return (
+          <Link key={t.href} href={t.href} aria-current={on ? "page" : undefined} data-tour={t.tour}
+            className={cn("flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors", on ? "bg-brand/10 font-medium text-brand" : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground")}>
+            {Icon && <Icon className="size-4 shrink-0" />}
+            <span className="flex-1">{t.label}</span>
             {t.count != null && t.count > 0 && <span className="rounded-full bg-muted px-1.5 text-xs tabular-nums text-muted-foreground">{t.count}</span>}
           </Link>
         );

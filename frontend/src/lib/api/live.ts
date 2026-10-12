@@ -15,6 +15,10 @@ export type Validation = S["PlaybookValidationResponse"];
 export type Proposal = S["RequirementProposal"];
 export type FlowSummary = S["FlowSummaryResponse"];
 export type TapeEntry = S["TapeEntry"];
+// The API always sends every field; the generated type marks defaulted ones optional, so tighten it here.
+export type Dashboard = Omit<Required<S["DashboardResponse"]>, "series" | "per_app" | "recent_runs" | "top_bugs"> & {
+  series: Required<S["DashboardDay"]>[]; per_app: Required<S["DashboardApp"]>[]; recent_runs: Required<S["DashboardRun"]>[]; top_bugs: Required<S["DashboardBug"]>[];
+};
 
 export interface StepArtifact { id: string; kind: string; flow_key: string | null; step_seq: number | null; url: string; content_type: string }
 export interface EvidenceItem { id: string; kind: string; ref_id: string; note: string; artifact_id?: string | null; available?: boolean; url?: string | null; call?: { id: string; method: string; url: string; status: number; duration_ms: number; traceparent?: string | null } }
@@ -69,3 +73,7 @@ export function useRegenerateReport(runId: string) {
 /** Every model call of a run in order: plans, step decisions, judgements, report calls. */
 export const useTape = (runId: string) =>
   useQuery({ queryKey: ["tape", runId], queryFn: () => pick(() => mockLive.tape(runId), () => http<TapeEntry[]>(`/runs/${runId}/tape`)) });
+
+/** Home dashboard: totals, trends, bugs and app health across every app. */
+export const useDashboard = (days: number) =>
+  useQuery({ queryKey: ["dashboard", days], queryFn: () => pick(() => mockLive.dashboard(days), () => http<Dashboard>(`/dashboard?days=${days}`)), refetchInterval: 15_000 });

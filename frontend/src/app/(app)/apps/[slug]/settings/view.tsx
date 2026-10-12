@@ -18,7 +18,7 @@ export default function Settings() {
   const { data: app, error, isPending, refetch } = useApp(slug);
   if (isPending) return <Loading />;
   if (error) return <ErrorState error={error} retry={refetch} />;
-  return <div className="mx-auto max-w-2xl space-y-6"><Form key={app.id} app={app} /><TestFiles key={`f${app.id}`} app={app} /><Retention key={`r${app.id}`} app={app} /></div>;
+  return <div className="grid items-start gap-6 xl:grid-cols-2"><Form key={app.id} app={app} /><div className="space-y-6"><TestFiles key={`f${app.id}`} app={app} /><Retention key={`r${app.id}`} app={app} /></div></div>;
 }
 
 const list = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);

@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from qagent.api import auth
 from qagent.config import settings
-from qagent.api.routes import apps, artifacts, dev, health, issues, observability, playbooks, reports, runs, traceability
+from qagent.api.routes import apps, artifacts, dashboard, dev, health, issues, observability, playbooks, reports, runs, traceability
 from qagent.api.seed import seed_demo
 from qagent.engine.tracing import logger
 from qagent.runs.manager import get_run_manager, recover_orphaned_runs
@@ -54,7 +54,7 @@ app.add_middleware(
 )
 
 # Everything except login, logout and the health check needs a signed-in user.
-_routers = [dev.router, apps.router, runs.router, runs.app_router, playbooks.router,
+_routers = [dev.router, dashboard.router, apps.router, runs.router, runs.app_router, playbooks.router,
             observability.router, issues.router, reports.router, traceability.router, artifacts.router]
 protected = [Depends(auth.require_user)]
 app.include_router(auth.router)

@@ -3,7 +3,7 @@
 // numbers on every page agree with each other.
 import { api } from "./client";
 import { shot } from "./fixtures";
-import type { Evidence, Issue, IssueDetail, Proposal, Report, TapeEntry, Traceability, Validation } from "./live";
+import type { Dashboard, Evidence, Issue, IssueDetail, Proposal, Report, TapeEntry, Traceability, Validation } from "./live";
 import type { Run, SseEnvelope } from "./types";
 import { validateMarkdown } from "../playbook-validate";
 
@@ -84,7 +84,45 @@ const issueContent = async (s: Spec) => {
   };
 };
 
+/** Same maths as the backend's /dashboard, over the demo apps, runs and bugs. */
+async function buildDashboard(days: number): Promise<Dashboard> {
+  const apps = await api.listApps();
+  const issues = await mockLive.issues();
+  const since = Date.now() - days * 86_400_000;
+  const all = (await Promise.all(apps.map(async (a) => (await api.listRuns(a.slug)).map((r) => ({ r, a }))))).flat()
+    .sort((x, y) => +new Date(y.r.started_at) - +new Date(x.r.started_at));
+  const period = all.filter(({ r }) => +new Date(r.started_at) >= since);
+  const done = period.filter(({ r }) => r.status !== "running" && r.status !== "queued");
+  const day = (t: number) => new Date(t).toISOString().slice(0, 10);
+  const series = Array.from({ length: days }, (_, i) => ({ date: day(since + (i + 1) * 86_400_000), passed: 0, failed: 0, findings: 0, cost_usd: 0 }));
+  for (const { r } of period) {
+    const d = series.find((x) => x.date === day(+new Date(r.started_at)));
+    if (!d) continue;
+    if (r.status === "passed") d.passed++; else if (r.status !== "running" && r.status !== "queued") d.failed++;
+    d.findings += r.totals.findings; d.cost_usd += r.totals.cost_usd;
+  }
+  const live = issues.filter((i) => i.status === "open" || i.status === "regressed");
+  const count = <T,>(xs: T[], key: (x: T) => string) => xs.reduce<Record<string, number>>((m, x) => ({ ...m, [key(x)]: (m[key(x)] ?? 0) + 1 }), {});
+  const cost = period.reduce((n, { r }) => n + r.totals.cost_usd, 0);
+  const rank: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+  const passed = period.filter(({ r }) => r.status === "passed").length;
+  return {
+    days, apps: apps.length, runs: period.length, passed, failed: done.length - passed, running: period.length - done.length,
+    pass_rate: done.length ? passed / done.length : null, cost_usd: cost, avg_cost_usd: period.length ? cost / period.length : 0,
+    avg_duration_ms: 0, open_bugs: live.length, bugs_by_severity: count(live, (i) => i.severity), bugs_by_status: count(issues, (i) => i.status), series,
+    per_app: apps.map((a) => {
+      const mine = all.filter((x) => x.a.id === a.id), mp = mine.filter((x) => period.includes(x)), md = mp.filter(({ r }) => r.status !== "running");
+      return { slug: a.slug, name: a.name, runs: mp.length, pass_rate: md.length ? md.filter(({ r }) => r.status === "passed").length / md.length : null, open_bugs: live.length,
+        last_status: mine[0]?.r.status ?? null, last_run_at: mine[0]?.r.started_at ?? null, recent_statuses: mine.slice(0, 12).map(({ r }) => r.status) };
+    }),
+    recent_runs: all.slice(0, 8).map(({ r, a }) => ({ id: r.id, app_slug: a.slug, app_name: a.name, status: r.status, mode: r.mode, started_at: r.started_at, findings: r.totals.findings, cost_usd: r.totals.cost_usd, duration_ms: 0 })),
+    top_bugs: [...live].sort((x, y) => (rank[x.severity] ?? 9) - (rank[y.severity] ?? 9) || y.occurrences - x.occurrences).slice(0, 6)
+      .map((i) => ({ id: i.id, app_slug: "demo-shop", app_name: "Demo Shop", title: i.title, severity: i.severity, status: i.status, occurrences: i.occurrences })),
+  };
+}
+
 export const mockLive = {
+  dashboard: buildDashboard,
   /** The run's model calls, built from the same scripted events the run viewer plays. */
   async tape(runId: string): Promise<TapeEntry[]> {
     const ev = (await eventsFor(runId)).map((e) => e.event);

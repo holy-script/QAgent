@@ -18,10 +18,10 @@ export default function Overview() {
   const passRate = done.length ? Math.round((done.filter((r) => r.status === "passed").length / done.length) * 100) : null;
   const last = done[0];
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
       <div className="min-w-0 space-y-6">
         <GettingStarted slug={slug} />
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 2xl:grid-cols-4">
           <Metric label="Test runs" value={runs.length} info="Each run walks every journey in a test plan in a real browser." />
           <Metric label="Runs without problems" info="Share of finished runs in which every check passed." value={passRate == null ? "–" : `${passRate}%`} tone={passRate == null ? undefined : passRate >= 80 ? "ok" : "bad"} />
           <Metric label="Problems in the last run" info="Checks that failed in the most recent run. The same problem across runs is tracked as one bug." value={last?.totals.findings ?? "–"} tone={last?.totals.findings ? "bad" : undefined} />

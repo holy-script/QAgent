@@ -21,7 +21,7 @@ export function RunLauncher({ slug }: { slug: string }) {
   const pb = confirmed.find((p) => p.id === pick) ?? confirmed[0];
 
   return (
-    <Card className="space-y-4 p-5">
+    <Card className="space-y-4 p-5" data-tour="run-launcher">
       <div><div className="font-medium">Run a test</div><p className="text-sm text-muted-foreground">QAgent opens a browser and works through your test plan. This usually takes under a minute.</p></div>
       {!pbs ? (
         <p className="text-sm text-muted-foreground">Loading your test plans…</p>

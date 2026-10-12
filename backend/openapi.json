@@ -182,6 +182,52 @@
         }
       }
     },
+    "/dashboard": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Dashboard",
+        "description": "Everything the home dashboard shows, across all apps, for the last `days` days.",
+        "operationId": "dashboard_dashboard_get",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 365,
+              "minimum": 1,
+              "default": 30,
+              "title": "Days"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/apps": {
       "get": {
         "tags": [
@@ -3380,6 +3426,321 @@
         },
         "type": "object",
         "title": "CreateRunRequest"
+      },
+      "DashboardApp": {
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "runs": {
+            "type": "integer",
+            "title": "Runs",
+            "default": 0
+          },
+          "pass_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pass Rate"
+          },
+          "open_bugs": {
+            "type": "integer",
+            "title": "Open Bugs",
+            "default": 0
+          },
+          "last_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Status"
+          },
+          "last_run_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Run At"
+          },
+          "recent_statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Recent Statuses",
+            "description": "Newest first, up to 12"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slug",
+          "name"
+        ],
+        "title": "DashboardApp"
+      },
+      "DashboardBug": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "app_slug": {
+            "type": "string",
+            "title": "App Slug"
+          },
+          "app_name": {
+            "type": "string",
+            "title": "App Name"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "occurrences": {
+            "type": "integer",
+            "title": "Occurrences",
+            "default": 1
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "app_slug",
+          "app_name",
+          "title",
+          "severity",
+          "status"
+        ],
+        "title": "DashboardBug"
+      },
+      "DashboardDay": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date"
+          },
+          "passed": {
+            "type": "integer",
+            "title": "Passed",
+            "default": 0
+          },
+          "failed": {
+            "type": "integer",
+            "title": "Failed",
+            "default": 0
+          },
+          "findings": {
+            "type": "integer",
+            "title": "Findings",
+            "default": 0
+          },
+          "cost_usd": {
+            "type": "number",
+            "title": "Cost Usd",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "date"
+        ],
+        "title": "DashboardDay"
+      },
+      "DashboardResponse": {
+        "properties": {
+          "days": {
+            "type": "integer",
+            "title": "Days"
+          },
+          "apps": {
+            "type": "integer",
+            "title": "Apps",
+            "default": 0
+          },
+          "runs": {
+            "type": "integer",
+            "title": "Runs",
+            "default": 0
+          },
+          "passed": {
+            "type": "integer",
+            "title": "Passed",
+            "default": 0
+          },
+          "failed": {
+            "type": "integer",
+            "title": "Failed",
+            "default": 0
+          },
+          "running": {
+            "type": "integer",
+            "title": "Running",
+            "default": 0
+          },
+          "pass_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pass Rate"
+          },
+          "cost_usd": {
+            "type": "number",
+            "title": "Cost Usd",
+            "default": 0.0
+          },
+          "avg_duration_ms": {
+            "type": "number",
+            "title": "Avg Duration Ms",
+            "default": 0.0
+          },
+          "avg_cost_usd": {
+            "type": "number",
+            "title": "Avg Cost Usd",
+            "default": 0.0
+          },
+          "open_bugs": {
+            "type": "integer",
+            "title": "Open Bugs",
+            "default": 0
+          },
+          "bugs_by_severity": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Bugs By Severity"
+          },
+          "bugs_by_status": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Bugs By Status"
+          },
+          "series": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardDay"
+            },
+            "type": "array",
+            "title": "Series"
+          },
+          "per_app": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardApp"
+            },
+            "type": "array",
+            "title": "Per App"
+          },
+          "recent_runs": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardRun"
+            },
+            "type": "array",
+            "title": "Recent Runs"
+          },
+          "top_bugs": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardBug"
+            },
+            "type": "array",
+            "title": "Top Bugs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "days"
+        ],
+        "title": "DashboardResponse"
+      },
+      "DashboardRun": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "app_slug": {
+            "type": "string",
+            "title": "App Slug"
+          },
+          "app_name": {
+            "type": "string",
+            "title": "App Name"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "findings": {
+            "type": "integer",
+            "title": "Findings",
+            "default": 0
+          },
+          "cost_usd": {
+            "type": "number",
+            "title": "Cost Usd",
+            "default": 0.0
+          },
+          "duration_ms": {
+            "type": "number",
+            "title": "Duration Ms",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "app_slug",
+          "app_name",
+          "status",
+          "mode"
+        ],
+        "title": "DashboardRun"
       },
       "DecisionResult": {
         "properties": {

@@ -93,14 +93,17 @@ test("planning is an opt-in choice when starting a run, and hidden for practice 
 test("each app sets its own clean-up policy and old runs can be removed", async ({ page }) => {
   await page.goto(APP);
   await page.getByRole("navigation", { name: "Sections" }).getByRole("link", { name: "Settings" }).click();
-  await expect(page.getByText("0 runs would be deleted").or(page.getByText(/runs stored; none will be deleted/))).toBeVisible();
+  await expect(page.getByText("10 runs stored; none will be deleted.")).toBeVisible();
   await expect(page.getByRole("button", { name: /Clean up now/ })).toBeDisabled();
   await page.getByLabel("Delete runs older than (days)").fill("0");
   await expect(page.getByText(/Days must be a whole number/)).toBeVisible();
-  await page.getByLabel("Delete runs older than (days)").fill("1");
-  await page.getByLabel("Always keep the newest runs").fill("1");
+  await page.getByLabel("Delete runs older than (days)").fill("7");
+  await page.getByLabel("Always keep the newest runs").fill("2");
   await page.getByRole("button", { name: "Save policy" }).click();
-  await expect(page.getByText("0 of 3 runs would be deleted right now.")).toBeVisible(); // the demo runs are all newer than a day
+  await expect(page.getByText("4 of 10 runs would be deleted right now.")).toBeVisible(); // the demo has runs 9, 13, 18 and 24 days old
+  await page.getByRole("button", { name: /Clean up now/ }).click();
+  await page.getByRole("button", { name: "Delete old runs" }).click();
+  await expect(page.getByText("0 of 6 runs would be deleted right now.")).toBeVisible();
   await expect(page.getByRole("button", { name: /Clean up now/ })).toBeDisabled();
 });
 
@@ -115,4 +118,76 @@ test("test files: built-in samples are listed and a new file can be added and re
   await expect(page.getByRole("cell", { name: "invoice.pdf", exact: true })).toHaveCount(0);
   await page.getByLabel("Choose test files").setInputFiles({ name: "huge.bin", mimeType: "application/octet-stream", buffer: Buffer.alloc(11 * 1024 * 1024) });
   await expect(page.getByRole("alert").filter({ hasText: "at most 10 MB" })).toBeVisible();
+});
+
+test("the home dashboard shows totals, charts, app health and the period switch", async ({ page }) => {
+  await page.goto("/");
+  const dash = page.getByRole("region", { name: "Dashboard" });
+  await expect(dash.getByText("Test runs").first()).toBeVisible();
+  await expect(dash.getByText("Open bugs").first()).toBeVisible();
+  await expect(dash.getByRole("img", { name: /Runs per day over the last 30 days/ })).toBeVisible();
+  await expect(dash.getByRole("heading", { name: "App health" })).toBeVisible();
+  await dash.getByRole("button", { name: "7 days" }).click();
+  await expect(dash.getByRole("img", { name: /over the last 7 days/ })).toBeVisible();
+  await dash.getByRole("link", { name: /Demo Shop/ }).first().click();
+  await expect(page).toHaveURL(/apps\/demo-shop/);
+});
+
+test("on wide screens the app sections sit in a side list; on a phone they are tabs", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(APP);
+  const nav = page.getByRole("navigation", { name: "Sections" });
+  await expect(nav).toHaveCount(1);
+  expect((await nav.boundingBox())!.width).toBeLessThan(260);
+  await page.setViewportSize({ width: 390, height: 800 });
+  await expect(page.getByRole("navigation", { name: "Sections" })).toHaveCount(1);
+  expect((await page.getByRole("navigation", { name: "Sections" }).boundingBox())!.width).toBeGreaterThan(300);
+});
+
+test.describe("guided tours", () => {
+  const popover = (page: import("@playwright/test").Page) => page.locator(".driver-popover");
+
+  test("the Tour button walks through the page and Esc stops it", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Take a tour of this page" }).click();
+    await expect(popover(page).getByText("Welcome to QAgent")).toBeVisible();
+    await popover(page).getByRole("button", { name: "Next" }).click();
+    await expect(popover(page).getByText("How testing is going")).toBeVisible();
+    await expect(popover(page).getByText(/2 of \d/)).toBeVisible();
+    await popover(page).getByRole("button", { name: "Back" }).click();
+    await expect(popover(page).getByText("Welcome to QAgent")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(popover(page)).toHaveCount(0);
+  });
+
+  test("an app page has its own tour and it finishes with Done", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(APP);
+    await page.getByRole("button", { name: "Take a tour of this page" }).click();
+    await expect(popover(page).getByText("An app's workspace")).toBeVisible();
+    for (let i = 0; i < 20 && (await popover(page).getByRole("button", { name: "Done" }).count()) === 0; i++) {
+      await popover(page).getByRole("button", { name: "Next" }).click();
+    }
+    await expect(popover(page).getByText("Run a test")).toBeVisible();
+    await popover(page).getByRole("button", { name: "Done" }).click();
+    await expect(popover(page)).toHaveCount(0);
+  });
+
+  test("on a phone the tour skips parts that are not on screen", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 800 });
+    await page.goto(APP);
+    await page.getByRole("button", { name: "Take a tour of this page" }).click();
+    await expect(popover(page).getByText("An app's workspace")).toBeVisible();
+    await page.keyboard.press("Escape");
+  });
+
+  test("a link with ?tour= starts that tour, and first-time visitors are offered one", async ({ page, context }) => {
+    await page.goto("/?tour=home");
+    await expect(popover(page).getByText("Welcome to QAgent")).toBeVisible();
+    await page.keyboard.press("Escape");
+    // a new visitor (no tours seen), in a normal (non-automated) browser, is offered the tour on their first page
+    await context.addInitScript(() => { localStorage.removeItem("qagent_tours"); Object.defineProperty(navigator, "webdriver", { get: () => false }); });
+    await page.goto("/");
+    await expect(popover(page).getByText("Welcome to QAgent")).toBeVisible({ timeout: 8000 });
+  });
 });

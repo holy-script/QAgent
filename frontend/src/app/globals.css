@@ -182,3 +182,16 @@
 /* React Flow follows the theme */
 .react-flow { --xy-background-color: transparent; --xy-edge-stroke: var(--muted-foreground); --xy-controls-button-background-color: var(--card); --xy-controls-button-color: var(--foreground); --xy-controls-button-border-color: var(--border); }
 .react-flow__attribution { display: none; }
+
+/* Guided tour (driver.js) follows the theme tokens */
+.driver-popover.qagent-tour { background: var(--popover); color: var(--popover-foreground); border: 1px solid var(--border); border-radius: 0.75rem; box-shadow: 0 10px 30px rgb(0 0 0 / 0.2); max-width: 22rem; padding: 1rem 1.1rem; font-family: inherit; }
+.driver-popover.qagent-tour .driver-popover-title { font-size: 0.95rem; font-weight: 600; color: var(--foreground); }
+.driver-popover.qagent-tour .driver-popover-description { font-size: 0.85rem; line-height: 1.5; color: var(--muted-foreground); }
+.driver-popover.qagent-tour .driver-popover-progress-text { color: var(--muted-foreground); font-size: 0.75rem; }
+.driver-popover.qagent-tour .driver-popover-arrow-side-left.driver-popover-arrow { border-left-color: var(--popover); }
+.driver-popover.qagent-tour .driver-popover-arrow-side-right.driver-popover-arrow { border-right-color: var(--popover); }
+.driver-popover.qagent-tour .driver-popover-arrow-side-top.driver-popover-arrow { border-top-color: var(--popover); }
+.driver-popover.qagent-tour .driver-popover-arrow-side-bottom.driver-popover-arrow { border-bottom-color: var(--popover); }
+.driver-popover.qagent-tour button { text-shadow: none; font-family: inherit; border-radius: 0.5rem; border: 1px solid var(--border); background: var(--card); color: var(--foreground); padding: 0.35rem 0.8rem; font-size: 0.8rem; }
+.driver-popover.qagent-tour .driver-popover-next-btn, .driver-popover.qagent-tour .driver-popover-done-btn { background: var(--primary); color: var(--primary-foreground); border-color: transparent; }
+.driver-popover.qagent-tour .driver-popover-close-btn { color: var(--muted-foreground); border: none; background: transparent; }

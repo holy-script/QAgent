@@ -525,3 +525,66 @@ class RequirementProposal(BaseModel):
 class PrdExtractResponse(BaseModel):
     proposals: List[RequirementProposal] = Field(default_factory=list)
     markdown: str = Field(default="", description="The proposals as playbook Markdown, ready to paste under ## Requirements")
+
+
+# --- Dashboard ---
+
+class DashboardDay(BaseModel):
+    date: str                       # YYYY-MM-DD (UTC)
+    passed: int = 0
+    failed: int = 0                 # failed, stopped or errored
+    findings: int = 0
+    cost_usd: float = 0.0
+
+
+class DashboardApp(BaseModel):
+    slug: str
+    name: str
+    runs: int = 0                   # in the period
+    pass_rate: Optional[float] = None
+    open_bugs: int = 0
+    last_status: Optional[str] = None
+    last_run_at: Optional[str] = None
+    recent_statuses: List[str] = Field(default_factory=list, description="Newest first, up to 12")
+
+
+class DashboardRun(BaseModel):
+    id: str
+    app_slug: str
+    app_name: str
+    status: str
+    mode: str
+    started_at: Optional[str] = None
+    findings: int = 0
+    cost_usd: float = 0.0
+    duration_ms: float = 0.0
+
+
+class DashboardBug(BaseModel):
+    id: str
+    app_slug: str
+    app_name: str
+    title: str
+    severity: str
+    status: str
+    occurrences: int = 1
+
+
+class DashboardResponse(BaseModel):
+    days: int
+    apps: int = 0
+    runs: int = 0
+    passed: int = 0
+    failed: int = 0
+    running: int = 0
+    pass_rate: Optional[float] = None
+    cost_usd: float = 0.0
+    avg_duration_ms: float = 0.0
+    avg_cost_usd: float = 0.0
+    open_bugs: int = 0
+    bugs_by_severity: Dict[str, int] = Field(default_factory=dict)
+    bugs_by_status: Dict[str, int] = Field(default_factory=dict)
+    series: List[DashboardDay] = Field(default_factory=list)
+    per_app: List[DashboardApp] = Field(default_factory=list)
+    recent_runs: List[DashboardRun] = Field(default_factory=list)
+    top_bugs: List[DashboardBug] = Field(default_factory=list)

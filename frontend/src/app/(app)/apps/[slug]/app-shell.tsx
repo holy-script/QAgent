@@ -1,10 +1,10 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
-import { Globe } from "lucide-react";
+import { Bug, FileText, GitCompare, Globe, LayoutDashboard, ListChecks, Play, Route, Settings } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
-import { ErrorState, Loading, Tabs } from "@/components/ui";
+import { ErrorState, Loading, SideNav, Tabs, type NavItem } from "@/components/ui";
 import { api } from "@/lib/api/client";
 import { useApp } from "@/lib/api/hooks";
 import { useIssues } from "@/lib/api/live";
@@ -25,30 +25,45 @@ function AppShell({ children }: { children: ReactNode }) {
   if (isPending) return <Loading />;
   if (error) return <ErrorState error={error} retry={refetch} />;
   const base = `/apps/${slug}`;
+  const items: NavItem[] = [
+    { href: base, label: "Overview", exact: true, icon: LayoutDashboard, tour: "nav-overview" },
+    { href: `${base}/playbooks`, label: "Test plans", icon: FileText, tour: "nav-plans" },
+    { href: `${base}/runs`, label: "Runs", count: runs?.length, icon: Play, tour: "nav-runs" },
+    { href: `${base}/flows`, label: "Journeys", icon: Route, tour: "nav-journeys" },
+    { href: `${base}/issues`, label: "Bugs", count: openIssues?.length, icon: Bug, tour: "nav-bugs" },
+    { href: `${base}/traceability`, label: "Requirements", icon: ListChecks, tour: "nav-requirements" },
+    { href: `${base}/compare`, label: "Compare", icon: GitCompare, tour: "nav-compare" },
+    { href: `${base}/settings`, label: "Settings", icon: Settings, tour: "nav-settings" },
+  ];
   return (
-    <div className="space-y-5">
-      {live && (
-        <Link href={`${base}/runs/${live.id}`} className="flex items-center gap-3 rounded-xl border border-brand/40 bg-brand/10 px-4 py-2.5 text-sm hover:bg-brand/15">
-          <span className="size-2 rounded-full bg-brand pulse-ring" />
-          <span><b>A test run is in progress</b> · {live.playbook_name}</span>
-          <span className="ml-auto text-brand">Watch it live →</span>
-        </Link>
-      )}
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{app.name}</h1>
-        <div className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground"><Globe className="size-3.5" />{app.base_url}</div>
+    // On wide screens the sections move to a side list, so the page gets the full height and more width.
+    <div className="lg:grid lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-8">
+      <aside className="hidden lg:block">
+        <div className="sticky top-20 space-y-4">
+          <div>
+            <h1 className="truncate text-lg font-semibold tracking-tight">{app.name}</h1>
+            <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground"><Globe className="size-3 shrink-0" /><span className="truncate">{app.base_url}</span></div>
+          </div>
+          <SideNav items={items} />
+        </div>
+      </aside>
+      <div className="min-w-0 space-y-5">
+        {live && (
+          <Link href={`${base}/runs/${live.id}`} className="flex items-center gap-3 rounded-xl border border-brand/40 bg-brand/10 px-4 py-2.5 text-sm hover:bg-brand/15">
+            <span className="size-2 rounded-full bg-brand pulse-ring" />
+            <span><b>A test run is in progress</b> · {live.playbook_name}</span>
+            <span className="ml-auto text-brand">Watch it live →</span>
+          </Link>
+        )}
+        <div className="space-y-4 lg:hidden">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">{app.name}</h1>
+            <div className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground"><Globe className="size-3.5" />{app.base_url}</div>
+          </div>
+          <Tabs tabs={items} />
+        </div>
+        {children}
       </div>
-      <Tabs tabs={[
-        { href: base, label: "Overview", exact: true },
-        { href: `${base}/playbooks`, label: "Test plans" },
-        { href: `${base}/runs`, label: "Runs", count: runs?.length },
-        { href: `${base}/flows`, label: "Journeys" },
-        { href: `${base}/issues`, label: "Bugs", count: openIssues?.length },
-        { href: `${base}/traceability`, label: "Requirements" },
-        { href: `${base}/compare`, label: "Compare" },
-        { href: `${base}/settings`, label: "Settings" },
-      ]} />
-      {children}
     </div>
   );
 }

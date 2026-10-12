@@ -66,7 +66,7 @@ make test         # 55 backend tests
 - **Deleting**: app and run deletion cascade through the database and object storage; confirmation dialogs (type the app name for an app).
 - **Reliability**: orphaned runs are marked failed on restart; uploads retry with backoff and emit `artifact.uploaded`.
 - **Editor**: CodeMirror 6 with Markdown highlighting, item IDs and bindings coloured, problems underlined on their line, edit-in-place for existing items (unseen fields are preserved).
-- **Tests and demo data**: every page and feature has demo data (in-browser fixtures with a scripted live run). Backend 85 pytest tests, frontend 43 unit tests, 56 Playwright tests (all pages x both themes, accessibility, phone width, auth, key journeys). CI runs all of them.
+- **Tests and demo data**: every page and feature has demo data (in-browser fixtures with a scripted live run). Backend 91 pytest tests, frontend 43 unit tests, 63 Playwright tests (all pages x both themes, accessibility, phone width, auth, key journeys). CI runs all of them.
 - **Done**: credential rotation (not needed, closed), `qagent-artifacts` bucket created and configured.
 
 - **Tape and cost**: judge verdicts and report calls are recorded as `model_calls` (new table, migration `b7e2c4a91d30`), so "Repeat exactly" answers judgements and reports from the recording with no model calls. Judge, planner and report cost roll into the run total with a breakdown; `GET /runs/{id}/tape` lists every call and the run page has an **AI calls** tab.
@@ -74,6 +74,9 @@ make test         # 55 backend tests
 - **Determinism**: the browser clock is fixed (`FIXED_CLOCK_ISO`), animations are off, locale and timezone are pinned, and each journey resets its own server-side state (demo shop: `POST /__reset?scope=session`) so parallel journeys never disturb each other. `DETERMINISTIC_BROWSER=false` turns this off.
 - **API**: app-scoped routes only for creating and listing (`/apps/{id}/runs`, `/apps/{id}/playbooks`); lookups by id stay flat (`/runs/{id}`, `/issues/{id}`).
 - **Retention (per app)**: each app sets how long its finished runs are kept (Settings > Keeping old runs: delete after N days, always keep the newest M). Applied hourly and on demand ("Clean up now"); rows and stored files go together; running runs are never touched. Migration `c3d9e5f1a2b4`.
+- **File uploads**: a step can attach a file to a page's file field. Each app has its own test files (Settings > Test files, up to 10 MB each) plus built-in samples (png, pdf, txt, csv, json). Which file a step uses: the journey's `file:` test data, a name in the step text, or one matching the field's accepted types. Hidden "drop zone" inputs work. The demo shop has a profile page with an avatar upload and a planted bug (accepts any file type); `playbooks/uploads.md` tests it. Migration `d4a1b8c6e7f2`.
+- **Dashboard and layout**: the home page opens with a dashboard (runs, clean-run rate, open bugs, AI cost, runs per day, bugs by severity, app health, latest runs, worst bugs; 7/30/90 days) from `GET /dashboard`. App pages use a side list on wide screens (tabs on phones), wider content area, and two-column Settings. The demo data now has 10 runs over 24 days (the oldest three clean).
+- **Guided tours** (driver.js): home, an app, a run, a test plan and a bug each have a tour; the Tour button in the header starts the one for the current page, first-time visitors get the home tour and a one-time offer on other pages, `?tour=home` starts one from a link. Steps for parts not on screen (phone) are skipped.
 - **Deploy**: `docker-compose.yml` + `deploy/` run Caddy, the web app and the backend (one worker) on one machine behind one address. See `deploy/README.md`. Not yet exercised on a real VM.
 
 ## Known gaps
