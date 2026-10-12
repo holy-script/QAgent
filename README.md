@@ -32,7 +32,7 @@ Runs use the pinned Playwright Chromium. Override with `QAGENT_BROWSER_PATH` (a 
 | Frontend end to end (every page in both themes, accessibility, key journeys, on demo data) | `cd frontend && npm run test:e2e` |
 | All frontend checks | `cd frontend && npm run test:all` |
 
-CI (`.github/workflows/ci.yml`) runs all of the above on every push and pull request.
+A ready-made GitHub Actions workflow that runs all of the above is in `deploy/ci.github-actions.yml`. To turn it on, add it as `.github/workflows/ci.yml` (GitHub's web editor works without any token scope).
 
 ## Deploying
 `docker compose up -d --build` runs the web app, the API and Caddy on one machine behind one address. Steps: [deploy/README.md](deploy/README.md).
