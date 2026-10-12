@@ -152,6 +152,7 @@ class FlowContext:
     log_cursor: int = 0
     steps: Dict[int, StepInfo] = field(default_factory=dict)
     plan_hints: Dict[int, str] = field(default_factory=dict)
+    downloads: List[str] = field(default_factory=list)   # files the page started downloading, with the step they followed
     snapshots: List[Dict[str, Any]] = field(default_factory=list)   # page text after each step that changed it
     done: List[str] = field(default_factory=list)   # the steps already done, for the final live checks
     blocked_seen: int = 0              # how many blocked requests were already reported
@@ -575,6 +576,7 @@ class EngineRunner:
             page = await sandbox.start(storage_state=None if flow.role == "setup" else self.shared_state)
             self.browser_version = self.browser_version or sandbox.browser_version
             recorder = NetworkRecorder(page, ctx.flow_run_id, sandbox=sandbox)
+            page.on("download", lambda d: ctx.downloads.append(f"{d.suggested_filename} (after step {ctx.steps_run})"))
             await self._reset_for_flow(page)
             await page.goto(self.spec.base_url, timeout=10000)
             recorder.drain()  # landing traffic is not part of any step
@@ -1113,6 +1115,7 @@ class EngineRunner:
             await self._log(ctx, seq, "warning", "network", f"requests to '{host}' were blocked because it is not in this app's allowed hosts; "
                                                          f"if the app needs it, add it in the app's settings (a '*.' prefix allows a whole domain)")
         try:
+            await wait_dom_stable(page, quiet_ms=500, max_ms=2000)   # a screen that is still revealing its result is not what the step produced
             text = (await page.evaluate("document.body ? document.body.innerText : ''"))[:6000]
             if text and (not ctx.snapshots or ctx.snapshots[-1]["text"] != text):
                 ctx.snapshots.append({"seq": seq, "intent": state["intent"], "url": page.url, "text": text})
@@ -1280,7 +1283,8 @@ class EngineRunner:
                     try:
                         outcome = await expectations.run_expectation_live(
                             self.judge, flow.key, n, text, severity, flow.covers, page_text, shots, hints, examples, page,
-                            journey=(flow.goal or "; ".join(flow.steps)) + ("\nSteps already done: " + " | ".join(ctx.done[-25:]) if ctx.done else ""), console_logs=rt.sandbox.console_logs,
+                            journey=(flow.goal or "; ".join(flow.steps)) + ("\nSteps already done: " + " | ".join(ctx.done[-25:]) if ctx.done else "")
+                            + ("\nFiles the browser downloaded during this journey: " + ", ".join(ctx.downloads) if ctx.downloads else "\nNo file was downloaded during this journey."), console_logs=rt.sandbox.console_logs,
                             state_js=PAGE_STATE_JS, network_calls=rt.recorder.calls, snapshots=ctx.snapshots)
                     except Exception as exc:
                         await self._log(ctx, seq, "warning", "checks",
