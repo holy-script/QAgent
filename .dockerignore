@@ -1,0 +1,11 @@
+.git
+**/node_modules
+**/.next
+**/.venv
+**/__pycache__
+**/.env
+**/.env.*
+backend/qagent.db
+backend/.artifacts
+frontend/test-results
+frontend/e2e/.auth

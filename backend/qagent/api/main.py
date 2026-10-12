@@ -65,6 +65,8 @@ for router in _routers:
 # Artifact and screenshot URLs in events and DTOs are `/api/...` paths; serve them too
 # (hidden from the OpenAPI schema so the generated client has one copy of each operation).
 api_alias = APIRouter(prefix="/api")
+api_alias.include_router(auth.router)    # sign-in and the health check are reachable under /api too, for the web app's proxy
+api_alias.include_router(health.router)
 for router in _routers:
     api_alias.include_router(router, dependencies=protected)
 app.include_router(api_alias, include_in_schema=False)

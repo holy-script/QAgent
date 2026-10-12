@@ -90,3 +90,14 @@ async def test_cors_allows_only_the_frontend_origin_with_credentials(client):
     assert ok.headers["access-control-allow-origin"] == "http://localhost:3000" and ok.headers["access-control-allow-credentials"] == "true"
     bad = await client.options("/apps", headers={"Origin": "http://evil.example", "Access-Control-Request-Method": "GET"})
     assert "access-control-allow-origin" not in bad.headers
+
+
+@pytest.mark.real_auth
+@pytest.mark.asyncio
+async def test_sign_in_and_health_also_work_under_api(client):
+    """The web app reaches the API through a /api proxy, so login and the health check must exist there too."""
+    assert (await client.get("/api/health")).status_code == 200
+    r = await client.post("/api/auth/login", json={"email": settings.auth_email, "password": settings.auth_password})
+    assert r.status_code == 200
+    assert (await client.get("/api/auth/me")).json()["email"] == settings.auth_email
+    assert (await client.get("/api/apps")).status_code == 200

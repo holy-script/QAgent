@@ -11,7 +11,7 @@ trap 'rm -rf "$tmp"' EXIT
 git -C "$root" archive HEAD | tar -x -C "$tmp"
 cp "$root/deploy/hf/Dockerfile" "$tmp/Dockerfile"
 cp "$root/deploy/hf/README.md" "$tmp/README.md"
-rm -rf "$tmp/.github" "$tmp/frontend/e2e"
+rm -rf "$tmp/.github" "$tmp/frontend"  # the web app is deployed to Vercel, not here
 cd "$tmp"
 git init -q -b main
 git add -A
