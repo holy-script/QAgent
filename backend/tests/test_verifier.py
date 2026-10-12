@@ -10,7 +10,9 @@ from qagent.checks.verifier import verify_live
 from qagent.decision.ledger import TapedJudge
 
 PAGE = ("<a href=\"#\" id=nav style='cursor:pointer' onclick=\"document.getElementById('out').textContent='opened';return false\">"
-        "Open planner</a><div id=out>closed</div>")
+        "Open planner</a><div id=out>closed</div>"
+    "<input id=amt value=1 aria-label=Amount>"
+    "<div id=dbl>2</div><script>document.getElementById('amt').addEventListener('input', e => { document.getElementById('dbl').textContent = String(Number(e.target.value) * 2); });</script>")
 
 
 class Script:
@@ -137,5 +139,24 @@ async def test_the_verifier_is_told_when_a_click_made_no_server_requests():
         client = Script([click(1), answer("false", "nothing was requested")])
         await verify_live(client, page, "The link loads data", network_calls=[])
         assert "no server requests were made" in client.prompts[1]
+    finally:
+        await sb.stop()
+
+
+def type_into(target, text):
+    return {"action": "type", "target_id": target, "text": text, "reasoning": "change the value and watch what else changes"}
+
+
+@pytest.mark.asyncio
+async def test_the_verifier_can_type_into_a_field_and_sees_earlier_screens():
+    sb, page = await on_page()
+    try:
+        client = Script([type_into(2, "21"), answer("true", "the doubled value follows the input")])
+        snaps = [{"seq": 4, "intent": "Click Confirm Mapping", "url": "https://x/upload", "text": "Validation 6/6 pass\n6 ecosystems · 52 months"},
+                 {"seq": 9, "intent": "Click Proceed", "url": "https://x/forecast", "text": "Forecast screen only"}]
+        verdict = await verify_live(client, page, "Validation shows 6/6 pass and 6 ecosystems", snapshots=snaps)
+        assert verdict.passed and await page.inner_text("#dbl") == "42"                   # it really typed, and the page reacted
+        assert "typed '21' into [2]" in client.prompts[1]
+        assert "After step 4" in client.prompts[0] and "6/6 pass" in client.prompts[0] and "Forecast screen only" not in client.prompts[0]
     finally:
         await sb.stop()

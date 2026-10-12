@@ -84,7 +84,8 @@ class Judge:
                       screenshots: List[bytes]) -> Verdict:
         assert self.claude
         system = ("You judge whether a statement about a web page is true, using the page text and screenshots. "
-                  "Answer strictly from what is visible; lower your confidence when the evidence is thin.")
+                  "Answer strictly from what is visible; lower your confidence when the evidence is thin. Statements may contain negations "
+                  "(is not, does not, never): answer true only when the whole statement as written is true, and make sure your reasoning agrees with your answer.")
         if hints:
             system += "\n\nKnown traps in this app:\n" + "\n".join(f"- {h}" for h in hints)
         if examples:
@@ -123,10 +124,11 @@ class Judge:
 
     async def verify(self, question: str, page_text: str, page: Any, journey: str = "", hints: Optional[List[str]] = None,
                      examples: Optional[List[Dict[str, Any]]] = None, console_logs: Optional[List[Dict[str, Any]]] = None,
-                     state_js: Optional[str] = None, network_calls: Optional[List[Dict[str, Any]]] = None) -> Optional[Verdict]:
+                     state_js: Optional[str] = None, network_calls: Optional[List[Dict[str, Any]]] = None,
+                     snapshots: Optional[List[Dict[str, Any]]] = None) -> Optional[Verdict]:
         """Works on the live page (clicks, hovers) to answer; None when there is no strong model or the evidence stays inconclusive."""
         if not self.claude:
             return None
         from qagent.checks.verifier import verify_live
         return await verify_live(self.claude, page, question, journey, hints, examples, console_logs, state_js,
-                                 network_calls=network_calls)
+                                 network_calls=network_calls, snapshots=snapshots)

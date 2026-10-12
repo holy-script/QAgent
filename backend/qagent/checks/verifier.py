@@ -5,6 +5,7 @@ The verifier: for a judged expectation that needs the page to be USED ("navigati
 happened (new URL, messages, console errors), or answers. It is capped at a few actions, and only its final verdict is put on
 the tape, so a repeat of the run makes no model calls and touches no browser.
 """
+import re
 import time
 from typing import Any, Callable, Dict, List, Optional
 
@@ -19,6 +20,8 @@ from qagent.decision.charter import with_charter
 from qagent.decision.claude import usage_cost
 from qagent.domain.schemas import CandidateAction
 
+_STOP = {"the", "and", "that", "with", "for", "are", "was", "not", "any", "all", "this", "shows", "show", "page", "from", "has", "have"}
+
 VERIFY_TOOL = {
     "toolSpec": {
         "name": "verify_step",
@@ -26,8 +29,9 @@ VERIFY_TOOL = {
         "inputSchema": {"json": {
             "type": "object",
             "properties": {
-                "action": {"type": "string", "enum": ["click", "hover", "back", "answer"]},
-                "target_id": {"type": "integer", "description": "id of the interactive element (for click or hover)"},
+                "action": {"type": "string", "enum": ["click", "hover", "type", "back", "answer"]},
+                "target_id": {"type": "integer", "description": "id of the interactive element (for click, hover or type)"},
+                "text": {"type": "string", "description": "only with action=type: the text to type into the field (it replaces what is there)"},
                 "verdict": {"type": "string", "enum": ["true", "false", "inconclusive"],
                             "description": "only with action=answer: is the statement true?"},
                 "confidence": {"type": "number", "description": "0.0-1.0, only with action=answer"},
@@ -39,9 +43,9 @@ VERIFY_TOOL = {
 }
 
 SYSTEM = (
-    "You verify a statement about a web app by using the live page, like a careful tester. You can click or hover an element, "
-    "go back, or answer. Gather real evidence: if the statement is about something working (clickable, responsive, navigates, "
-    "opens, updates), try it on a few representative elements and look at what happened. Do not answer 'inconclusive' just "
+    "You verify a statement about a web app by using the live page, like a careful tester. You can click or hover an element, type "
+    "into a field, go back, or answer. Statements may contain negations (is not, does not, never): answer 'true' only when the whole statement as written is true, and check that your reasoning agrees with your answer. Gather real evidence: if the statement is about something working (clickable, responsive, navigates, "
+    "opens, updates), try it on a few representative elements and look at what happened; to check that something responds to input or is computed from data, change a value (type) and see what else changes. Do not answer 'inconclusive' just "
     "because a screenshot is static: you can act. Answer 'false' only when what you saw contradicts the statement (nothing "
     "happened, an error appeared, the wrong page opened); answer 'true' when your evidence supports it; use 'inconclusive' only "
     "when you tried and still cannot tell. Avoid destructive actions (deleting, paying, submitting real data) and do not repeat "
@@ -79,7 +83,19 @@ async def _look(page: Page, with_image: bool = True) -> Dict[str, Any]:
     return {"url": page.url, "title": title, "text": text, "aria": await _aria(page), "candidates": candidates, "shot": shot}
 
 
-def _prompt(statement: str, journey: str, hints: List[str], seen: Dict[str, Any], trail: List[str], left: int) -> str:
+def _earlier(statement: str, snapshots: List[Dict[str, Any]]) -> str:
+    """Page text after earlier steps that mention what the statement talks about, so a statement about an earlier screen can be judged."""
+    words = {w for w in re.findall(r"[a-z0-9%/.,]{3,}", statement.lower()) if w not in _STOP}
+    scored = sorted(((sum(w in snap['text'].lower() for w in words), snap) for snap in snapshots), key=lambda t: -t[0])
+    picks = sorted((snap for sc, snap in scored[:3] if sc >= 2), key=lambda snap: snap['seq'])
+    out = []
+    for snap in picks:
+        t = snap['text']
+        out.append(f"After step {snap['seq']} ({snap['intent'][:60]}) the page at {snap['url']} showed:\n" + (t if len(t) <= 2400 else t[:1200] + ' ... ' + t[-1200:]))
+    return "\n\n".join(out)
+
+
+def _prompt(statement: str, journey: str, hints: List[str], seen: Dict[str, Any], trail: List[str], left: int, earlier: str = "") -> str:
     elements = "\n".join(f"[{c.id}] <{c.tag}> {c.label!r}" for c in seen["candidates"]) or "(no interactive elements)"
     return (
         f"Statement to verify: {statement}\n"
@@ -87,6 +103,7 @@ def _prompt(statement: str, journey: str, hints: List[str], seen: Dict[str, Any]
         + ("Known traps in this app:\n" + "\n".join(f"- {h}" for h in hints[:3]) + "\n" if hints else "")
         + f"\nWhat you did so far:\n" + ("\n".join(trail) if trail else "(nothing yet)")
         + f"\n\nActions left: {left}" + (" (answer now)" if left <= 0 else "")
+        + (f"\nEarlier screens of this journey (what the page showed after those steps):\n{earlier}\n" if earlier else "")
         + f"\nPage: {seen['url']}\nTitle: {seen['title']}\n\nAccessibility tree:\n{seen['aria'] or '(unavailable)'}\n\n"
         + f"Visible text (excerpt):\n{seen['text']}\n\nInteractive elements:\n{elements}"
     )
@@ -95,7 +112,8 @@ def _prompt(statement: str, journey: str, hints: List[str], seen: Dict[str, Any]
 async def verify_live(client: Any, page: Page, statement: str, journey: str = "", hints: Optional[List[str]] = None,
                       examples: Optional[List[Dict[str, Any]]] = None, console_logs: Optional[List[Dict[str, Any]]] = None,
                       state_js: Optional[str] = None, max_actions: Optional[int] = None,
-                      network_calls: Optional[List[Dict[str, Any]]] = None) -> Optional[Verdict]:
+                      network_calls: Optional[List[Dict[str, Any]]] = None,
+                      snapshots: Optional[List[Dict[str, Any]]] = None) -> Optional[Verdict]:
     """A Verdict from working on the live page, or None when the evidence stays inconclusive."""
     hints = hints or []
     limit = settings.verify_max_actions if max_actions is None else max_actions
@@ -117,7 +135,7 @@ async def verify_live(client: Any, page: Page, statement: str, journey: str = ""
         for turn in range(limit + 2):
             left = limit - len([t for t in trail if t.startswith("-")])
             seen = await _look(page)
-            out = await client.converse_tool(system, _prompt(statement, journey, hints, seen, trail, left), VERIFY_TOOL,
+            out = await client.converse_tool(system, _prompt(statement, journey, hints, seen, trail, left, _earlier(statement, snapshots or [])), VERIFY_TOOL,
                                              max_tokens=500, images=[seen["shot"]] if seen["shot"] else None)
             usage = out.get("usage", {})
             in_tok += usage.get("inputTokens", 0)
@@ -146,6 +164,13 @@ async def verify_live(client: Any, page: Page, statement: str, journey: str = ""
                 target = next((c for c in seen["candidates"] if c.id == a.get("target_id")), None)
                 if target is None:
                     note = f"there is no element [{a.get('target_id')}]"
+                elif action == "type":
+                    if target.action_type != "fill":
+                        note = f"[{target.id}] {target.label!r} is not a text field"
+                    else:
+                        res = await executor.execute(target, str(a.get("text", "")))
+                        await wait_dom_stable(page, quiet_ms=300, max_ms=2000)
+                        note = f"typed {str(a.get('text', ''))[:40]!r} into [{target.id}] {target.label!r}" + (f": it failed ({res['error']})" if res["status"] != "success" else "")
                 elif action == "hover":
                     try:
                         loc = await executor._locate(target)

@@ -121,12 +121,12 @@ Sign in with the saved sign-in details and reach the Setup screen.
 - severity: critical
 
 #### Goal
-Pick a 12 month horizon, upload the clean data file from the test data, confirm the column mapping and validation, go through Explore and Method (let the benchmark finish, then let the app auto-select the best method), and reach the Forecast screen.
+Pick a 12 month horizon, upload the clean data file from the test data, confirm the column mapping and validation, go through Explore and Method (let the benchmark finish, then select the ETS row in the Model Evaluation Matrix and use Use selected method), and reach the Forecast screen.
 
 #### Expect
 - Validation shows 6/6 pass and the footer says 6 ecosystems and 52 months
 - On Explore the Great Lakes card shows an increase of about 45.6% and the Pacific West card about 35.8%
-- The benchmark finishes with status ready and lists four methods with WAPE scores
+- The benchmark finishes with status ready and the Model Evaluation Matrix lists the four fitted methods (Holt-Winters, SARIMA, Linear Trend + Seasonality, ETS) with WAPE scores
 - The Forecast screen shows the method ETS, a national baseline of 6,786 and a projected horizon of about 6,889, a net growth of about 1.5%
 - The Chart, Data Table and Treemap views can all be opened
 
@@ -138,7 +138,7 @@ Pick a 12 month horizon, upload the clean data file from the test data, confirm 
 - severity: high
 
 #### Goal
-Reach the Forecast screen with the clean data file from the test data and a 12 month horizon (auto-select the best method), then use Generate Deck (.pptx) and Export Forecast (.csv).
+Reach the Forecast screen with the clean data file from the test data and a 12 month horizon (select the ETS row and use Use selected method), then use Generate Deck (.pptx) and Export Forecast (.csv).
 
 #### Expect
 - Generate Deck (.pptx) starts a download of a .pptx file
@@ -191,11 +191,12 @@ After choosing a 12 month horizon, upload the file from the test data, confirm t
 - severity: medium
 
 #### Goal
-Reach the Method screen with the clean data file from the test data and a 12 month horizon, wait for the benchmark, then on the custom month-on-month table click Reset All (0%) and look at how the Custom Trend Curve is ranked.
+Reach the Method screen with the clean data file from the test data and a 12 month horizon, wait for the benchmark, then in the custom month-on-month table click Reset All (0%), look at the Custom Trend Curve row of the Model Evaluation Matrix, then click Set Baseline (+2%) and look at that row again.
 
 #### Expect
-- A flat 0% custom curve is not presented as the best fitting method
-- The Custom Trend Curve row shows scores that come from the data, not fixed numbers
+- With a flat 0% curve the Custom Trend Curve is ranked below the data-driven methods and is not labelled Best Fit
+- Changing the percentages changes the Custom Trend Curve's Test WAPE, Test RMSE and AIC, because they are computed from the data and the curve
+- Auto-select best chooses a data-driven method, not the Custom Trend Curve
 
 #### Test data
 - file: ocrevus_trx_data.csv

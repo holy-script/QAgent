@@ -43,7 +43,8 @@ NEEDS_INTERACTION = re.compile(
 async def run_expectation_live(judge: Any, flow_key: str, n: int, text: str, severity: str, requirement_keys: List[str],
                                page_text: str, screenshots: List[bytes], hints: List[str], examples: List[Dict[str, Any]],
                                page: Any, journey: str = "", console_logs: Optional[List[Dict[str, Any]]] = None,
-                               state_js: Optional[str] = None, network_calls: Optional[List[Dict[str, Any]]] = None) -> Optional[CheckOutcome]:
+                               state_js: Optional[str] = None, network_calls: Optional[List[Dict[str, Any]]] = None,
+                               snapshots: Optional[List[Dict[str, Any]]] = None) -> Optional[CheckOutcome]:
     """An expectation checked with the live page when it needs it.
     Statements about things working go straight to the live verifier; the others get the quick judgement first, and a 'no'
     is double-checked live before it is reported (a screenshot cannot show that something does not work, or that it does).
@@ -52,7 +53,7 @@ async def run_expectation_live(judge: Any, flow_key: str, n: int, text: str, sev
     question = f"On this page, is the following true: {text}"
 
     async def live() -> Optional[Verdict]:
-        return await judge.verify(question, page_text, page, journey, hints, examples, console_logs, state_js, network_calls)
+        return await judge.verify(question, page_text, page, journey, hints, examples, console_logs, state_js, network_calls, snapshots)
 
     outcome: Optional[CheckOutcome] = None
     if verify and NEEDS_INTERACTION.search(text):
