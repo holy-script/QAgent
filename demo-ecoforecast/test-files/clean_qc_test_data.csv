@@ -1,0 +1,589 @@
+date,month_label,year,month,ecosystem_id,ecosystem_name,product,therapeutic_area,trx,nrx,nbrx
+2024-01-01,Jan-24,2024,1,NE,Northeast Corridor,Product A,Oncology,1320,290,159
+2024-01-01,Jan-24,2024,1,PAC,Pacific West,Product A,Oncology,1380,303,166
+2024-01-01,Jan-24,2024,1,GL,Great Lakes,Product A,Oncology,1320,290,159
+2024-01-01,Jan-24,2024,1,SE,Southeast,Product A,Oncology,1320,290,159
+2024-01-01,Jan-24,2024,1,SW,Southwest,Product A,Oncology,1320,290,159
+2024-01-01,Jan-24,2024,1,MW,Mountain West,Product A,Oncology,1320,290,159
+2024-01-01,Jan-24,2024,1,PL,Plains,Product A,Oncology,1320,290,159
+2024-01-01,Jan-24,2024,1,NE,Northeast Corridor,Product B,Immunology,935,205,112
+2024-01-01,Jan-24,2024,1,PAC,Pacific West,Product B,Immunology,977,214,117
+2024-01-01,Jan-24,2024,1,GL,Great Lakes,Product B,Immunology,935,205,112
+2024-01-01,Jan-24,2024,1,SE,Southeast,Product B,Immunology,935,205,112
+2024-01-01,Jan-24,2024,1,SW,Southwest,Product B,Immunology,935,205,112
+2024-01-01,Jan-24,2024,1,NE,Northeast Corridor,Product C,Neurology,1650,363,199
+2024-01-01,Jan-24,2024,1,PAC,Pacific West,Product C,Neurology,1724,379,208
+2024-01-01,Jan-24,2024,1,GL,Great Lakes,Product C,Neurology,1650,363,199
+2024-01-01,Jan-24,2024,1,SE,Southeast,Product C,Neurology,1650,363,199
+2024-01-01,Jan-24,2024,1,PAC,Pacific West,Product D,Ophthalmology,690,151,83
+2024-01-01,Jan-24,2024,1,GL,Great Lakes,Product D,Ophthalmology,660,145,79
+2024-01-01,Jan-24,2024,1,SE,Southeast,Product D,Ophthalmology,660,145,79
+2024-01-01,Jan-24,2024,1,GL,Great Lakes,Product E,Rare Disease,440,96,52
+2024-01-01,Jan-24,2024,1,SE,Southeast,Product E,Rare Disease,440,96,52
+2024-02-01,Feb-24,2024,2,NE,Northeast Corridor,Product A,Oncology,1339,294,161
+2024-02-01,Feb-24,2024,2,PAC,Pacific West,Product A,Oncology,1400,308,169
+2024-02-01,Feb-24,2024,2,GL,Great Lakes,Product A,Oncology,1339,294,161
+2024-02-01,Feb-24,2024,2,SE,Southeast,Product A,Oncology,1339,294,161
+2024-02-01,Feb-24,2024,2,SW,Southwest,Product A,Oncology,1339,294,161
+2024-02-01,Feb-24,2024,2,MW,Mountain West,Product A,Oncology,1339,294,161
+2024-02-01,Feb-24,2024,2,PL,Plains,Product A,Oncology,1339,294,161
+2024-02-01,Feb-24,2024,2,NE,Northeast Corridor,Product B,Immunology,949,208,114
+2024-02-01,Feb-24,2024,2,PAC,Pacific West,Product B,Immunology,992,218,119
+2024-02-01,Feb-24,2024,2,GL,Great Lakes,Product B,Immunology,949,208,114
+2024-02-01,Feb-24,2024,2,SE,Southeast,Product B,Immunology,949,208,114
+2024-02-01,Feb-24,2024,2,SW,Southwest,Product B,Immunology,949,208,114
+2024-02-01,Feb-24,2024,2,NE,Northeast Corridor,Product C,Neurology,1674,368,202
+2024-02-01,Feb-24,2024,2,PAC,Pacific West,Product C,Neurology,1750,385,211
+2024-02-01,Feb-24,2024,2,GL,Great Lakes,Product C,Neurology,1674,368,202
+2024-02-01,Feb-24,2024,2,SE,Southeast,Product C,Neurology,1674,368,202
+2024-02-01,Feb-24,2024,2,PAC,Pacific West,Product D,Ophthalmology,700,154,84
+2024-02-01,Feb-24,2024,2,GL,Great Lakes,Product D,Ophthalmology,669,147,80
+2024-02-01,Feb-24,2024,2,SE,Southeast,Product D,Ophthalmology,669,147,80
+2024-02-01,Feb-24,2024,2,GL,Great Lakes,Product E,Rare Disease,446,98,53
+2024-02-01,Feb-24,2024,2,SE,Southeast,Product E,Rare Disease,446,98,53
+2024-03-01,Mar-24,2024,3,NE,Northeast Corridor,Product A,Oncology,1359,298,163
+2024-03-01,Mar-24,2024,3,PAC,Pacific West,Product A,Oncology,1421,312,171
+2024-03-01,Mar-24,2024,3,GL,Great Lakes,Product A,Oncology,1359,298,163
+2024-03-01,Mar-24,2024,3,SE,Southeast,Product A,Oncology,1359,298,163
+2024-03-01,Mar-24,2024,3,SW,Southwest,Product A,Oncology,1359,298,163
+2024-03-01,Mar-24,2024,3,MW,Mountain West,Product A,Oncology,1359,298,163
+2024-03-01,Mar-24,2024,3,PL,Plains,Product A,Oncology,1359,298,163
+2024-03-01,Mar-24,2024,3,NE,Northeast Corridor,Product B,Immunology,963,211,116
+2024-03-01,Mar-24,2024,3,PAC,Pacific West,Product B,Immunology,1006,221,121
+2024-03-01,Mar-24,2024,3,GL,Great Lakes,Product B,Immunology,963,211,116
+2024-03-01,Mar-24,2024,3,SE,Southeast,Product B,Immunology,963,211,116
+2024-03-01,Mar-24,2024,3,SW,Southwest,Product B,Immunology,963,211,116
+2024-03-01,Mar-24,2024,3,NE,Northeast Corridor,Product C,Neurology,1699,373,205
+2024-03-01,Mar-24,2024,3,PAC,Pacific West,Product C,Neurology,1776,390,214
+2024-03-01,Mar-24,2024,3,GL,Great Lakes,Product C,Neurology,1699,373,205
+2024-03-01,Mar-24,2024,3,SE,Southeast,Product C,Neurology,1699,373,205
+2024-03-01,Mar-24,2024,3,PAC,Pacific West,Product D,Ophthalmology,710,156,85
+2024-03-01,Mar-24,2024,3,GL,Great Lakes,Product D,Ophthalmology,679,149,81
+2024-03-01,Mar-24,2024,3,SE,Southeast,Product D,Ophthalmology,679,149,81
+2024-03-01,Mar-24,2024,3,GL,Great Lakes,Product E,Rare Disease,453,99,54
+2024-03-01,Mar-24,2024,3,SE,Southeast,Product E,Rare Disease,453,99,54
+2024-04-01,Apr-24,2024,4,NE,Northeast Corridor,Product A,Oncology,1379,303,166
+2024-04-01,Apr-24,2024,4,PAC,Pacific West,Product A,Oncology,1442,317,174
+2024-04-01,Apr-24,2024,4,GL,Great Lakes,Product A,Oncology,1379,303,166
+2024-04-01,Apr-24,2024,4,SE,Southeast,Product A,Oncology,1379,303,166
+2024-04-01,Apr-24,2024,4,SW,Southwest,Product A,Oncology,1379,303,166
+2024-04-01,Apr-24,2024,4,MW,Mountain West,Product A,Oncology,1379,303,166
+2024-04-01,Apr-24,2024,4,PL,Plains,Product A,Oncology,1379,303,166
+2024-04-01,Apr-24,2024,4,NE,Northeast Corridor,Product B,Immunology,977,214,117
+2024-04-01,Apr-24,2024,4,PAC,Pacific West,Product B,Immunology,1021,224,123
+2024-04-01,Apr-24,2024,4,GL,Great Lakes,Product B,Immunology,977,214,117
+2024-04-01,Apr-24,2024,4,SE,Southeast,Product B,Immunology,977,214,117
+2024-04-01,Apr-24,2024,4,SW,Southwest,Product B,Immunology,977,214,117
+2024-04-01,Apr-24,2024,4,NE,Northeast Corridor,Product C,Neurology,1724,379,208
+2024-04-01,Apr-24,2024,4,PAC,Pacific West,Product C,Neurology,1802,396,217
+2024-04-01,Apr-24,2024,4,GL,Great Lakes,Product C,Neurology,1724,379,208
+2024-04-01,Apr-24,2024,4,SE,Southeast,Product C,Neurology,1724,379,208
+2024-04-01,Apr-24,2024,4,PAC,Pacific West,Product D,Ophthalmology,721,158,86
+2024-04-01,Apr-24,2024,4,GL,Great Lakes,Product D,Ophthalmology,689,151,83
+2024-04-01,Apr-24,2024,4,SE,Southeast,Product D,Ophthalmology,689,151,83
+2024-04-01,Apr-24,2024,4,GL,Great Lakes,Product E,Rare Disease,459,100,55
+2024-04-01,Apr-24,2024,4,SE,Southeast,Product E,Rare Disease,459,100,55
+2024-05-01,May-24,2024,5,NE,Northeast Corridor,Product A,Oncology,1399,307,168
+2024-05-01,May-24,2024,5,PAC,Pacific West,Product A,Oncology,1462,321,176
+2024-05-01,May-24,2024,5,GL,Great Lakes,Product A,Oncology,1399,307,168
+2024-05-01,May-24,2024,5,SE,Southeast,Product A,Oncology,1399,307,168
+2024-05-01,May-24,2024,5,SW,Southwest,Product A,Oncology,1399,307,168
+2024-05-01,May-24,2024,5,MW,Mountain West,Product A,Oncology,1399,307,168
+2024-05-01,May-24,2024,5,PL,Plains,Product A,Oncology,1399,307,168
+2024-05-01,May-24,2024,5,NE,Northeast Corridor,Product B,Immunology,991,218,119
+2024-05-01,May-24,2024,5,PAC,Pacific West,Product B,Immunology,1036,227,124
+2024-05-01,May-24,2024,5,GL,Great Lakes,Product B,Immunology,991,218,119
+2024-05-01,May-24,2024,5,SE,Southeast,Product B,Immunology,991,218,119
+2024-05-01,May-24,2024,5,SW,Southwest,Product B,Immunology,991,218,119
+2024-05-01,May-24,2024,5,NE,Northeast Corridor,Product C,Neurology,1749,384,211
+2024-05-01,May-24,2024,5,PAC,Pacific West,Product C,Neurology,1828,402,221
+2024-05-01,May-24,2024,5,GL,Great Lakes,Product C,Neurology,1749,384,211
+2024-05-01,May-24,2024,5,SE,Southeast,Product C,Neurology,1749,384,211
+2024-05-01,May-24,2024,5,PAC,Pacific West,Product D,Ophthalmology,731,160,88
+2024-05-01,May-24,2024,5,GL,Great Lakes,Product D,Ophthalmology,699,153,84
+2024-05-01,May-24,2024,5,SE,Southeast,Product D,Ophthalmology,699,153,84
+2024-05-01,May-24,2024,5,GL,Great Lakes,Product E,Rare Disease,466,102,56
+2024-05-01,May-24,2024,5,SE,Southeast,Product E,Rare Disease,466,102,56
+2024-06-01,Jun-24,2024,6,NE,Northeast Corridor,Product A,Oncology,1419,312,171
+2024-06-01,Jun-24,2024,6,PAC,Pacific West,Product A,Oncology,1483,326,179
+2024-06-01,Jun-24,2024,6,GL,Great Lakes,Product A,Oncology,1419,312,171
+2024-06-01,Jun-24,2024,6,SE,Southeast,Product A,Oncology,1419,312,171
+2024-06-01,Jun-24,2024,6,SW,Southwest,Product A,Oncology,1419,312,171
+2024-06-01,Jun-24,2024,6,MW,Mountain West,Product A,Oncology,1419,312,171
+2024-06-01,Jun-24,2024,6,PL,Plains,Product A,Oncology,1419,312,171
+2024-06-01,Jun-24,2024,6,NE,Northeast Corridor,Product B,Immunology,1005,221,121
+2024-06-01,Jun-24,2024,6,PAC,Pacific West,Product B,Immunology,1050,231,127
+2024-06-01,Jun-24,2024,6,GL,Great Lakes,Product B,Immunology,1005,221,121
+2024-06-01,Jun-24,2024,6,SE,Southeast,Product B,Immunology,1005,221,121
+2024-06-01,Jun-24,2024,6,SW,Southwest,Product B,Immunology,1005,221,121
+2024-06-01,Jun-24,2024,6,NE,Northeast Corridor,Product C,Neurology,1773,390,214
+2024-06-01,Jun-24,2024,6,PAC,Pacific West,Product C,Neurology,1854,407,223
+2024-06-01,Jun-24,2024,6,GL,Great Lakes,Product C,Neurology,1773,390,214
+2024-06-01,Jun-24,2024,6,SE,Southeast,Product C,Neurology,1773,390,214
+2024-06-01,Jun-24,2024,6,PAC,Pacific West,Product D,Ophthalmology,741,163,89
+2024-06-01,Jun-24,2024,6,GL,Great Lakes,Product D,Ophthalmology,709,155,85
+2024-06-01,Jun-24,2024,6,SE,Southeast,Product D,Ophthalmology,709,155,85
+2024-06-01,Jun-24,2024,6,GL,Great Lakes,Product E,Rare Disease,473,104,57
+2024-06-01,Jun-24,2024,6,SE,Southeast,Product E,Rare Disease,473,104,57
+2024-07-01,Jul-24,2024,7,NE,Northeast Corridor,Product A,Oncology,1438,316,173
+2024-07-01,Jul-24,2024,7,PAC,Pacific West,Product A,Oncology,1504,330,181
+2024-07-01,Jul-24,2024,7,GL,Great Lakes,Product A,Oncology,1438,316,173
+2024-07-01,Jul-24,2024,7,SE,Southeast,Product A,Oncology,1438,316,173
+2024-07-01,Jul-24,2024,7,SW,Southwest,Product A,Oncology,1438,316,173
+2024-07-01,Jul-24,2024,7,MW,Mountain West,Product A,Oncology,1438,316,173
+2024-07-01,Jul-24,2024,7,PL,Plains,Product A,Oncology,1438,316,173
+2024-07-01,Jul-24,2024,7,NE,Northeast Corridor,Product B,Immunology,1019,224,123
+2024-07-01,Jul-24,2024,7,PAC,Pacific West,Product B,Immunology,1065,234,128
+2024-07-01,Jul-24,2024,7,GL,Great Lakes,Product B,Immunology,1019,224,123
+2024-07-01,Jul-24,2024,7,SE,Southeast,Product B,Immunology,1019,224,123
+2024-07-01,Jul-24,2024,7,SW,Southwest,Product B,Immunology,1019,224,123
+2024-07-01,Jul-24,2024,7,NE,Northeast Corridor,Product C,Neurology,1798,395,217
+2024-07-01,Jul-24,2024,7,PAC,Pacific West,Product C,Neurology,1880,413,227
+2024-07-01,Jul-24,2024,7,GL,Great Lakes,Product C,Neurology,1798,395,217
+2024-07-01,Jul-24,2024,7,SE,Southeast,Product C,Neurology,1798,395,217
+2024-07-01,Jul-24,2024,7,PAC,Pacific West,Product D,Ophthalmology,752,165,90
+2024-07-01,Jul-24,2024,7,GL,Great Lakes,Product D,Ophthalmology,719,158,86
+2024-07-01,Jul-24,2024,7,SE,Southeast,Product D,Ophthalmology,719,158,86
+2024-07-01,Jul-24,2024,7,GL,Great Lakes,Product E,Rare Disease,479,105,57
+2024-07-01,Jul-24,2024,7,SE,Southeast,Product E,Rare Disease,479,105,57
+2024-08-01,Aug-24,2024,8,NE,Northeast Corridor,Product A,Oncology,1458,320,176
+2024-08-01,Aug-24,2024,8,PAC,Pacific West,Product A,Oncology,1524,335,184
+2024-08-01,Aug-24,2024,8,GL,Great Lakes,Product A,Oncology,1458,320,176
+2024-08-01,Aug-24,2024,8,SE,Southeast,Product A,Oncology,1458,320,176
+2024-08-01,Aug-24,2024,8,SW,Southwest,Product A,Oncology,1458,320,176
+2024-08-01,Aug-24,2024,8,MW,Mountain West,Product A,Oncology,1458,320,176
+2024-08-01,Aug-24,2024,8,PL,Plains,Product A,Oncology,1458,320,176
+2024-08-01,Aug-24,2024,8,NE,Northeast Corridor,Product B,Immunology,1033,227,124
+2024-08-01,Aug-24,2024,8,PAC,Pacific West,Product B,Immunology,1080,237,130
+2024-08-01,Aug-24,2024,8,GL,Great Lakes,Product B,Immunology,1033,227,124
+2024-08-01,Aug-24,2024,8,SE,Southeast,Product B,Immunology,1033,227,124
+2024-08-01,Aug-24,2024,8,SW,Southwest,Product B,Immunology,1033,227,124
+2024-08-01,Aug-24,2024,8,NE,Northeast Corridor,Product C,Neurology,1823,401,220
+2024-08-01,Aug-24,2024,8,PAC,Pacific West,Product C,Neurology,1906,419,230
+2024-08-01,Aug-24,2024,8,GL,Great Lakes,Product C,Neurology,1823,401,220
+2024-08-01,Aug-24,2024,8,SE,Southeast,Product C,Neurology,1823,401,220
+2024-08-01,Aug-24,2024,8,PAC,Pacific West,Product D,Ophthalmology,762,167,91
+2024-08-01,Aug-24,2024,8,GL,Great Lakes,Product D,Ophthalmology,729,160,88
+2024-08-01,Aug-24,2024,8,SE,Southeast,Product D,Ophthalmology,729,160,88
+2024-08-01,Aug-24,2024,8,GL,Great Lakes,Product E,Rare Disease,486,106,58
+2024-08-01,Aug-24,2024,8,SE,Southeast,Product E,Rare Disease,486,106,58
+2024-09-01,Sep-24,2024,9,NE,Northeast Corridor,Product A,Oncology,1478,325,178
+2024-09-01,Sep-24,2024,9,PAC,Pacific West,Product A,Oncology,1545,339,186
+2024-09-01,Sep-24,2024,9,GL,Great Lakes,Product A,Oncology,1478,325,178
+2024-09-01,Sep-24,2024,9,SE,Southeast,Product A,Oncology,1478,325,178
+2024-09-01,Sep-24,2024,9,SW,Southwest,Product A,Oncology,1478,325,178
+2024-09-01,Sep-24,2024,9,MW,Mountain West,Product A,Oncology,1478,325,178
+2024-09-01,Sep-24,2024,9,PL,Plains,Product A,Oncology,1478,325,178
+2024-09-01,Sep-24,2024,9,NE,Northeast Corridor,Product B,Immunology,1047,230,126
+2024-09-01,Sep-24,2024,9,PAC,Pacific West,Product B,Immunology,1094,240,132
+2024-09-01,Sep-24,2024,9,GL,Great Lakes,Product B,Immunology,1047,230,126
+2024-09-01,Sep-24,2024,9,SE,Southeast,Product B,Immunology,1047,230,126
+2024-09-01,Sep-24,2024,9,SW,Southwest,Product B,Immunology,1047,230,126
+2024-09-01,Sep-24,2024,9,NE,Northeast Corridor,Product C,Neurology,1848,406,223
+2024-09-01,Sep-24,2024,9,PAC,Pacific West,Product C,Neurology,1932,425,233
+2024-09-01,Sep-24,2024,9,GL,Great Lakes,Product C,Neurology,1848,406,223
+2024-09-01,Sep-24,2024,9,SE,Southeast,Product C,Neurology,1848,406,223
+2024-09-01,Sep-24,2024,9,PAC,Pacific West,Product D,Ophthalmology,772,169,92
+2024-09-01,Sep-24,2024,9,GL,Great Lakes,Product D,Ophthalmology,739,162,89
+2024-09-01,Sep-24,2024,9,SE,Southeast,Product D,Ophthalmology,739,162,89
+2024-09-01,Sep-24,2024,9,GL,Great Lakes,Product E,Rare Disease,492,108,59
+2024-09-01,Sep-24,2024,9,SE,Southeast,Product E,Rare Disease,492,108,59
+2024-10-01,Oct-24,2024,10,NE,Northeast Corridor,Product A,Oncology,1498,329,180
+2024-10-01,Oct-24,2024,10,PAC,Pacific West,Product A,Oncology,1566,344,189
+2024-10-01,Oct-24,2024,10,GL,Great Lakes,Product A,Oncology,1498,329,180
+2024-10-01,Oct-24,2024,10,SE,Southeast,Product A,Oncology,1498,329,180
+2024-10-01,Oct-24,2024,10,SW,Southwest,Product A,Oncology,1498,329,180
+2024-10-01,Oct-24,2024,10,MW,Mountain West,Product A,Oncology,1498,329,180
+2024-10-01,Oct-24,2024,10,PL,Plains,Product A,Oncology,1498,329,180
+2024-10-01,Oct-24,2024,10,NE,Northeast Corridor,Product B,Immunology,1061,233,128
+2024-10-01,Oct-24,2024,10,PAC,Pacific West,Product B,Immunology,1109,243,133
+2024-10-01,Oct-24,2024,10,GL,Great Lakes,Product B,Immunology,1061,233,128
+2024-10-01,Oct-24,2024,10,SE,Southeast,Product B,Immunology,1061,233,128
+2024-10-01,Oct-24,2024,10,SW,Southwest,Product B,Immunology,1061,233,128
+2024-10-01,Oct-24,2024,10,NE,Northeast Corridor,Product C,Neurology,1872,411,226
+2024-10-01,Oct-24,2024,10,PAC,Pacific West,Product C,Neurology,1957,430,236
+2024-10-01,Oct-24,2024,10,GL,Great Lakes,Product C,Neurology,1872,411,226
+2024-10-01,Oct-24,2024,10,SE,Southeast,Product C,Neurology,1872,411,226
+2024-10-01,Oct-24,2024,10,PAC,Pacific West,Product D,Ophthalmology,783,172,94
+2024-10-01,Oct-24,2024,10,GL,Great Lakes,Product D,Ophthalmology,749,164,90
+2024-10-01,Oct-24,2024,10,SE,Southeast,Product D,Ophthalmology,749,164,90
+2024-10-01,Oct-24,2024,10,GL,Great Lakes,Product E,Rare Disease,499,109,59
+2024-10-01,Oct-24,2024,10,SE,Southeast,Product E,Rare Disease,499,109,59
+2024-11-01,Nov-24,2024,11,NE,Northeast Corridor,Product A,Oncology,1517,333,183
+2024-11-01,Nov-24,2024,11,PAC,Pacific West,Product A,Oncology,1586,348,191
+2024-11-01,Nov-24,2024,11,GL,Great Lakes,Product A,Oncology,1517,333,183
+2024-11-01,Nov-24,2024,11,SE,Southeast,Product A,Oncology,1517,333,183
+2024-11-01,Nov-24,2024,11,SW,Southwest,Product A,Oncology,1517,333,183
+2024-11-01,Nov-24,2024,11,MW,Mountain West,Product A,Oncology,1517,333,183
+2024-11-01,Nov-24,2024,11,PL,Plains,Product A,Oncology,1517,333,183
+2024-11-01,Nov-24,2024,11,NE,Northeast Corridor,Product B,Immunology,1075,236,129
+2024-11-01,Nov-24,2024,11,PAC,Pacific West,Product B,Immunology,1124,247,135
+2024-11-01,Nov-24,2024,11,GL,Great Lakes,Product B,Immunology,1075,236,129
+2024-11-01,Nov-24,2024,11,SE,Southeast,Product B,Immunology,1075,236,129
+2024-11-01,Nov-24,2024,11,SW,Southwest,Product B,Immunology,1075,236,129
+2024-11-01,Nov-24,2024,11,NE,Northeast Corridor,Product C,Neurology,1897,417,229
+2024-11-01,Nov-24,2024,11,PAC,Pacific West,Product C,Neurology,1983,436,239
+2024-11-01,Nov-24,2024,11,GL,Great Lakes,Product C,Neurology,1897,417,229
+2024-11-01,Nov-24,2024,11,SE,Southeast,Product C,Neurology,1897,417,229
+2024-11-01,Nov-24,2024,11,PAC,Pacific West,Product D,Ophthalmology,793,174,95
+2024-11-01,Nov-24,2024,11,GL,Great Lakes,Product D,Ophthalmology,758,166,91
+2024-11-01,Nov-24,2024,11,SE,Southeast,Product D,Ophthalmology,758,166,91
+2024-11-01,Nov-24,2024,11,GL,Great Lakes,Product E,Rare Disease,506,111,61
+2024-11-01,Nov-24,2024,11,SE,Southeast,Product E,Rare Disease,506,111,61
+2024-12-01,Dec-24,2024,12,NE,Northeast Corridor,Product A,Oncology,1537,338,185
+2024-12-01,Dec-24,2024,12,PAC,Pacific West,Product A,Oncology,1607,353,194
+2024-12-01,Dec-24,2024,12,GL,Great Lakes,Product A,Oncology,1537,338,185
+2024-12-01,Dec-24,2024,12,SE,Southeast,Product A,Oncology,1537,338,185
+2024-12-01,Dec-24,2024,12,SW,Southwest,Product A,Oncology,1537,338,185
+2024-12-01,Dec-24,2024,12,MW,Mountain West,Product A,Oncology,1537,338,185
+2024-12-01,Dec-24,2024,12,PL,Plains,Product A,Oncology,1537,338,185
+2024-12-01,Dec-24,2024,12,NE,Northeast Corridor,Product B,Immunology,1089,239,131
+2024-12-01,Dec-24,2024,12,PAC,Pacific West,Product B,Immunology,1138,250,137
+2024-12-01,Dec-24,2024,12,GL,Great Lakes,Product B,Immunology,1089,239,131
+2024-12-01,Dec-24,2024,12,SE,Southeast,Product B,Immunology,1089,239,131
+2024-12-01,Dec-24,2024,12,SW,Southwest,Product B,Immunology,1089,239,131
+2024-12-01,Dec-24,2024,12,NE,Northeast Corridor,Product C,Neurology,1922,422,232
+2024-12-01,Dec-24,2024,12,PAC,Pacific West,Product C,Neurology,2009,441,242
+2024-12-01,Dec-24,2024,12,GL,Great Lakes,Product C,Neurology,1922,422,232
+2024-12-01,Dec-24,2024,12,SE,Southeast,Product C,Neurology,1922,422,232
+2024-12-01,Dec-24,2024,12,PAC,Pacific West,Product D,Ophthalmology,803,176,96
+2024-12-01,Dec-24,2024,12,GL,Great Lakes,Product D,Ophthalmology,768,168,92
+2024-12-01,Dec-24,2024,12,SE,Southeast,Product D,Ophthalmology,768,168,92
+2024-12-01,Dec-24,2024,12,GL,Great Lakes,Product E,Rare Disease,512,112,61
+2024-12-01,Dec-24,2024,12,SE,Southeast,Product E,Rare Disease,512,112,61
+2025-01-01,Jan-25,2025,1,NE,Northeast Corridor,Product A,Oncology,1557,342,188
+2025-01-01,Jan-25,2025,1,PAC,Pacific West,Product A,Oncology,1628,358,196
+2025-01-01,Jan-25,2025,1,GL,Great Lakes,Product A,Oncology,1557,342,188
+2025-01-01,Jan-25,2025,1,SE,Southeast,Product A,Oncology,1557,342,188
+2025-01-01,Jan-25,2025,1,SW,Southwest,Product A,Oncology,1557,342,188
+2025-01-01,Jan-25,2025,1,MW,Mountain West,Product A,Oncology,1557,342,188
+2025-01-01,Jan-25,2025,1,PL,Plains,Product A,Oncology,1557,342,188
+2025-01-01,Jan-25,2025,1,NE,Northeast Corridor,Product B,Immunology,1103,242,133
+2025-01-01,Jan-25,2025,1,PAC,Pacific West,Product B,Immunology,1153,253,139
+2025-01-01,Jan-25,2025,1,GL,Great Lakes,Product B,Immunology,1103,242,133
+2025-01-01,Jan-25,2025,1,SE,Southeast,Product B,Immunology,1103,242,133
+2025-01-01,Jan-25,2025,1,SW,Southwest,Product B,Immunology,1103,242,133
+2025-01-01,Jan-25,2025,1,NE,Northeast Corridor,Product C,Neurology,1947,428,235
+2025-01-01,Jan-25,2025,1,PAC,Pacific West,Product C,Neurology,2035,447,245
+2025-01-01,Jan-25,2025,1,GL,Great Lakes,Product C,Neurology,1947,428,235
+2025-01-01,Jan-25,2025,1,SE,Southeast,Product C,Neurology,1947,428,235
+2025-01-01,Jan-25,2025,1,PAC,Pacific West,Product D,Ophthalmology,814,179,98
+2025-01-01,Jan-25,2025,1,GL,Great Lakes,Product D,Ophthalmology,778,171,94
+2025-01-01,Jan-25,2025,1,SE,Southeast,Product D,Ophthalmology,778,171,94
+2025-01-01,Jan-25,2025,1,GL,Great Lakes,Product E,Rare Disease,519,114,62
+2025-01-01,Jan-25,2025,1,SE,Southeast,Product E,Rare Disease,519,114,62
+2025-02-01,Feb-25,2025,2,NE,Northeast Corridor,Product A,Oncology,1577,346,190
+2025-02-01,Feb-25,2025,2,PAC,Pacific West,Product A,Oncology,1649,362,199
+2025-02-01,Feb-25,2025,2,GL,Great Lakes,Product A,Oncology,1577,346,190
+2025-02-01,Feb-25,2025,2,SE,Southeast,Product A,Oncology,1577,346,190
+2025-02-01,Feb-25,2025,2,SW,Southwest,Product A,Oncology,1577,346,190
+2025-02-01,Feb-25,2025,2,MW,Mountain West,Product A,Oncology,1577,346,190
+2025-02-01,Feb-25,2025,2,PL,Plains,Product A,Oncology,1577,346,190
+2025-02-01,Feb-25,2025,2,NE,Northeast Corridor,Product B,Immunology,1117,245,134
+2025-02-01,Feb-25,2025,2,PAC,Pacific West,Product B,Immunology,1168,256,140
+2025-02-01,Feb-25,2025,2,GL,Great Lakes,Product B,Immunology,1117,245,134
+2025-02-01,Feb-25,2025,2,SE,Southeast,Product B,Immunology,1117,245,134
+2025-02-01,Feb-25,2025,2,SW,Southwest,Product B,Immunology,1117,245,134
+2025-02-01,Feb-25,2025,2,NE,Northeast Corridor,Product C,Neurology,1971,433,238
+2025-02-01,Feb-25,2025,2,PAC,Pacific West,Product C,Neurology,2061,453,249
+2025-02-01,Feb-25,2025,2,GL,Great Lakes,Product C,Neurology,1971,433,238
+2025-02-01,Feb-25,2025,2,SE,Southeast,Product C,Neurology,1971,433,238
+2025-02-01,Feb-25,2025,2,PAC,Pacific West,Product D,Ophthalmology,824,181,99
+2025-02-01,Feb-25,2025,2,GL,Great Lakes,Product D,Ophthalmology,788,173,95
+2025-02-01,Feb-25,2025,2,SE,Southeast,Product D,Ophthalmology,788,173,95
+2025-02-01,Feb-25,2025,2,GL,Great Lakes,Product E,Rare Disease,525,115,63
+2025-02-01,Feb-25,2025,2,SE,Southeast,Product E,Rare Disease,525,115,63
+2025-03-01,Mar-25,2025,3,NE,Northeast Corridor,Product A,Oncology,1597,351,193
+2025-03-01,Mar-25,2025,3,PAC,Pacific West,Product A,Oncology,1669,367,201
+2025-03-01,Mar-25,2025,3,GL,Great Lakes,Product A,Oncology,1597,351,193
+2025-03-01,Mar-25,2025,3,SE,Southeast,Product A,Oncology,1597,351,193
+2025-03-01,Mar-25,2025,3,SW,Southwest,Product A,Oncology,1597,351,193
+2025-03-01,Mar-25,2025,3,MW,Mountain West,Product A,Oncology,1597,351,193
+2025-03-01,Mar-25,2025,3,PL,Plains,Product A,Oncology,1597,351,193
+2025-03-01,Mar-25,2025,3,NE,Northeast Corridor,Product B,Immunology,1131,248,136
+2025-03-01,Mar-25,2025,3,PAC,Pacific West,Product B,Immunology,1182,260,143
+2025-03-01,Mar-25,2025,3,GL,Great Lakes,Product B,Immunology,1131,248,136
+2025-03-01,Mar-25,2025,3,SE,Southeast,Product B,Immunology,1131,248,136
+2025-03-01,Mar-25,2025,3,SW,Southwest,Product B,Immunology,1131,248,136
+2025-03-01,Mar-25,2025,3,NE,Northeast Corridor,Product C,Neurology,1996,439,241
+2025-03-01,Mar-25,2025,3,PAC,Pacific West,Product C,Neurology,2087,459,252
+2025-03-01,Mar-25,2025,3,GL,Great Lakes,Product C,Neurology,1996,439,241
+2025-03-01,Mar-25,2025,3,SE,Southeast,Product C,Neurology,1996,439,241
+2025-03-01,Mar-25,2025,3,PAC,Pacific West,Product D,Ophthalmology,834,183,100
+2025-03-01,Mar-25,2025,3,GL,Great Lakes,Product D,Ophthalmology,798,175,96
+2025-03-01,Mar-25,2025,3,SE,Southeast,Product D,Ophthalmology,798,175,96
+2025-03-01,Mar-25,2025,3,GL,Great Lakes,Product E,Rare Disease,532,117,64
+2025-03-01,Mar-25,2025,3,SE,Southeast,Product E,Rare Disease,532,117,64
+2025-04-01,Apr-25,2025,4,NE,Northeast Corridor,Product A,Oncology,1617,355,195
+2025-04-01,Apr-25,2025,4,PAC,Pacific West,Product A,Oncology,1690,371,204
+2025-04-01,Apr-25,2025,4,GL,Great Lakes,Product A,Oncology,1617,355,195
+2025-04-01,Apr-25,2025,4,SE,Southeast,Product A,Oncology,1617,355,195
+2025-04-01,Apr-25,2025,4,SW,Southwest,Product A,Oncology,1617,355,195
+2025-04-01,Apr-25,2025,4,MW,Mountain West,Product A,Oncology,1617,355,195
+2025-04-01,Apr-25,2025,4,PL,Plains,Product A,Oncology,1617,355,195
+2025-04-01,Apr-25,2025,4,NE,Northeast Corridor,Product B,Immunology,1145,251,138
+2025-04-01,Apr-25,2025,4,PAC,Pacific West,Product B,Immunology,1197,263,144
+2025-04-01,Apr-25,2025,4,GL,Great Lakes,Product B,Immunology,1145,251,138
+2025-04-01,Apr-25,2025,4,SE,Southeast,Product B,Immunology,1145,251,138
+2025-04-01,Apr-25,2025,4,SW,Southwest,Product B,Immunology,1145,251,138
+2025-04-01,Apr-25,2025,4,NE,Northeast Corridor,Product C,Neurology,2021,444,244
+2025-04-01,Apr-25,2025,4,PAC,Pacific West,Product C,Neurology,2113,464,255
+2025-04-01,Apr-25,2025,4,GL,Great Lakes,Product C,Neurology,2021,444,244
+2025-04-01,Apr-25,2025,4,SE,Southeast,Product C,Neurology,2021,444,244
+2025-04-01,Apr-25,2025,4,PAC,Pacific West,Product D,Ophthalmology,845,185,101
+2025-04-01,Apr-25,2025,4,GL,Great Lakes,Product D,Ophthalmology,808,177,97
+2025-04-01,Apr-25,2025,4,SE,Southeast,Product D,Ophthalmology,808,177,97
+2025-04-01,Apr-25,2025,4,GL,Great Lakes,Product E,Rare Disease,539,118,64
+2025-04-01,Apr-25,2025,4,SE,Southeast,Product E,Rare Disease,539,118,64
+2025-05-01,May-25,2025,5,NE,Northeast Corridor,Product A,Oncology,1636,359,197
+2025-05-01,May-25,2025,5,PAC,Pacific West,Product A,Oncology,1711,376,206
+2025-05-01,May-25,2025,5,GL,Great Lakes,Product A,Oncology,1636,359,197
+2025-05-01,May-25,2025,5,SE,Southeast,Product A,Oncology,1636,359,197
+2025-05-01,May-25,2025,5,SW,Southwest,Product A,Oncology,1636,359,197
+2025-05-01,May-25,2025,5,MW,Mountain West,Product A,Oncology,1636,359,197
+2025-05-01,May-25,2025,5,PL,Plains,Product A,Oncology,1636,359,197
+2025-05-01,May-25,2025,5,NE,Northeast Corridor,Product B,Immunology,1159,254,139
+2025-05-01,May-25,2025,5,PAC,Pacific West,Product B,Immunology,1212,266,146
+2025-05-01,May-25,2025,5,GL,Great Lakes,Product B,Immunology,1159,254,139
+2025-05-01,May-25,2025,5,SE,Southeast,Product B,Immunology,1159,254,139
+2025-05-01,May-25,2025,5,SW,Southwest,Product B,Immunology,1159,254,139
+2025-05-01,May-25,2025,5,NE,Northeast Corridor,Product C,Neurology,2046,450,247
+2025-05-01,May-25,2025,5,PAC,Pacific West,Product C,Neurology,2138,470,258
+2025-05-01,May-25,2025,5,GL,Great Lakes,Product C,Neurology,2046,450,247
+2025-05-01,May-25,2025,5,SE,Southeast,Product C,Neurology,2046,450,247
+2025-05-01,May-25,2025,5,PAC,Pacific West,Product D,Ophthalmology,855,188,103
+2025-05-01,May-25,2025,5,GL,Great Lakes,Product D,Ophthalmology,818,179,98
+2025-05-01,May-25,2025,5,SE,Southeast,Product D,Ophthalmology,818,179,98
+2025-05-01,May-25,2025,5,GL,Great Lakes,Product E,Rare Disease,545,119,65
+2025-05-01,May-25,2025,5,SE,Southeast,Product E,Rare Disease,545,119,65
+2025-06-01,Jun-25,2025,6,NE,Northeast Corridor,Product A,Oncology,1656,364,200
+2025-06-01,Jun-25,2025,6,PAC,Pacific West,Product A,Oncology,1731,380,209
+2025-06-01,Jun-25,2025,6,GL,Great Lakes,Product A,Oncology,1656,364,200
+2025-06-01,Jun-25,2025,6,SE,Southeast,Product A,Oncology,1656,364,200
+2025-06-01,Jun-25,2025,6,SW,Southwest,Product A,Oncology,1656,364,200
+2025-06-01,Jun-25,2025,6,MW,Mountain West,Product A,Oncology,1656,364,200
+2025-06-01,Jun-25,2025,6,PL,Plains,Product A,Oncology,1656,364,200
+2025-06-01,Jun-25,2025,6,NE,Northeast Corridor,Product B,Immunology,1173,258,141
+2025-06-01,Jun-25,2025,6,PAC,Pacific West,Product B,Immunology,1226,269,147
+2025-06-01,Jun-25,2025,6,GL,Great Lakes,Product B,Immunology,1173,258,141
+2025-06-01,Jun-25,2025,6,SE,Southeast,Product B,Immunology,1173,258,141
+2025-06-01,Jun-25,2025,6,SW,Southwest,Product B,Immunology,1173,258,141
+2025-06-01,Jun-25,2025,6,NE,Northeast Corridor,Product C,Neurology,2070,455,250
+2025-06-01,Jun-25,2025,6,PAC,Pacific West,Product C,Neurology,2164,476,261
+2025-06-01,Jun-25,2025,6,GL,Great Lakes,Product C,Neurology,2070,455,250
+2025-06-01,Jun-25,2025,6,SE,Southeast,Product C,Neurology,2070,455,250
+2025-06-01,Jun-25,2025,6,PAC,Pacific West,Product D,Ophthalmology,865,190,104
+2025-06-01,Jun-25,2025,6,GL,Great Lakes,Product D,Ophthalmology,828,182,100
+2025-06-01,Jun-25,2025,6,SE,Southeast,Product D,Ophthalmology,828,182,100
+2025-06-01,Jun-25,2025,6,GL,Great Lakes,Product E,Rare Disease,552,121,66
+2025-06-01,Jun-25,2025,6,SE,Southeast,Product E,Rare Disease,552,121,66
+2025-07-01,Jul-25,2025,7,NE,Northeast Corridor,Product A,Oncology,1676,368,202
+2025-07-01,Jul-25,2025,7,PAC,Pacific West,Product A,Oncology,1752,385,211
+2025-07-01,Jul-25,2025,7,GL,Great Lakes,Product A,Oncology,1676,368,202
+2025-07-01,Jul-25,2025,7,SE,Southeast,Product A,Oncology,1676,368,202
+2025-07-01,Jul-25,2025,7,SW,Southwest,Product A,Oncology,1676,368,202
+2025-07-01,Jul-25,2025,7,MW,Mountain West,Product A,Oncology,1676,368,202
+2025-07-01,Jul-25,2025,7,PL,Plains,Product A,Oncology,1676,368,202
+2025-07-01,Jul-25,2025,7,NE,Northeast Corridor,Product B,Immunology,1187,261,143
+2025-07-01,Jul-25,2025,7,PAC,Pacific West,Product B,Immunology,1241,273,150
+2025-07-01,Jul-25,2025,7,GL,Great Lakes,Product B,Immunology,1187,261,143
+2025-07-01,Jul-25,2025,7,SE,Southeast,Product B,Immunology,1187,261,143
+2025-07-01,Jul-25,2025,7,SW,Southwest,Product B,Immunology,1187,261,143
+2025-07-01,Jul-25,2025,7,NE,Northeast Corridor,Product C,Neurology,2095,460,253
+2025-07-01,Jul-25,2025,7,PAC,Pacific West,Product C,Neurology,2190,481,264
+2025-07-01,Jul-25,2025,7,GL,Great Lakes,Product C,Neurology,2095,460,253
+2025-07-01,Jul-25,2025,7,SE,Southeast,Product C,Neurology,2095,460,253
+2025-07-01,Jul-25,2025,7,PAC,Pacific West,Product D,Ophthalmology,876,192,105
+2025-07-01,Jul-25,2025,7,GL,Great Lakes,Product D,Ophthalmology,838,184,101
+2025-07-01,Jul-25,2025,7,SE,Southeast,Product D,Ophthalmology,838,184,101
+2025-07-01,Jul-25,2025,7,GL,Great Lakes,Product E,Rare Disease,558,122,67
+2025-07-01,Jul-25,2025,7,SE,Southeast,Product E,Rare Disease,558,122,67
+2025-08-01,Aug-25,2025,8,NE,Northeast Corridor,Product A,Oncology,1696,373,205
+2025-08-01,Aug-25,2025,8,PAC,Pacific West,Product A,Oncology,1773,390,214
+2025-08-01,Aug-25,2025,8,GL,Great Lakes,Product A,Oncology,1696,373,205
+2025-08-01,Aug-25,2025,8,SE,Southeast,Product A,Oncology,1696,373,205
+2025-08-01,Aug-25,2025,8,SW,Southwest,Product A,Oncology,1696,373,205
+2025-08-01,Aug-25,2025,8,MW,Mountain West,Product A,Oncology,1696,373,205
+2025-08-01,Aug-25,2025,8,PL,Plains,Product A,Oncology,1696,373,205
+2025-08-01,Aug-25,2025,8,NE,Northeast Corridor,Product B,Immunology,1201,264,145
+2025-08-01,Aug-25,2025,8,PAC,Pacific West,Product B,Immunology,1256,276,151
+2025-08-01,Aug-25,2025,8,GL,Great Lakes,Product B,Immunology,1201,264,145
+2025-08-01,Aug-25,2025,8,SE,Southeast,Product B,Immunology,1201,264,145
+2025-08-01,Aug-25,2025,8,SW,Southwest,Product B,Immunology,1201,264,145
+2025-08-01,Aug-25,2025,8,NE,Northeast Corridor,Product C,Neurology,2120,466,256
+2025-08-01,Aug-25,2025,8,PAC,Pacific West,Product C,Neurology,2216,487,267
+2025-08-01,Aug-25,2025,8,GL,Great Lakes,Product C,Neurology,2120,466,256
+2025-08-01,Aug-25,2025,8,SE,Southeast,Product C,Neurology,2120,466,256
+2025-08-01,Aug-25,2025,8,PAC,Pacific West,Product D,Ophthalmology,886,194,106
+2025-08-01,Aug-25,2025,8,GL,Great Lakes,Product D,Ophthalmology,848,186,102
+2025-08-01,Aug-25,2025,8,SE,Southeast,Product D,Ophthalmology,848,186,102
+2025-08-01,Aug-25,2025,8,GL,Great Lakes,Product E,Rare Disease,565,124,68
+2025-08-01,Aug-25,2025,8,SE,Southeast,Product E,Rare Disease,565,124,68
+2025-09-01,Sep-25,2025,9,NE,Northeast Corridor,Product A,Oncology,1716,377,207
+2025-09-01,Sep-25,2025,9,PAC,Pacific West,Product A,Oncology,1794,394,216
+2025-09-01,Sep-25,2025,9,GL,Great Lakes,Product A,Oncology,1716,377,207
+2025-09-01,Sep-25,2025,9,SE,Southeast,Product A,Oncology,1716,377,207
+2025-09-01,Sep-25,2025,9,SW,Southwest,Product A,Oncology,1716,377,207
+2025-09-01,Sep-25,2025,9,MW,Mountain West,Product A,Oncology,1716,377,207
+2025-09-01,Sep-25,2025,9,PL,Plains,Product A,Oncology,1716,377,207
+2025-09-01,Sep-25,2025,9,NE,Northeast Corridor,Product B,Immunology,1215,267,146
+2025-09-01,Sep-25,2025,9,PAC,Pacific West,Product B,Immunology,1270,279,153
+2025-09-01,Sep-25,2025,9,GL,Great Lakes,Product B,Immunology,1215,267,146
+2025-09-01,Sep-25,2025,9,SE,Southeast,Product B,Immunology,1215,267,146
+2025-09-01,Sep-25,2025,9,SW,Southwest,Product B,Immunology,1215,267,146
+2025-09-01,Sep-25,2025,9,NE,Northeast Corridor,Product C,Neurology,2145,471,259
+2025-09-01,Sep-25,2025,9,PAC,Pacific West,Product C,Neurology,2242,493,271
+2025-09-01,Sep-25,2025,9,GL,Great Lakes,Product C,Neurology,2145,471,259
+2025-09-01,Sep-25,2025,9,SE,Southeast,Product C,Neurology,2145,471,259
+2025-09-01,Sep-25,2025,9,PAC,Pacific West,Product D,Ophthalmology,897,197,108
+2025-09-01,Sep-25,2025,9,GL,Great Lakes,Product D,Ophthalmology,858,188,103
+2025-09-01,Sep-25,2025,9,SE,Southeast,Product D,Ophthalmology,858,188,103
+2025-09-01,Sep-25,2025,9,GL,Great Lakes,Product E,Rare Disease,572,125,68
+2025-09-01,Sep-25,2025,9,SE,Southeast,Product E,Rare Disease,572,125,68
+2025-10-01,Oct-25,2025,10,NE,Northeast Corridor,Product A,Oncology,1735,381,209
+2025-10-01,Oct-25,2025,10,PAC,Pacific West,Product A,Oncology,1814,399,219
+2025-10-01,Oct-25,2025,10,GL,Great Lakes,Product A,Oncology,1735,381,209
+2025-10-01,Oct-25,2025,10,SE,Southeast,Product A,Oncology,1735,381,209
+2025-10-01,Oct-25,2025,10,SW,Southwest,Product A,Oncology,1735,381,209
+2025-10-01,Oct-25,2025,10,MW,Mountain West,Product A,Oncology,1735,381,209
+2025-10-01,Oct-25,2025,10,PL,Plains,Product A,Oncology,1735,381,209
+2025-10-01,Oct-25,2025,10,NE,Northeast Corridor,Product B,Immunology,1229,270,148
+2025-10-01,Oct-25,2025,10,PAC,Pacific West,Product B,Immunology,1285,282,155
+2025-10-01,Oct-25,2025,10,GL,Great Lakes,Product B,Immunology,1229,270,148
+2025-10-01,Oct-25,2025,10,SE,Southeast,Product B,Immunology,1229,270,148
+2025-10-01,Oct-25,2025,10,SW,Southwest,Product B,Immunology,1229,270,148
+2025-10-01,Oct-25,2025,10,NE,Northeast Corridor,Product C,Neurology,2169,477,262
+2025-10-01,Oct-25,2025,10,PAC,Pacific West,Product C,Neurology,2268,498,273
+2025-10-01,Oct-25,2025,10,GL,Great Lakes,Product C,Neurology,2169,477,262
+2025-10-01,Oct-25,2025,10,SE,Southeast,Product C,Neurology,2169,477,262
+2025-10-01,Oct-25,2025,10,PAC,Pacific West,Product D,Ophthalmology,907,199,109
+2025-10-01,Oct-25,2025,10,GL,Great Lakes,Product D,Ophthalmology,867,190,104
+2025-10-01,Oct-25,2025,10,SE,Southeast,Product D,Ophthalmology,867,190,104
+2025-10-01,Oct-25,2025,10,GL,Great Lakes,Product E,Rare Disease,578,127,69
+2025-10-01,Oct-25,2025,10,SE,Southeast,Product E,Rare Disease,578,127,69
+2025-11-01,Nov-25,2025,11,NE,Northeast Corridor,Product A,Oncology,1755,386,212
+2025-11-01,Nov-25,2025,11,PAC,Pacific West,Product A,Oncology,1835,403,221
+2025-11-01,Nov-25,2025,11,GL,Great Lakes,Product A,Oncology,1755,386,212
+2025-11-01,Nov-25,2025,11,SE,Southeast,Product A,Oncology,1755,386,212
+2025-11-01,Nov-25,2025,11,SW,Southwest,Product A,Oncology,1755,386,212
+2025-11-01,Nov-25,2025,11,MW,Mountain West,Product A,Oncology,1755,386,212
+2025-11-01,Nov-25,2025,11,PL,Plains,Product A,Oncology,1755,386,212
+2025-11-01,Nov-25,2025,11,NE,Northeast Corridor,Product B,Immunology,1243,273,150
+2025-11-01,Nov-25,2025,11,PAC,Pacific West,Product B,Immunology,1300,286,157
+2025-11-01,Nov-25,2025,11,GL,Great Lakes,Product B,Immunology,1243,273,150
+2025-11-01,Nov-25,2025,11,SE,Southeast,Product B,Immunology,1243,273,150
+2025-11-01,Nov-25,2025,11,SW,Southwest,Product B,Immunology,1243,273,150
+2025-11-01,Nov-25,2025,11,NE,Northeast Corridor,Product C,Neurology,2194,482,265
+2025-11-01,Nov-25,2025,11,PAC,Pacific West,Product C,Neurology,2294,504,277
+2025-11-01,Nov-25,2025,11,GL,Great Lakes,Product C,Neurology,2194,482,265
+2025-11-01,Nov-25,2025,11,SE,Southeast,Product C,Neurology,2194,482,265
+2025-11-01,Nov-25,2025,11,PAC,Pacific West,Product D,Ophthalmology,917,201,110
+2025-11-01,Nov-25,2025,11,GL,Great Lakes,Product D,Ophthalmology,877,192,105
+2025-11-01,Nov-25,2025,11,SE,Southeast,Product D,Ophthalmology,877,192,105
+2025-11-01,Nov-25,2025,11,GL,Great Lakes,Product E,Rare Disease,585,128,70
+2025-11-01,Nov-25,2025,11,SE,Southeast,Product E,Rare Disease,585,128,70
+2025-12-01,Dec-25,2025,12,NE,Northeast Corridor,Product A,Oncology,1775,390,214
+2025-12-01,Dec-25,2025,12,PAC,Pacific West,Product A,Oncology,1856,408,224
+2025-12-01,Dec-25,2025,12,GL,Great Lakes,Product A,Oncology,1775,390,214
+2025-12-01,Dec-25,2025,12,SE,Southeast,Product A,Oncology,1775,390,214
+2025-12-01,Dec-25,2025,12,SW,Southwest,Product A,Oncology,1775,390,214
+2025-12-01,Dec-25,2025,12,MW,Mountain West,Product A,Oncology,1775,390,214
+2025-12-01,Dec-25,2025,12,PL,Plains,Product A,Oncology,1775,390,214
+2025-12-01,Dec-25,2025,12,NE,Northeast Corridor,Product B,Immunology,1257,276,151
+2025-12-01,Dec-25,2025,12,PAC,Pacific West,Product B,Immunology,1314,289,158
+2025-12-01,Dec-25,2025,12,GL,Great Lakes,Product B,Immunology,1257,276,151
+2025-12-01,Dec-25,2025,12,SE,Southeast,Product B,Immunology,1257,276,151
+2025-12-01,Dec-25,2025,12,SW,Southwest,Product B,Immunology,1257,276,151
+2025-12-01,Dec-25,2025,12,NE,Northeast Corridor,Product C,Neurology,2219,488,268
+2025-12-01,Dec-25,2025,12,PAC,Pacific West,Product C,Neurology,2320,510,280
+2025-12-01,Dec-25,2025,12,GL,Great Lakes,Product C,Neurology,2219,488,268
+2025-12-01,Dec-25,2025,12,SE,Southeast,Product C,Neurology,2219,488,268
+2025-12-01,Dec-25,2025,12,PAC,Pacific West,Product D,Ophthalmology,928,204,112
+2025-12-01,Dec-25,2025,12,GL,Great Lakes,Product D,Ophthalmology,887,195,107
+2025-12-01,Dec-25,2025,12,SE,Southeast,Product D,Ophthalmology,887,195,107
+2025-12-01,Dec-25,2025,12,GL,Great Lakes,Product E,Rare Disease,591,130,71
+2025-12-01,Dec-25,2025,12,SE,Southeast,Product E,Rare Disease,591,130,71
+2026-01-01,Jan-26,2026,1,NE,Northeast Corridor,Product A,Oncology,1795,394,216
+2026-01-01,Jan-26,2026,1,PAC,Pacific West,Product A,Oncology,1876,412,226
+2026-01-01,Jan-26,2026,1,GL,Great Lakes,Product A,Oncology,1795,394,216
+2026-01-01,Jan-26,2026,1,SE,Southeast,Product A,Oncology,1795,394,216
+2026-01-01,Jan-26,2026,1,SW,Southwest,Product A,Oncology,1795,394,216
+2026-01-01,Jan-26,2026,1,MW,Mountain West,Product A,Oncology,1795,394,216
+2026-01-01,Jan-26,2026,1,PL,Plains,Product A,Oncology,1795,394,216
+2026-01-01,Jan-26,2026,1,NE,Northeast Corridor,Product B,Immunology,1271,279,153
+2026-01-01,Jan-26,2026,1,PAC,Pacific West,Product B,Immunology,1329,292,160
+2026-01-01,Jan-26,2026,1,GL,Great Lakes,Product B,Immunology,1271,279,153
+2026-01-01,Jan-26,2026,1,SE,Southeast,Product B,Immunology,1271,279,153
+2026-01-01,Jan-26,2026,1,SW,Southwest,Product B,Immunology,1271,279,153
+2026-01-01,Jan-26,2026,1,NE,Northeast Corridor,Product C,Neurology,2244,493,271
+2026-01-01,Jan-26,2026,1,PAC,Pacific West,Product C,Neurology,2345,515,283
+2026-01-01,Jan-26,2026,1,GL,Great Lakes,Product C,Neurology,2244,493,271
+2026-01-01,Jan-26,2026,1,SE,Southeast,Product C,Neurology,2244,493,271
+2026-01-01,Jan-26,2026,1,PAC,Pacific West,Product D,Ophthalmology,938,206,113
+2026-01-01,Jan-26,2026,1,GL,Great Lakes,Product D,Ophthalmology,897,197,108
+2026-01-01,Jan-26,2026,1,SE,Southeast,Product D,Ophthalmology,897,197,108
+2026-01-01,Jan-26,2026,1,GL,Great Lakes,Product E,Rare Disease,598,131,72
+2026-01-01,Jan-26,2026,1,SE,Southeast,Product E,Rare Disease,598,131,72
+2026-02-01,Feb-26,2026,2,NE,Northeast Corridor,Product A,Oncology,1815,399,219
+2026-02-01,Feb-26,2026,2,PAC,Pacific West,Product A,Oncology,1897,417,229
+2026-02-01,Feb-26,2026,2,GL,Great Lakes,Product A,Oncology,1815,399,219
+2026-02-01,Feb-26,2026,2,SE,Southeast,Product A,Oncology,1815,399,219
+2026-02-01,Feb-26,2026,2,SW,Southwest,Product A,Oncology,1815,399,219
+2026-02-01,Feb-26,2026,2,MW,Mountain West,Product A,Oncology,1815,399,219
+2026-02-01,Feb-26,2026,2,PL,Plains,Product A,Oncology,1815,399,219
+2026-02-01,Feb-26,2026,2,NE,Northeast Corridor,Product B,Immunology,1285,282,155
+2026-02-01,Feb-26,2026,2,PAC,Pacific West,Product B,Immunology,1344,295,162
+2026-02-01,Feb-26,2026,2,GL,Great Lakes,Product B,Immunology,1285,282,155
+2026-02-01,Feb-26,2026,2,SE,Southeast,Product B,Immunology,1285,282,155
+2026-02-01,Feb-26,2026,2,SW,Southwest,Product B,Immunology,1285,282,155
+2026-02-01,Feb-26,2026,2,NE,Northeast Corridor,Product C,Neurology,2268,498,273
+2026-02-01,Feb-26,2026,2,PAC,Pacific West,Product C,Neurology,2371,521,286
+2026-02-01,Feb-26,2026,2,GL,Great Lakes,Product C,Neurology,2268,498,273
+2026-02-01,Feb-26,2026,2,SE,Southeast,Product C,Neurology,2268,498,273
+2026-02-01,Feb-26,2026,2,PAC,Pacific West,Product D,Ophthalmology,948,208,114
+2026-02-01,Feb-26,2026,2,GL,Great Lakes,Product D,Ophthalmology,907,199,109
+2026-02-01,Feb-26,2026,2,SE,Southeast,Product D,Ophthalmology,907,199,109
+2026-02-01,Feb-26,2026,2,GL,Great Lakes,Product E,Rare Disease,605,133,73
+2026-02-01,Feb-26,2026,2,SE,Southeast,Product E,Rare Disease,605,133,73
+2026-03-01,Mar-26,2026,3,NE,Northeast Corridor,Product A,Oncology,1834,403,221
+2026-03-01,Mar-26,2026,3,PAC,Pacific West,Product A,Oncology,1918,421,231
+2026-03-01,Mar-26,2026,3,GL,Great Lakes,Product A,Oncology,1834,403,221
+2026-03-01,Mar-26,2026,3,SE,Southeast,Product A,Oncology,1834,403,221
+2026-03-01,Mar-26,2026,3,SW,Southwest,Product A,Oncology,1834,403,221
+2026-03-01,Mar-26,2026,3,MW,Mountain West,Product A,Oncology,1834,403,221
+2026-03-01,Mar-26,2026,3,PL,Plains,Product A,Oncology,1834,403,221
+2026-03-01,Mar-26,2026,3,NE,Northeast Corridor,Product B,Immunology,1299,285,156
+2026-03-01,Mar-26,2026,3,PAC,Pacific West,Product B,Immunology,1358,298,163
+2026-03-01,Mar-26,2026,3,GL,Great Lakes,Product B,Immunology,1299,285,156
+2026-03-01,Mar-26,2026,3,SE,Southeast,Product B,Immunology,1299,285,156
+2026-03-01,Mar-26,2026,3,SW,Southwest,Product B,Immunology,1299,285,156
+2026-03-01,Mar-26,2026,3,NE,Northeast Corridor,Product C,Neurology,2293,504,277
+2026-03-01,Mar-26,2026,3,PAC,Pacific West,Product C,Neurology,2397,527,289
+2026-03-01,Mar-26,2026,3,GL,Great Lakes,Product C,Neurology,2293,504,277
+2026-03-01,Mar-26,2026,3,SE,Southeast,Product C,Neurology,2293,504,277
+2026-03-01,Mar-26,2026,3,PAC,Pacific West,Product D,Ophthalmology,959,210,115
+2026-03-01,Mar-26,2026,3,GL,Great Lakes,Product D,Ophthalmology,917,201,110
+2026-03-01,Mar-26,2026,3,SE,Southeast,Product D,Ophthalmology,917,201,110
+2026-03-01,Mar-26,2026,3,GL,Great Lakes,Product E,Rare Disease,611,134,73
+2026-03-01,Mar-26,2026,3,SE,Southeast,Product E,Rare Disease,611,134,73
+2026-04-01,Apr-26,2026,4,NE,Northeast Corridor,Product A,Oncology,1854,407,223
+2026-04-01,Apr-26,2026,4,PAC,Pacific West,Product A,Oncology,1938,426,234
+2026-04-01,Apr-26,2026,4,GL,Great Lakes,Product A,Oncology,1854,407,223
+2026-04-01,Apr-26,2026,4,SE,Southeast,Product A,Oncology,1854,407,223
+2026-04-01,Apr-26,2026,4,SW,Southwest,Product A,Oncology,1854,407,223
+2026-04-01,Apr-26,2026,4,MW,Mountain West,Product A,Oncology,1854,407,223
+2026-04-01,Apr-26,2026,4,PL,Plains,Product A,Oncology,1854,407,223
+2026-04-01,Apr-26,2026,4,NE,Northeast Corridor,Product B,Immunology,1313,288,158
+2026-04-01,Apr-26,2026,4,PAC,Pacific West,Product B,Immunology,1373,302,166
+2026-04-01,Apr-26,2026,4,GL,Great Lakes,Product B,Immunology,1313,288,158
+2026-04-01,Apr-26,2026,4,SE,Southeast,Product B,Immunology,1313,288,158
+2026-04-01,Apr-26,2026,4,SW,Southwest,Product B,Immunology,1313,288,158
+2026-04-01,Apr-26,2026,4,NE,Northeast Corridor,Product C,Neurology,2318,509,279
+2026-04-01,Apr-26,2026,4,PAC,Pacific West,Product C,Neurology,2423,533,293
+2026-04-01,Apr-26,2026,4,GL,Great Lakes,Product C,Neurology,2318,509,279
+2026-04-01,Apr-26,2026,4,SE,Southeast,Product C,Neurology,2318,509,279
+2026-04-01,Apr-26,2026,4,PAC,Pacific West,Product D,Ophthalmology,969,213,117
+2026-04-01,Apr-26,2026,4,GL,Great Lakes,Product D,Ophthalmology,927,203,111
+2026-04-01,Apr-26,2026,4,SE,Southeast,Product D,Ophthalmology,927,203,111
+2026-04-01,Apr-26,2026,4,GL,Great Lakes,Product E,Rare Disease,618,135,74
+2026-04-01,Apr-26,2026,4,SE,Southeast,Product E,Rare Disease,618,135,74

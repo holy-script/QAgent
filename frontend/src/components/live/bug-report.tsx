@@ -65,7 +65,7 @@ export function BugReportView({ content, slug }: { content: Record<string, any>;
           <>
             <div className="mb-2 flex gap-1">
               {shots.map((e: any, i: number) => (
-                <button key={e.id} onClick={() => setShot(i)} className={cn("rounded-md border px-2.5 py-1 text-xs", shot === i ? "border-brand bg-brand/10 text-brand" : "border-border text-muted-foreground hover:bg-foreground/5")}>
+                <button key={e.id} onClick={() => setShot(i)} className={cn("rounded-md border px-2.5 py-1 text-xs", shot === i ? "border-brand bg-brand/10 text-brand" : "border-border text-muted-foreground hover:bg-secondary")}>
                   {e.kind === "annotated" ? "Annotated" : e.kind === "screenshot_before" ? "Before" : "After"}
                 </button>
               ))}

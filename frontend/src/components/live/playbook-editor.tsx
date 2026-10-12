@@ -45,7 +45,7 @@ export function PlaybookEditor({ value, onChange, slug, onValidation }: { value:
       <div className="flex flex-wrap items-center gap-2">
         <div role="group" aria-label="How to edit" className="flex overflow-hidden rounded-lg border border-border">
           {(["categories", "raw"] as const).map((k) => (
-            <button key={k} onClick={() => setView(k)} aria-pressed={view === k} className={cn("px-3 py-1.5 text-xs", view === k ? "bg-brand/20 text-brand" : "text-muted-foreground hover:bg-foreground/5")}>{k === "raw" ? "Text" : "Guided"}</button>
+            <button key={k} onClick={() => setView(k)} aria-pressed={view === k} className={cn("px-3 py-1.5 text-xs", view === k ? "bg-brand/20 text-brand" : "text-muted-foreground hover:bg-secondary")}>{k === "raw" ? "Text" : "Guided"}</button>
           ))}
         </div>
         <Dictate label="Dictate your notes" onText={(chunk) => { setView("raw"); onChange(appendDictation(valueRef.current, chunk)); }} />

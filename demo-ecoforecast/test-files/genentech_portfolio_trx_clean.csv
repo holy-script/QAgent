@@ -1,0 +1,937 @@
+date,month_label,year,month,ecosystem_id,ecosystem_name,product,therapeutic_area,trx,nrx,nbrx
+2022-01-01,Jan-22,2022,1,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1182,213,136
+2022-01-01,Jan-22,2022,1,NE,Northeast Corridor,Hemlibra,Hemophilia A,529,157,94
+2022-01-01,Jan-22,2022,1,NE,Northeast Corridor,Tecentriq,Oncology,967,145,90
+2022-01-01,Jan-22,2022,1,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1377,238,153
+2022-01-01,Jan-22,2022,1,PAC,Pacific West,Hemlibra,Hemophilia A,628,187,112
+2022-01-01,Jan-22,2022,1,PAC,Pacific West,Tecentriq,Oncology,1072,156,95
+2022-01-01,Jan-22,2022,1,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,915,170,106
+2022-01-01,Jan-22,2022,1,GL,Great Lakes,Hemlibra,Hemophilia A,420,129,76
+2022-01-01,Jan-22,2022,1,GL,Great Lakes,Tecentriq,Oncology,728,105,68
+2022-01-01,Jan-22,2022,1,SE,Southeast,Ocrevus IV,Multiple Sclerosis,835,150,92
+2022-01-01,Jan-22,2022,1,SE,Southeast,Hemlibra,Hemophilia A,365,104,61
+2022-01-01,Jan-22,2022,1,SE,Southeast,Tecentriq,Oncology,667,104,67
+2022-01-01,Jan-22,2022,1,SW,Southwest,Ocrevus IV,Multiple Sclerosis,645,119,75
+2022-01-01,Jan-22,2022,1,SW,Southwest,Hemlibra,Hemophilia A,282,84,51
+2022-01-01,Jan-22,2022,1,SW,Southwest,Tecentriq,Oncology,497,76,46
+2022-01-01,Jan-22,2022,1,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,439,79,47
+2022-01-01,Jan-22,2022,1,MW,Mountain West,Hemlibra,Hemophilia A,198,58,35
+2022-01-01,Jan-22,2022,1,MW,Mountain West,Tecentriq,Oncology,342,54,34
+2022-02-01,Feb-22,2022,2,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1287,242,148
+2022-02-01,Feb-22,2022,2,NE,Northeast Corridor,Hemlibra,Hemophilia A,548,158,98
+2022-02-01,Feb-22,2022,2,NE,Northeast Corridor,Tecentriq,Oncology,1006,145,91
+2022-02-01,Feb-22,2022,2,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1504,268,170
+2022-02-01,Feb-22,2022,2,PAC,Pacific West,Hemlibra,Hemophilia A,614,188,120
+2022-02-01,Feb-22,2022,2,PAC,Pacific West,Tecentriq,Oncology,1106,157,93
+2022-02-01,Feb-22,2022,2,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1019,180,108
+2022-02-01,Feb-22,2022,2,GL,Great Lakes,Hemlibra,Hemophilia A,418,124,73
+2022-02-01,Feb-22,2022,2,GL,Great Lakes,Tecentriq,Oncology,774,114,73
+2022-02-01,Feb-22,2022,2,SE,Southeast,Ocrevus IV,Multiple Sclerosis,896,163,106
+2022-02-01,Feb-22,2022,2,SE,Southeast,Hemlibra,Hemophilia A,374,110,71
+2022-02-01,Feb-22,2022,2,SE,Southeast,Tecentriq,Oncology,676,106,64
+2022-02-01,Feb-22,2022,2,SW,Southwest,Ocrevus IV,Multiple Sclerosis,707,131,83
+2022-02-01,Feb-22,2022,2,SW,Southwest,Hemlibra,Hemophilia A,288,88,54
+2022-02-01,Feb-22,2022,2,SW,Southwest,Tecentriq,Oncology,515,76,46
+2022-02-01,Feb-22,2022,2,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,485,87,55
+2022-02-01,Feb-22,2022,2,MW,Mountain West,Hemlibra,Hemophilia A,196,58,36
+2022-02-01,Feb-22,2022,2,MW,Mountain West,Tecentriq,Oncology,354,54,33
+2022-03-01,Mar-22,2022,3,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1398,260,152
+2022-03-01,Mar-22,2022,3,NE,Northeast Corridor,Hemlibra,Hemophilia A,537,155,94
+2022-03-01,Mar-22,2022,3,NE,Northeast Corridor,Tecentriq,Oncology,978,143,90
+2022-03-01,Mar-22,2022,3,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1647,279,171
+2022-03-01,Mar-22,2022,3,PAC,Pacific West,Hemlibra,Hemophilia A,629,186,109
+2022-03-01,Mar-22,2022,3,PAC,Pacific West,Tecentriq,Oncology,1134,162,103
+2022-03-01,Mar-22,2022,3,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1074,183,114
+2022-03-01,Mar-22,2022,3,GL,Great Lakes,Hemlibra,Hemophilia A,411,118,71
+2022-03-01,Mar-22,2022,3,GL,Great Lakes,Tecentriq,Oncology,756,113,67
+2022-03-01,Mar-22,2022,3,SE,Southeast,Ocrevus IV,Multiple Sclerosis,957,179,106
+2022-03-01,Mar-22,2022,3,SE,Southeast,Hemlibra,Hemophilia A,375,110,70
+2022-03-01,Mar-22,2022,3,SE,Southeast,Tecentriq,Oncology,671,98,58
+2022-03-01,Mar-22,2022,3,SW,Southwest,Ocrevus IV,Multiple Sclerosis,736,127,82
+2022-03-01,Mar-22,2022,3,SW,Southwest,Hemlibra,Hemophilia A,289,86,53
+2022-03-01,Mar-22,2022,3,SW,Southwest,Tecentriq,Oncology,525,77,46
+2022-03-01,Mar-22,2022,3,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,516,91,55
+2022-03-01,Mar-22,2022,3,MW,Mountain West,Hemlibra,Hemophilia A,198,57,33
+2022-03-01,Mar-22,2022,3,MW,Mountain West,Tecentriq,Oncology,371,54,31
+2022-04-01,Apr-22,2022,4,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1442,256,151
+2022-04-01,Apr-22,2022,4,NE,Northeast Corridor,Hemlibra,Hemophilia A,556,168,108
+2022-04-01,Apr-22,2022,4,NE,Northeast Corridor,Tecentriq,Oncology,1036,148,91
+2022-04-01,Apr-22,2022,4,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1646,302,191
+2022-04-01,Apr-22,2022,4,PAC,Pacific West,Hemlibra,Hemophilia A,643,184,114
+2022-04-01,Apr-22,2022,4,PAC,Pacific West,Tecentriq,Oncology,1184,181,106
+2022-04-01,Apr-22,2022,4,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1129,210,136
+2022-04-01,Apr-22,2022,4,GL,Great Lakes,Hemlibra,Hemophilia A,413,119,69
+2022-04-01,Apr-22,2022,4,GL,Great Lakes,Tecentriq,Oncology,788,112,68
+2022-04-01,Apr-22,2022,4,SE,Southeast,Ocrevus IV,Multiple Sclerosis,985,179,106
+2022-04-01,Apr-22,2022,4,SE,Southeast,Hemlibra,Hemophilia A,371,106,67
+2022-04-01,Apr-22,2022,4,SE,Southeast,Tecentriq,Oncology,701,108,67
+2022-04-01,Apr-22,2022,4,SW,Southwest,Ocrevus IV,Multiple Sclerosis,768,138,89
+2022-04-01,Apr-22,2022,4,SW,Southwest,Hemlibra,Hemophilia A,289,84,49
+2022-04-01,Apr-22,2022,4,SW,Southwest,Tecentriq,Oncology,548,78,48
+2022-04-01,Apr-22,2022,4,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,540,94,57
+2022-04-01,Apr-22,2022,4,MW,Mountain West,Hemlibra,Hemophilia A,199,60,37
+2022-04-01,Apr-22,2022,4,MW,Mountain West,Tecentriq,Oncology,381,56,32
+2022-05-01,May-22,2022,5,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1508,270,157
+2022-05-01,May-22,2022,5,NE,Northeast Corridor,Hemlibra,Hemophilia A,562,157,90
+2022-05-01,May-22,2022,5,NE,Northeast Corridor,Tecentriq,Oncology,1029,154,99
+2022-05-01,May-22,2022,5,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1726,290,179
+2022-05-01,May-22,2022,5,PAC,Pacific West,Hemlibra,Hemophilia A,633,182,109
+2022-05-01,May-22,2022,5,PAC,Pacific West,Tecentriq,Oncology,1179,178,113
+2022-05-01,May-22,2022,5,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1178,208,120
+2022-05-01,May-22,2022,5,GL,Great Lakes,Hemlibra,Hemophilia A,431,121,75
+2022-05-01,May-22,2022,5,GL,Great Lakes,Tecentriq,Oncology,775,113,70
+2022-05-01,May-22,2022,5,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1054,182,116
+2022-05-01,May-22,2022,5,SE,Southeast,Hemlibra,Hemophilia A,391,112,68
+2022-05-01,May-22,2022,5,SE,Southeast,Tecentriq,Oncology,725,101,58
+2022-05-01,May-22,2022,5,SW,Southwest,Ocrevus IV,Multiple Sclerosis,793,140,84
+2022-05-01,May-22,2022,5,SW,Southwest,Hemlibra,Hemophilia A,294,86,53
+2022-05-01,May-22,2022,5,SW,Southwest,Tecentriq,Oncology,550,77,48
+2022-05-01,May-22,2022,5,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,563,104,63
+2022-05-01,May-22,2022,5,MW,Mountain West,Hemlibra,Hemophilia A,201,58,37
+2022-05-01,May-22,2022,5,MW,Mountain West,Tecentriq,Oncology,391,57,34
+2022-06-01,Jun-22,2022,6,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1526,275,164
+2022-06-01,Jun-22,2022,6,NE,Northeast Corridor,Hemlibra,Hemophilia A,556,152,97
+2022-06-01,Jun-22,2022,6,NE,Northeast Corridor,Tecentriq,Oncology,1049,159,99
+2022-06-01,Jun-22,2022,6,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1743,294,177
+2022-06-01,Jun-22,2022,6,PAC,Pacific West,Hemlibra,Hemophilia A,632,176,103
+2022-06-01,Jun-22,2022,6,PAC,Pacific West,Tecentriq,Oncology,1194,177,110
+2022-06-01,Jun-22,2022,6,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1132,197,123
+2022-06-01,Jun-22,2022,6,GL,Great Lakes,Hemlibra,Hemophilia A,435,124,78
+2022-06-01,Jun-22,2022,6,GL,Great Lakes,Tecentriq,Oncology,815,115,67
+2022-06-01,Jun-22,2022,6,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1036,176,105
+2022-06-01,Jun-22,2022,6,SE,Southeast,Hemlibra,Hemophilia A,383,111,64
+2022-06-01,Jun-22,2022,6,SE,Southeast,Tecentriq,Oncology,723,103,60
+2022-06-01,Jun-22,2022,6,SW,Southwest,Ocrevus IV,Multiple Sclerosis,791,137,82
+2022-06-01,Jun-22,2022,6,SW,Southwest,Hemlibra,Hemophilia A,304,83,48
+2022-06-01,Jun-22,2022,6,SW,Southwest,Tecentriq,Oncology,546,81,51
+2022-06-01,Jun-22,2022,6,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,552,92,58
+2022-06-01,Jun-22,2022,6,MW,Mountain West,Hemlibra,Hemophilia A,207,57,33
+2022-06-01,Jun-22,2022,6,MW,Mountain West,Tecentriq,Oncology,383,53,31
+2022-07-01,Jul-22,2022,7,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1521,257,146
+2022-07-01,Jul-22,2022,7,NE,Northeast Corridor,Hemlibra,Hemophilia A,570,165,95
+2022-07-01,Jul-22,2022,7,NE,Northeast Corridor,Tecentriq,Oncology,1052,152,92
+2022-07-01,Jul-22,2022,7,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1756,320,188
+2022-07-01,Jul-22,2022,7,PAC,Pacific West,Hemlibra,Hemophilia A,657,181,109
+2022-07-01,Jul-22,2022,7,PAC,Pacific West,Tecentriq,Oncology,1198,168,100
+2022-07-01,Jul-22,2022,7,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1165,205,120
+2022-07-01,Jul-22,2022,7,GL,Great Lakes,Hemlibra,Hemophilia A,438,122,73
+2022-07-01,Jul-22,2022,7,GL,Great Lakes,Tecentriq,Oncology,796,113,70
+2022-07-01,Jul-22,2022,7,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1054,190,114
+2022-07-01,Jul-22,2022,7,SE,Southeast,Hemlibra,Hemophilia A,388,107,62
+2022-07-01,Jul-22,2022,7,SE,Southeast,Tecentriq,Oncology,711,105,67
+2022-07-01,Jul-22,2022,7,SW,Southwest,Ocrevus IV,Multiple Sclerosis,812,143,86
+2022-07-01,Jul-22,2022,7,SW,Southwest,Hemlibra,Hemophilia A,292,86,52
+2022-07-01,Jul-22,2022,7,SW,Southwest,Tecentriq,Oncology,539,80,47
+2022-07-01,Jul-22,2022,7,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,556,93,54
+2022-07-01,Jul-22,2022,7,MW,Mountain West,Hemlibra,Hemophilia A,207,61,38
+2022-07-01,Jul-22,2022,7,MW,Mountain West,Tecentriq,Oncology,386,57,34
+2022-08-01,Aug-22,2022,8,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1507,263,160
+2022-08-01,Aug-22,2022,8,NE,Northeast Corridor,Hemlibra,Hemophilia A,565,161,98
+2022-08-01,Aug-22,2022,8,NE,Northeast Corridor,Tecentriq,Oncology,1028,142,88
+2022-08-01,Aug-22,2022,8,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1724,309,195
+2022-08-01,Aug-22,2022,8,PAC,Pacific West,Hemlibra,Hemophilia A,672,185,109
+2022-08-01,Aug-22,2022,8,PAC,Pacific West,Tecentriq,Oncology,1187,171,106
+2022-08-01,Aug-22,2022,8,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1180,211,124
+2022-08-01,Aug-22,2022,8,GL,Great Lakes,Hemlibra,Hemophilia A,432,117,69
+2022-08-01,Aug-22,2022,8,GL,Great Lakes,Tecentriq,Oncology,812,120,73
+2022-08-01,Aug-22,2022,8,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1056,178,108
+2022-08-01,Aug-22,2022,8,SE,Southeast,Hemlibra,Hemophilia A,402,107,63
+2022-08-01,Aug-22,2022,8,SE,Southeast,Tecentriq,Oncology,716,106,64
+2022-08-01,Aug-22,2022,8,SW,Southwest,Ocrevus IV,Multiple Sclerosis,791,134,85
+2022-08-01,Aug-22,2022,8,SW,Southwest,Hemlibra,Hemophilia A,307,85,51
+2022-08-01,Aug-22,2022,8,SW,Southwest,Tecentriq,Oncology,543,74,43
+2022-08-01,Aug-22,2022,8,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,568,101,59
+2022-08-01,Aug-22,2022,8,MW,Mountain West,Hemlibra,Hemophilia A,207,55,32
+2022-08-01,Aug-22,2022,8,MW,Mountain West,Tecentriq,Oncology,382,55,35
+2022-09-01,Sep-22,2022,9,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1498,256,158
+2022-09-01,Sep-22,2022,9,NE,Northeast Corridor,Hemlibra,Hemophilia A,575,166,96
+2022-09-01,Sep-22,2022,9,NE,Northeast Corridor,Tecentriq,Oncology,1075,154,88
+2022-09-01,Sep-22,2022,9,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1690,292,175
+2022-09-01,Sep-22,2022,9,PAC,Pacific West,Hemlibra,Hemophilia A,676,180,112
+2022-09-01,Sep-22,2022,9,PAC,Pacific West,Tecentriq,Oncology,1240,181,112
+2022-09-01,Sep-22,2022,9,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1160,195,112
+2022-09-01,Sep-22,2022,9,GL,Great Lakes,Hemlibra,Hemophilia A,443,128,74
+2022-09-01,Sep-22,2022,9,GL,Great Lakes,Tecentriq,Oncology,831,122,73
+2022-09-01,Sep-22,2022,9,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1055,175,107
+2022-09-01,Sep-22,2022,9,SE,Southeast,Hemlibra,Hemophilia A,401,116,67
+2022-09-01,Sep-22,2022,9,SE,Southeast,Tecentriq,Oncology,746,101,63
+2022-09-01,Sep-22,2022,9,SW,Southwest,Ocrevus IV,Multiple Sclerosis,813,144,89
+2022-09-01,Sep-22,2022,9,SW,Southwest,Hemlibra,Hemophilia A,319,86,51
+2022-09-01,Sep-22,2022,9,SW,Southwest,Tecentriq,Oncology,551,75,45
+2022-09-01,Sep-22,2022,9,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,567,100,57
+2022-09-01,Sep-22,2022,9,MW,Mountain West,Hemlibra,Hemophilia A,214,61,35
+2022-09-01,Sep-22,2022,9,MW,Mountain West,Tecentriq,Oncology,388,57,33
+2022-10-01,Oct-22,2022,10,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1479,253,143
+2022-10-01,Oct-22,2022,10,NE,Northeast Corridor,Hemlibra,Hemophilia A,592,170,100
+2022-10-01,Oct-22,2022,10,NE,Northeast Corridor,Tecentriq,Oncology,1054,151,93
+2022-10-01,Oct-22,2022,10,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1727,301,174
+2022-10-01,Oct-22,2022,10,PAC,Pacific West,Hemlibra,Hemophilia A,692,187,116
+2022-10-01,Oct-22,2022,10,PAC,Pacific West,Tecentriq,Oncology,1235,173,106
+2022-10-01,Oct-22,2022,10,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1150,206,119
+2022-10-01,Oct-22,2022,10,GL,Great Lakes,Hemlibra,Hemophilia A,465,121,74
+2022-10-01,Oct-22,2022,10,GL,Great Lakes,Tecentriq,Oncology,813,119,69
+2022-10-01,Oct-22,2022,10,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1013,171,104
+2022-10-01,Oct-22,2022,10,SE,Southeast,Hemlibra,Hemophilia A,421,113,70
+2022-10-01,Oct-22,2022,10,SE,Southeast,Tecentriq,Oncology,728,103,63
+2022-10-01,Oct-22,2022,10,SW,Southwest,Ocrevus IV,Multiple Sclerosis,792,139,83
+2022-10-01,Oct-22,2022,10,SW,Southwest,Hemlibra,Hemophilia A,310,86,53
+2022-10-01,Oct-22,2022,10,SW,Southwest,Tecentriq,Oncology,573,79,48
+2022-10-01,Oct-22,2022,10,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,546,95,56
+2022-10-01,Oct-22,2022,10,MW,Mountain West,Hemlibra,Hemophilia A,221,62,39
+2022-10-01,Oct-22,2022,10,MW,Mountain West,Tecentriq,Oncology,390,53,32
+2022-11-01,Nov-22,2022,11,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1523,257,149
+2022-11-01,Nov-22,2022,11,NE,Northeast Corridor,Hemlibra,Hemophilia A,607,169,103
+2022-11-01,Nov-22,2022,11,NE,Northeast Corridor,Tecentriq,Oncology,1107,151,90
+2022-11-01,Nov-22,2022,11,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1760,288,168
+2022-11-01,Nov-22,2022,11,PAC,Pacific West,Hemlibra,Hemophilia A,693,183,107
+2022-11-01,Nov-22,2022,11,PAC,Pacific West,Tecentriq,Oncology,1226,174,98
+2022-11-01,Nov-22,2022,11,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1180,193,114
+2022-11-01,Nov-22,2022,11,GL,Great Lakes,Hemlibra,Hemophilia A,473,132,75
+2022-11-01,Nov-22,2022,11,GL,Great Lakes,Tecentriq,Oncology,829,111,67
+2022-11-01,Nov-22,2022,11,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1020,166,95
+2022-11-01,Nov-22,2022,11,SE,Southeast,Hemlibra,Hemophilia A,414,116,65
+2022-11-01,Nov-22,2022,11,SE,Southeast,Tecentriq,Oncology,731,101,58
+2022-11-01,Nov-22,2022,11,SW,Southwest,Ocrevus IV,Multiple Sclerosis,809,136,82
+2022-11-01,Nov-22,2022,11,SW,Southwest,Hemlibra,Hemophilia A,316,83,51
+2022-11-01,Nov-22,2022,11,SW,Southwest,Tecentriq,Oncology,583,84,49
+2022-11-01,Nov-22,2022,11,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,560,94,57
+2022-11-01,Nov-22,2022,11,MW,Mountain West,Hemlibra,Hemophilia A,221,59,36
+2022-11-01,Nov-22,2022,11,MW,Mountain West,Tecentriq,Oncology,402,55,32
+2022-12-01,Dec-22,2022,12,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1422,229,135
+2022-12-01,Dec-22,2022,12,NE,Northeast Corridor,Hemlibra,Hemophilia A,629,171,101
+2022-12-01,Dec-22,2022,12,NE,Northeast Corridor,Tecentriq,Oncology,1094,156,91
+2022-12-01,Dec-22,2022,12,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1597,272,166
+2022-12-01,Dec-22,2022,12,PAC,Pacific West,Hemlibra,Hemophilia A,694,181,107
+2022-12-01,Dec-22,2022,12,PAC,Pacific West,Tecentriq,Oncology,1248,172,103
+2022-12-01,Dec-22,2022,12,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1099,195,120
+2022-12-01,Dec-22,2022,12,GL,Great Lakes,Hemlibra,Hemophilia A,485,129,78
+2022-12-01,Dec-22,2022,12,GL,Great Lakes,Tecentriq,Oncology,818,116,65
+2022-12-01,Dec-22,2022,12,SE,Southeast,Ocrevus IV,Multiple Sclerosis,950,163,95
+2022-12-01,Dec-22,2022,12,SE,Southeast,Hemlibra,Hemophilia A,437,115,69
+2022-12-01,Dec-22,2022,12,SE,Southeast,Tecentriq,Oncology,753,105,64
+2022-12-01,Dec-22,2022,12,SW,Southwest,Ocrevus IV,Multiple Sclerosis,756,128,71
+2022-12-01,Dec-22,2022,12,SW,Southwest,Hemlibra,Hemophilia A,335,89,53
+2022-12-01,Dec-22,2022,12,SW,Southwest,Tecentriq,Oncology,575,79,44
+2022-12-01,Dec-22,2022,12,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,514,90,55
+2022-12-01,Dec-22,2022,12,MW,Mountain West,Hemlibra,Hemophilia A,231,59,33
+2022-12-01,Dec-22,2022,12,MW,Mountain West,Tecentriq,Oncology,392,56,31
+2023-01-01,Jan-23,2023,1,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1489,255,149
+2023-01-01,Jan-23,2023,1,NE,Northeast Corridor,Hemlibra,Hemophilia A,642,173,100
+2023-01-01,Jan-23,2023,1,NE,Northeast Corridor,Tecentriq,Oncology,1081,143,86
+2023-01-01,Jan-23,2023,1,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1734,294,182
+2023-01-01,Jan-23,2023,1,PAC,Pacific West,Hemlibra,Hemophilia A,745,193,119
+2023-01-01,Jan-23,2023,1,PAC,Pacific West,Tecentriq,Oncology,1225,177,98
+2023-01-01,Jan-23,2023,1,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1118,188,114
+2023-01-01,Jan-23,2023,1,GL,Great Lakes,Hemlibra,Hemophilia A,504,136,78
+2023-01-01,Jan-23,2023,1,GL,Great Lakes,Tecentriq,Oncology,846,118,65
+2023-01-01,Jan-23,2023,1,SE,Southeast,Ocrevus IV,Multiple Sclerosis,998,160,88
+2023-01-01,Jan-23,2023,1,SE,Southeast,Hemlibra,Hemophilia A,453,117,71
+2023-01-01,Jan-23,2023,1,SE,Southeast,Tecentriq,Oncology,755,99,55
+2023-01-01,Jan-23,2023,1,SW,Southwest,Ocrevus IV,Multiple Sclerosis,772,135,80
+2023-01-01,Jan-23,2023,1,SW,Southwest,Hemlibra,Hemophilia A,336,88,53
+2023-01-01,Jan-23,2023,1,SW,Southwest,Tecentriq,Oncology,573,81,50
+2023-01-01,Jan-23,2023,1,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,536,90,51
+2023-01-01,Jan-23,2023,1,MW,Mountain West,Hemlibra,Hemophilia A,235,59,33
+2023-01-01,Jan-23,2023,1,MW,Mountain West,Tecentriq,Oncology,388,54,30
+2023-02-01,Feb-23,2023,2,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1634,259,155
+2023-02-01,Feb-23,2023,2,NE,Northeast Corridor,Hemlibra,Hemophilia A,654,168,93
+2023-02-01,Feb-23,2023,2,NE,Northeast Corridor,Tecentriq,Oncology,1133,153,85
+2023-02-01,Feb-23,2023,2,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1892,315,182
+2023-02-01,Feb-23,2023,2,PAC,Pacific West,Hemlibra,Hemophilia A,743,194,107
+2023-02-01,Feb-23,2023,2,PAC,Pacific West,Tecentriq,Oncology,1268,166,98
+2023-02-01,Feb-23,2023,2,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1227,203,119
+2023-02-01,Feb-23,2023,2,GL,Great Lakes,Hemlibra,Hemophilia A,501,128,72
+2023-02-01,Feb-23,2023,2,GL,Great Lakes,Tecentriq,Oncology,846,115,64
+2023-02-01,Feb-23,2023,2,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1130,188,111
+2023-02-01,Feb-23,2023,2,SE,Southeast,Hemlibra,Hemophilia A,449,120,70
+2023-02-01,Feb-23,2023,2,SE,Southeast,Tecentriq,Oncology,765,104,63
+2023-02-01,Feb-23,2023,2,SW,Southwest,Ocrevus IV,Multiple Sclerosis,848,136,83
+2023-02-01,Feb-23,2023,2,SW,Southwest,Hemlibra,Hemophilia A,349,92,53
+2023-02-01,Feb-23,2023,2,SW,Southwest,Tecentriq,Oncology,584,81,44
+2023-02-01,Feb-23,2023,2,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,604,101,58
+2023-02-01,Feb-23,2023,2,MW,Mountain West,Hemlibra,Hemophilia A,238,61,36
+2023-02-01,Feb-23,2023,2,MW,Mountain West,Tecentriq,Oncology,406,57,31
+2023-03-01,Mar-23,2023,3,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1706,274,158
+2023-03-01,Mar-23,2023,3,NE,Northeast Corridor,Hemlibra,Hemophilia A,652,165,96
+2023-03-01,Mar-23,2023,3,NE,Northeast Corridor,Tecentriq,Oncology,1116,147,85
+2023-03-01,Mar-23,2023,3,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1980,328,197
+2023-03-01,Mar-23,2023,3,PAC,Pacific West,Hemlibra,Hemophilia A,739,198,112
+2023-03-01,Mar-23,2023,3,PAC,Pacific West,Tecentriq,Oncology,1276,171,99
+2023-03-01,Mar-23,2023,3,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1348,233,132
+2023-03-01,Mar-23,2023,3,GL,Great Lakes,Hemlibra,Hemophilia A,506,130,78
+2023-03-01,Mar-23,2023,3,GL,Great Lakes,Tecentriq,Oncology,887,123,70
+2023-03-01,Mar-23,2023,3,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1176,198,121
+2023-03-01,Mar-23,2023,3,SE,Southeast,Hemlibra,Hemophilia A,441,117,66
+2023-03-01,Mar-23,2023,3,SE,Southeast,Tecentriq,Oncology,777,110,64
+2023-03-01,Mar-23,2023,3,SW,Southwest,Ocrevus IV,Multiple Sclerosis,900,152,89
+2023-03-01,Mar-23,2023,3,SW,Southwest,Hemlibra,Hemophilia A,351,89,49
+2023-03-01,Mar-23,2023,3,SW,Southwest,Tecentriq,Oncology,587,78,46
+2023-03-01,Mar-23,2023,3,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,652,105,62
+2023-03-01,Mar-23,2023,3,MW,Mountain West,Hemlibra,Hemophilia A,241,63,36
+2023-03-01,Mar-23,2023,3,MW,Mountain West,Tecentriq,Oncology,411,54,31
+2023-04-01,Apr-23,2023,4,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1798,292,167
+2023-04-01,Apr-23,2023,4,NE,Northeast Corridor,Hemlibra,Hemophilia A,679,168,102
+2023-04-01,Apr-23,2023,4,NE,Northeast Corridor,Tecentriq,Oncology,1153,151,91
+2023-04-01,Apr-23,2023,4,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,2008,342,207
+2023-04-01,Apr-23,2023,4,PAC,Pacific West,Hemlibra,Hemophilia A,747,196,116
+2023-04-01,Apr-23,2023,4,PAC,Pacific West,Tecentriq,Oncology,1346,174,98
+2023-04-01,Apr-23,2023,4,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1384,220,132
+2023-04-01,Apr-23,2023,4,GL,Great Lakes,Hemlibra,Hemophilia A,506,131,77
+2023-04-01,Apr-23,2023,4,GL,Great Lakes,Tecentriq,Oncology,919,123,73
+2023-04-01,Apr-23,2023,4,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1254,198,119
+2023-04-01,Apr-23,2023,4,SE,Southeast,Hemlibra,Hemophilia A,449,111,60
+2023-04-01,Apr-23,2023,4,SE,Southeast,Tecentriq,Oncology,790,109,66
+2023-04-01,Apr-23,2023,4,SW,Southwest,Ocrevus IV,Multiple Sclerosis,942,163,93
+2023-04-01,Apr-23,2023,4,SW,Southwest,Hemlibra,Hemophilia A,353,87,48
+2023-04-01,Apr-23,2023,4,SW,Southwest,Tecentriq,Oncology,607,81,44
+2023-04-01,Apr-23,2023,4,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,647,111,62
+2023-04-01,Apr-23,2023,4,MW,Mountain West,Hemlibra,Hemophilia A,251,67,37
+2023-04-01,Apr-23,2023,4,MW,Mountain West,Tecentriq,Oncology,426,58,32
+2023-05-01,May-23,2023,5,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1843,298,177
+2023-05-01,May-23,2023,5,NE,Northeast Corridor,Hemlibra,Hemophilia A,663,159,90
+2023-05-01,May-23,2023,5,NE,Northeast Corridor,Tecentriq,Oncology,1154,152,86
+2023-05-01,May-23,2023,5,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,2080,332,183
+2023-05-01,May-23,2023,5,PAC,Pacific West,Hemlibra,Hemophilia A,776,197,108
+2023-05-01,May-23,2023,5,PAC,Pacific West,Tecentriq,Oncology,1359,174,96
+2023-05-01,May-23,2023,5,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1378,220,121
+2023-05-01,May-23,2023,5,GL,Great Lakes,Hemlibra,Hemophilia A,528,131,79
+2023-05-01,May-23,2023,5,GL,Great Lakes,Tecentriq,Oncology,919,122,68
+2023-05-01,May-23,2023,5,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1278,208,114
+2023-05-01,May-23,2023,5,SE,Southeast,Hemlibra,Hemophilia A,474,115,63
+2023-05-01,May-23,2023,5,SE,Southeast,Tecentriq,Oncology,819,114,61
+2023-05-01,May-23,2023,5,SW,Southwest,Ocrevus IV,Multiple Sclerosis,964,151,83
+2023-05-01,May-23,2023,5,SW,Southwest,Hemlibra,Hemophilia A,350,86,46
+2023-05-01,May-23,2023,5,SW,Southwest,Tecentriq,Oncology,639,83,45
+2023-05-01,May-23,2023,5,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,671,107,62
+2023-05-01,May-23,2023,5,MW,Mountain West,Hemlibra,Hemophilia A,244,63,36
+2023-05-01,May-23,2023,5,MW,Mountain West,Tecentriq,Oncology,429,56,30
+2023-06-01,Jun-23,2023,6,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1780,295,159
+2023-06-01,Jun-23,2023,6,NE,Northeast Corridor,Hemlibra,Hemophilia A,678,174,100
+2023-06-01,Jun-23,2023,6,NE,Northeast Corridor,Tecentriq,Oncology,1212,169,96
+2023-06-01,Jun-23,2023,6,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,2064,338,184
+2023-06-01,Jun-23,2023,6,PAC,Pacific West,Hemlibra,Hemophilia A,788,196,113
+2023-06-01,Jun-23,2023,6,PAC,Pacific West,Tecentriq,Oncology,1356,178,104
+2023-06-01,Jun-23,2023,6,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1392,231,125
+2023-06-01,Jun-23,2023,6,GL,Great Lakes,Hemlibra,Hemophilia A,519,129,76
+2023-06-01,Jun-23,2023,6,GL,Great Lakes,Tecentriq,Oncology,941,128,71
+2023-06-01,Jun-23,2023,6,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1233,203,109
+2023-06-01,Jun-23,2023,6,SE,Southeast,Hemlibra,Hemophilia A,468,120,68
+2023-06-01,Jun-23,2023,6,SE,Southeast,Tecentriq,Oncology,824,108,63
+2023-06-01,Jun-23,2023,6,SW,Southwest,Ocrevus IV,Multiple Sclerosis,935,147,85
+2023-06-01,Jun-23,2023,6,SW,Southwest,Hemlibra,Hemophilia A,356,88,49
+2023-06-01,Jun-23,2023,6,SW,Southwest,Tecentriq,Oncology,635,84,50
+2023-06-01,Jun-23,2023,6,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,651,105,61
+2023-06-01,Jun-23,2023,6,MW,Mountain West,Hemlibra,Hemophilia A,251,64,37
+2023-06-01,Jun-23,2023,6,MW,Mountain West,Tecentriq,Oncology,436,59,35
+2023-07-01,Jul-23,2023,7,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1821,287,168
+2023-07-01,Jul-23,2023,7,NE,Northeast Corridor,Hemlibra,Hemophilia A,681,160,93
+2023-07-01,Jul-23,2023,7,NE,Northeast Corridor,Tecentriq,Oncology,1197,150,87
+2023-07-01,Jul-23,2023,7,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,2069,348,199
+2023-07-01,Jul-23,2023,7,PAC,Pacific West,Hemlibra,Hemophilia A,797,198,113
+2023-07-01,Jul-23,2023,7,PAC,Pacific West,Tecentriq,Oncology,1373,190,113
+2023-07-01,Jul-23,2023,7,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1386,216,121
+2023-07-01,Jul-23,2023,7,GL,Great Lakes,Hemlibra,Hemophilia A,546,129,73
+2023-07-01,Jul-23,2023,7,GL,Great Lakes,Tecentriq,Oncology,907,114,67
+2023-07-01,Jul-23,2023,7,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1226,199,107
+2023-07-01,Jul-23,2023,7,SE,Southeast,Hemlibra,Hemophilia A,473,115,63
+2023-07-01,Jul-23,2023,7,SE,Southeast,Tecentriq,Oncology,808,110,59
+2023-07-01,Jul-23,2023,7,SW,Southwest,Ocrevus IV,Multiple Sclerosis,946,148,81
+2023-07-01,Jul-23,2023,7,SW,Southwest,Hemlibra,Hemophilia A,362,89,51
+2023-07-01,Jul-23,2023,7,SW,Southwest,Tecentriq,Oncology,614,84,45
+2023-07-01,Jul-23,2023,7,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,663,106,57
+2023-07-01,Jul-23,2023,7,MW,Mountain West,Hemlibra,Hemophilia A,251,61,36
+2023-07-01,Jul-23,2023,7,MW,Mountain West,Tecentriq,Oncology,448,60,35
+2023-08-01,Aug-23,2023,8,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1751,282,154
+2023-08-01,Aug-23,2023,8,NE,Northeast Corridor,Hemlibra,Hemophilia A,713,175,97
+2023-08-01,Aug-23,2023,8,NE,Northeast Corridor,Tecentriq,Oncology,1220,163,94
+2023-08-01,Aug-23,2023,8,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,2090,333,177
+2023-08-01,Aug-23,2023,8,PAC,Pacific West,Hemlibra,Hemophilia A,809,205,117
+2023-08-01,Aug-23,2023,8,PAC,Pacific West,Tecentriq,Oncology,1362,186,105
+2023-08-01,Aug-23,2023,8,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1350,216,126
+2023-08-01,Aug-23,2023,8,GL,Great Lakes,Hemlibra,Hemophilia A,536,124,66
+2023-08-01,Aug-23,2023,8,GL,Great Lakes,Tecentriq,Oncology,916,119,63
+2023-08-01,Aug-23,2023,8,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1203,190,112
+2023-08-01,Aug-23,2023,8,SE,Southeast,Hemlibra,Hemophilia A,477,114,68
+2023-08-01,Aug-23,2023,8,SE,Southeast,Tecentriq,Oncology,810,109,61
+2023-08-01,Aug-23,2023,8,SW,Southwest,Ocrevus IV,Multiple Sclerosis,948,146,83
+2023-08-01,Aug-23,2023,8,SW,Southwest,Hemlibra,Hemophilia A,368,86,51
+2023-08-01,Aug-23,2023,8,SW,Southwest,Tecentriq,Oncology,649,82,47
+2023-08-01,Aug-23,2023,8,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,649,104,61
+2023-08-01,Aug-23,2023,8,MW,Mountain West,Hemlibra,Hemophilia A,257,60,34
+2023-08-01,Aug-23,2023,8,MW,Mountain West,Tecentriq,Oncology,437,57,33
+2023-09-01,Sep-23,2023,9,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1776,282,165
+2023-09-01,Sep-23,2023,9,NE,Northeast Corridor,Hemlibra,Hemophilia A,712,175,95
+2023-09-01,Sep-23,2023,9,NE,Northeast Corridor,Tecentriq,Oncology,1241,160,92
+2023-09-01,Sep-23,2023,9,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,2008,314,167
+2023-09-01,Sep-23,2023,9,PAC,Pacific West,Hemlibra,Hemophilia A,829,193,102
+2023-09-01,Sep-23,2023,9,PAC,Pacific West,Tecentriq,Oncology,1375,176,97
+2023-09-01,Sep-23,2023,9,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1328,210,111
+2023-09-01,Sep-23,2023,9,GL,Great Lakes,Hemlibra,Hemophilia A,551,134,78
+2023-09-01,Sep-23,2023,9,GL,Great Lakes,Tecentriq,Oncology,915,115,64
+2023-09-01,Sep-23,2023,9,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1173,196,110
+2023-09-01,Sep-23,2023,9,SE,Southeast,Hemlibra,Hemophilia A,491,123,72
+2023-09-01,Sep-23,2023,9,SE,Southeast,Tecentriq,Oncology,835,114,62
+2023-09-01,Sep-23,2023,9,SW,Southwest,Ocrevus IV,Multiple Sclerosis,916,140,78
+2023-09-01,Sep-23,2023,9,SW,Southwest,Hemlibra,Hemophilia A,378,88,48
+2023-09-01,Sep-23,2023,9,SW,Southwest,Tecentriq,Oncology,652,89,52
+2023-09-01,Sep-23,2023,9,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,658,108,64
+2023-09-01,Sep-23,2023,9,MW,Mountain West,Hemlibra,Hemophilia A,263,66,36
+2023-09-01,Sep-23,2023,9,MW,Mountain West,Tecentriq,Oncology,459,57,31
+2023-10-01,Oct-23,2023,10,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1720,266,145
+2023-10-01,Oct-23,2023,10,NE,Northeast Corridor,Hemlibra,Hemophilia A,747,176,102
+2023-10-01,Oct-23,2023,10,NE,Northeast Corridor,Tecentriq,Oncology,1229,158,88
+2023-10-01,Oct-23,2023,10,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1906,289,169
+2023-10-01,Oct-23,2023,10,PAC,Pacific West,Hemlibra,Hemophilia A,858,201,119
+2023-10-01,Oct-23,2023,10,PAC,Pacific West,Tecentriq,Oncology,1409,185,108
+2023-10-01,Oct-23,2023,10,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1329,210,116
+2023-10-01,Oct-23,2023,10,GL,Great Lakes,Hemlibra,Hemophilia A,569,131,75
+2023-10-01,Oct-23,2023,10,GL,Great Lakes,Tecentriq,Oncology,937,115,65
+2023-10-01,Oct-23,2023,10,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1167,190,104
+2023-10-01,Oct-23,2023,10,SE,Southeast,Hemlibra,Hemophilia A,521,121,70
+2023-10-01,Oct-23,2023,10,SE,Southeast,Tecentriq,Oncology,851,113,64
+2023-10-01,Oct-23,2023,10,SW,Southwest,Ocrevus IV,Multiple Sclerosis,889,138,78
+2023-10-01,Oct-23,2023,10,SW,Southwest,Hemlibra,Hemophilia A,393,94,54
+2023-10-01,Oct-23,2023,10,SW,Southwest,Tecentriq,Oncology,661,83,47
+2023-10-01,Oct-23,2023,10,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,621,101,57
+2023-10-01,Oct-23,2023,10,MW,Mountain West,Hemlibra,Hemophilia A,280,65,36
+2023-10-01,Oct-23,2023,10,MW,Mountain West,Tecentriq,Oncology,453,61,33
+2023-11-01,Nov-23,2023,11,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1659,271,146
+2023-11-01,Nov-23,2023,11,NE,Northeast Corridor,Hemlibra,Hemophilia A,758,176,102
+2023-11-01,Nov-23,2023,11,NE,Northeast Corridor,Tecentriq,Oncology,1229,150,88
+2023-11-01,Nov-23,2023,11,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1927,317,176
+2023-11-01,Nov-23,2023,11,PAC,Pacific West,Hemlibra,Hemophilia A,877,214,121
+2023-11-01,Nov-23,2023,11,PAC,Pacific West,Tecentriq,Oncology,1424,187,99
+2023-11-01,Nov-23,2023,11,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1282,198,109
+2023-11-01,Nov-23,2023,11,GL,Great Lakes,Hemlibra,Hemophilia A,566,131,71
+2023-11-01,Nov-23,2023,11,GL,Great Lakes,Tecentriq,Oncology,953,127,70
+2023-11-01,Nov-23,2023,11,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1129,170,89
+2023-11-01,Nov-23,2023,11,SE,Southeast,Hemlibra,Hemophilia A,507,122,66
+2023-11-01,Nov-23,2023,11,SE,Southeast,Tecentriq,Oncology,855,105,60
+2023-11-01,Nov-23,2023,11,SW,Southwest,Ocrevus IV,Multiple Sclerosis,869,133,78
+2023-11-01,Nov-23,2023,11,SW,Southwest,Hemlibra,Hemophilia A,399,96,51
+2023-11-01,Nov-23,2023,11,SW,Southwest,Tecentriq,Oncology,649,84,49
+2023-11-01,Nov-23,2023,11,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,606,95,50
+2023-11-01,Nov-23,2023,11,MW,Mountain West,Hemlibra,Hemophilia A,283,64,35
+2023-11-01,Nov-23,2023,11,MW,Mountain West,Tecentriq,Oncology,462,62,34
+2023-12-01,Dec-23,2023,12,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1554,233,134
+2023-12-01,Dec-23,2023,12,NE,Northeast Corridor,Hemlibra,Hemophilia A,773,180,103
+2023-12-01,Dec-23,2023,12,NE,Northeast Corridor,Tecentriq,Oncology,1210,150,82
+2023-12-01,Dec-23,2023,12,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1734,265,147
+2023-12-01,Dec-23,2023,12,PAC,Pacific West,Hemlibra,Hemophilia A,870,198,113
+2023-12-01,Dec-23,2023,12,PAC,Pacific West,Tecentriq,Oncology,1422,174,96
+2023-12-01,Dec-23,2023,12,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1163,189,110
+2023-12-01,Dec-23,2023,12,GL,Great Lakes,Hemlibra,Hemophilia A,577,130,73
+2023-12-01,Dec-23,2023,12,GL,Great Lakes,Tecentriq,Oncology,923,122,64
+2023-12-01,Dec-23,2023,12,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1061,173,98
+2023-12-01,Dec-23,2023,12,SE,Southeast,Hemlibra,Hemophilia A,528,125,68
+2023-12-01,Dec-23,2023,12,SE,Southeast,Tecentriq,Oncology,853,106,62
+2023-12-01,Dec-23,2023,12,SW,Southwest,Ocrevus IV,Multiple Sclerosis,819,125,65
+2023-12-01,Dec-23,2023,12,SW,Southwest,Hemlibra,Hemophilia A,400,95,50
+2023-12-01,Dec-23,2023,12,SW,Southwest,Tecentriq,Oncology,636,81,43
+2023-12-01,Dec-23,2023,12,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,556,91,49
+2023-12-01,Dec-23,2023,12,MW,Mountain West,Hemlibra,Hemophilia A,278,65,36
+2023-12-01,Dec-23,2023,12,MW,Mountain West,Tecentriq,Oncology,441,55,30
+2024-01-01,Jan-24,2024,1,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1597,253,134
+2024-01-01,Jan-24,2024,1,NE,Northeast Corridor,Hemlibra,Hemophilia A,786,171,97
+2024-01-01,Jan-24,2024,1,NE,Northeast Corridor,Tecentriq,Oncology,1235,152,84
+2024-01-01,Jan-24,2024,1,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1795,271,142
+2024-01-01,Jan-24,2024,1,PAC,Pacific West,Hemlibra,Hemophilia A,899,203,118
+2024-01-01,Jan-24,2024,1,PAC,Pacific West,Tecentriq,Oncology,1434,174,98
+2024-01-01,Jan-24,2024,1,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1208,186,99
+2024-01-01,Jan-24,2024,1,GL,Great Lakes,Hemlibra,Hemophilia A,618,142,78
+2024-01-01,Jan-24,2024,1,GL,Great Lakes,Tecentriq,Oncology,924,117,63
+2024-01-01,Jan-24,2024,1,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1087,171,94
+2024-01-01,Jan-24,2024,1,SE,Southeast,Hemlibra,Hemophilia A,540,119,65
+2024-01-01,Jan-24,2024,1,SE,Southeast,Tecentriq,Oncology,862,107,55
+2024-01-01,Jan-24,2024,1,SW,Southwest,Ocrevus IV,Multiple Sclerosis,814,127,73
+2024-01-01,Jan-24,2024,1,SW,Southwest,Hemlibra,Hemophilia A,418,98,57
+2024-01-01,Jan-24,2024,1,SW,Southwest,Tecentriq,Oncology,633,78,44
+2024-01-01,Jan-24,2024,1,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,594,93,50
+2024-01-01,Jan-24,2024,1,MW,Mountain West,Hemlibra,Hemophilia A,296,70,40
+2024-01-01,Jan-24,2024,1,MW,Mountain West,Tecentriq,Oncology,458,59,33
+2024-02-01,Feb-24,2024,2,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1651,254,130
+2024-02-01,Feb-24,2024,2,NE,Northeast Corridor,Hemlibra,Hemophilia A,791,181,102
+2024-02-01,Feb-24,2024,2,NE,Northeast Corridor,Tecentriq,Oncology,1291,164,92
+2024-02-01,Feb-24,2024,2,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1926,308,171
+2024-02-01,Feb-24,2024,2,PAC,Pacific West,Hemlibra,Hemophilia A,923,209,116
+2024-02-01,Feb-24,2024,2,PAC,Pacific West,Tecentriq,Oncology,1469,189,105
+2024-02-01,Feb-24,2024,2,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1307,199,114
+2024-02-01,Feb-24,2024,2,GL,Great Lakes,Hemlibra,Hemophilia A,619,146,81
+2024-02-01,Feb-24,2024,2,GL,Great Lakes,Tecentriq,Oncology,984,118,63
+2024-02-01,Feb-24,2024,2,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1155,187,102
+2024-02-01,Feb-24,2024,2,SE,Southeast,Hemlibra,Hemophilia A,559,126,68
+2024-02-01,Feb-24,2024,2,SE,Southeast,Tecentriq,Oncology,855,111,57
+2024-02-01,Feb-24,2024,2,SW,Southwest,Ocrevus IV,Multiple Sclerosis,882,137,79
+2024-02-01,Feb-24,2024,2,SW,Southwest,Hemlibra,Hemophilia A,434,98,56
+2024-02-01,Feb-24,2024,2,SW,Southwest,Tecentriq,Oncology,662,84,48
+2024-02-01,Feb-24,2024,2,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,637,102,53
+2024-02-01,Feb-24,2024,2,MW,Mountain West,Hemlibra,Hemophilia A,301,69,39
+2024-02-01,Feb-24,2024,2,MW,Mountain West,Tecentriq,Oncology,478,60,34
+2024-03-01,Mar-24,2024,3,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1763,260,139
+2024-03-01,Mar-24,2024,3,NE,Northeast Corridor,Hemlibra,Hemophilia A,793,170,96
+2024-03-01,Mar-24,2024,3,NE,Northeast Corridor,Tecentriq,Oncology,1258,152,80
+2024-03-01,Mar-24,2024,3,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,2065,308,158
+2024-03-01,Mar-24,2024,3,PAC,Pacific West,Hemlibra,Hemophilia A,938,212,121
+2024-03-01,Mar-24,2024,3,PAC,Pacific West,Tecentriq,Oncology,1443,177,96
+2024-03-01,Mar-24,2024,3,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1356,200,106
+2024-03-01,Mar-24,2024,3,GL,Great Lakes,Hemlibra,Hemophilia A,623,139,76
+2024-03-01,Mar-24,2024,3,GL,Great Lakes,Tecentriq,Oncology,982,127,69
+2024-03-01,Mar-24,2024,3,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1239,185,99
+2024-03-01,Mar-24,2024,3,SE,Southeast,Hemlibra,Hemophilia A,553,117,65
+2024-03-01,Mar-24,2024,3,SE,Southeast,Tecentriq,Oncology,884,106,59
+2024-03-01,Mar-24,2024,3,SW,Southwest,Ocrevus IV,Multiple Sclerosis,963,150,78
+2024-03-01,Mar-24,2024,3,SW,Southwest,Hemlibra,Hemophilia A,425,94,50
+2024-03-01,Mar-24,2024,3,SW,Southwest,Tecentriq,Oncology,660,80,42
+2024-03-01,Mar-24,2024,3,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,649,99,57
+2024-03-01,Mar-24,2024,3,MW,Mountain West,Hemlibra,Hemophilia A,292,65,34
+2024-03-01,Mar-24,2024,3,MW,Mountain West,Tecentriq,Oncology,469,58,30
+2024-04-01,Apr-24,2024,4,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1844,286,163
+2024-04-01,Apr-24,2024,4,NE,Northeast Corridor,Hemlibra,Hemophilia A,801,176,100
+2024-04-01,Apr-24,2024,4,NE,Northeast Corridor,Tecentriq,Oncology,1330,165,86
+2024-04-01,Apr-24,2024,4,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,2105,309,165
+2024-04-01,Apr-24,2024,4,PAC,Pacific West,Hemlibra,Hemophilia A,930,204,114
+2024-04-01,Apr-24,2024,4,PAC,Pacific West,Tecentriq,Oncology,1491,188,104
+2024-04-01,Apr-24,2024,4,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1366,201,103
+2024-04-01,Apr-24,2024,4,GL,Great Lakes,Hemlibra,Hemophilia A,636,146,82
+2024-04-01,Apr-24,2024,4,GL,Great Lakes,Tecentriq,Oncology,991,127,71
+2024-04-01,Apr-24,2024,4,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1270,186,95
+2024-04-01,Apr-24,2024,4,SE,Southeast,Hemlibra,Hemophilia A,567,124,69
+2024-04-01,Apr-24,2024,4,SE,Southeast,Tecentriq,Oncology,888,108,60
+2024-04-01,Apr-24,2024,4,SW,Southwest,Ocrevus IV,Multiple Sclerosis,981,145,76
+2024-04-01,Apr-24,2024,4,SW,Southwest,Hemlibra,Hemophilia A,420,94,50
+2024-04-01,Apr-24,2024,4,SW,Southwest,Tecentriq,Oncology,709,83,47
+2024-04-01,Apr-24,2024,4,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,685,108,58
+2024-04-01,Apr-24,2024,4,MW,Mountain West,Hemlibra,Hemophilia A,307,70,37
+2024-04-01,Apr-24,2024,4,MW,Mountain West,Tecentriq,Oncology,487,57,30
+2024-05-01,May-24,2024,5,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1874,288,147
+2024-05-01,May-24,2024,5,NE,Northeast Corridor,Hemlibra,Hemophilia A,828,178,97
+2024-05-01,May-24,2024,5,NE,Northeast Corridor,Tecentriq,Oncology,1332,156,87
+2024-05-01,May-24,2024,5,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,2090,314,161
+2024-05-01,May-24,2024,5,PAC,Pacific West,Hemlibra,Hemophilia A,955,216,114
+2024-05-01,May-24,2024,5,PAC,Pacific West,Tecentriq,Oncology,1548,194,102
+2024-05-01,May-24,2024,5,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1452,215,112
+2024-05-01,May-24,2024,5,GL,Great Lakes,Hemlibra,Hemophilia A,640,137,71
+2024-05-01,May-24,2024,5,GL,Great Lakes,Tecentriq,Oncology,1036,121,61
+2024-05-01,May-24,2024,5,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1288,189,100
+2024-05-01,May-24,2024,5,SE,Southeast,Hemlibra,Hemophilia A,577,129,72
+2024-05-01,May-24,2024,5,SE,Southeast,Tecentriq,Oncology,930,117,66
+2024-05-01,May-24,2024,5,SW,Southwest,Ocrevus IV,Multiple Sclerosis,999,156,84
+2024-05-01,May-24,2024,5,SW,Southwest,Hemlibra,Hemophilia A,432,95,49
+2024-05-01,May-24,2024,5,SW,Southwest,Tecentriq,Oncology,683,87,47
+2024-05-01,May-24,2024,5,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,675,104,54
+2024-05-01,May-24,2024,5,MW,Mountain West,Hemlibra,Hemophilia A,299,62,34
+2024-05-01,May-24,2024,5,MW,Mountain West,Tecentriq,Oncology,482,58,33
+2024-06-01,Jun-24,2024,6,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1827,287,149
+2024-06-01,Jun-24,2024,6,NE,Northeast Corridor,Hemlibra,Hemophilia A,854,190,97
+2024-06-01,Jun-24,2024,6,NE,Northeast Corridor,Tecentriq,Oncology,1327,158,87
+2024-06-01,Jun-24,2024,6,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,2093,323,164
+2024-06-01,Jun-24,2024,6,PAC,Pacific West,Hemlibra,Hemophilia A,965,197,107
+2024-06-01,Jun-24,2024,6,PAC,Pacific West,Tecentriq,Oncology,1492,182,99
+2024-06-01,Jun-24,2024,6,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1375,213,109
+2024-06-01,Jun-24,2024,6,GL,Great Lakes,Hemlibra,Hemophilia A,630,128,70
+2024-06-01,Jun-24,2024,6,GL,Great Lakes,Tecentriq,Oncology,1012,128,71
+2024-06-01,Jun-24,2024,6,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1235,190,107
+2024-06-01,Jun-24,2024,6,SE,Southeast,Hemlibra,Hemophilia A,570,118,61
+2024-06-01,Jun-24,2024,6,SE,Southeast,Tecentriq,Oncology,932,110,57
+2024-06-01,Jun-24,2024,6,SW,Southwest,Ocrevus IV,Multiple Sclerosis,953,148,75
+2024-06-01,Jun-24,2024,6,SW,Southwest,Hemlibra,Hemophilia A,451,99,50
+2024-06-01,Jun-24,2024,6,SW,Southwest,Tecentriq,Oncology,708,82,46
+2024-06-01,Jun-24,2024,6,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,678,104,53
+2024-06-01,Jun-24,2024,6,MW,Mountain West,Hemlibra,Hemophilia A,316,64,34
+2024-06-01,Jun-24,2024,6,MW,Mountain West,Tecentriq,Oncology,478,60,32
+2024-07-01,Jul-24,2024,7,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1809,278,151
+2024-07-01,Jul-24,2024,7,NE,Northeast Corridor,Hemlibra,Hemophilia A,831,171,95
+2024-07-01,Jul-24,2024,7,NE,Northeast Corridor,Tecentriq,Oncology,1273,146,75
+2024-07-01,Jul-24,2024,7,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,2044,321,176
+2024-07-01,Jul-24,2024,7,PAC,Pacific West,Hemlibra,Hemophilia A,944,200,105
+2024-07-01,Jul-24,2024,7,PAC,Pacific West,Tecentriq,Oncology,1510,189,95
+2024-07-01,Jul-24,2024,7,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1382,216,120
+2024-07-01,Jul-24,2024,7,GL,Great Lakes,Hemlibra,Hemophilia A,658,135,69
+2024-07-01,Jul-24,2024,7,GL,Great Lakes,Tecentriq,Oncology,1022,122,65
+2024-07-01,Jul-24,2024,7,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1214,186,100
+2024-07-01,Jul-24,2024,7,SE,Southeast,Hemlibra,Hemophilia A,589,118,62
+2024-07-01,Jul-24,2024,7,SE,Southeast,Tecentriq,Oncology,881,103,54
+2024-07-01,Jul-24,2024,7,SW,Southwest,Ocrevus IV,Multiple Sclerosis,927,139,74
+2024-07-01,Jul-24,2024,7,SW,Southwest,Hemlibra,Hemophilia A,441,95,50
+2024-07-01,Jul-24,2024,7,SW,Southwest,Tecentriq,Oncology,703,82,43
+2024-07-01,Jul-24,2024,7,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,666,98,51
+2024-07-01,Jul-24,2024,7,MW,Mountain West,Hemlibra,Hemophilia A,316,68,38
+2024-07-01,Jul-24,2024,7,MW,Mountain West,Tecentriq,Oncology,493,57,29
+2024-08-01,Aug-24,2024,8,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1730,251,128
+2024-08-01,Aug-24,2024,8,NE,Northeast Corridor,Hemlibra,Hemophilia A,830,176,97
+2024-08-01,Aug-24,2024,8,NE,Northeast Corridor,Tecentriq,Oncology,1283,156,83
+2024-08-01,Aug-24,2024,8,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1957,289,158
+2024-08-01,Aug-24,2024,8,PAC,Pacific West,Hemlibra,Hemophilia A,987,204,110
+2024-08-01,Aug-24,2024,8,PAC,Pacific West,Tecentriq,Oncology,1498,181,93
+2024-08-01,Aug-24,2024,8,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1348,195,99
+2024-08-01,Aug-24,2024,8,GL,Great Lakes,Hemlibra,Hemophilia A,638,129,72
+2024-08-01,Aug-24,2024,8,GL,Great Lakes,Tecentriq,Oncology,1013,120,60
+2024-08-01,Aug-24,2024,8,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1185,171,93
+2024-08-01,Aug-24,2024,8,SE,Southeast,Hemlibra,Hemophilia A,574,124,69
+2024-08-01,Aug-24,2024,8,SE,Southeast,Tecentriq,Oncology,892,106,54
+2024-08-01,Aug-24,2024,8,SW,Southwest,Ocrevus IV,Multiple Sclerosis,921,138,76
+2024-08-01,Aug-24,2024,8,SW,Southwest,Hemlibra,Hemophilia A,441,88,47
+2024-08-01,Aug-24,2024,8,SW,Southwest,Tecentriq,Oncology,690,84,42
+2024-08-01,Aug-24,2024,8,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,637,98,51
+2024-08-01,Aug-24,2024,8,MW,Mountain West,Hemlibra,Hemophilia A,311,67,37
+2024-08-01,Aug-24,2024,8,MW,Mountain West,Tecentriq,Oncology,491,59,32
+2024-09-01,Sep-24,2024,9,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1657,253,139
+2024-09-01,Sep-24,2024,9,NE,Northeast Corridor,Hemlibra,Hemophilia A,866,170,91
+2024-09-01,Sep-24,2024,9,NE,Northeast Corridor,Tecentriq,Oncology,1316,158,85
+2024-09-01,Sep-24,2024,9,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1978,287,157
+2024-09-01,Sep-24,2024,9,PAC,Pacific West,Hemlibra,Hemophilia A,977,197,103
+2024-09-01,Sep-24,2024,9,PAC,Pacific West,Tecentriq,Oncology,1541,189,99
+2024-09-01,Sep-24,2024,9,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1327,199,110
+2024-09-01,Sep-24,2024,9,GL,Great Lakes,Hemlibra,Hemophilia A,671,136,75
+2024-09-01,Sep-24,2024,9,GL,Great Lakes,Tecentriq,Oncology,1022,118,60
+2024-09-01,Sep-24,2024,9,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1171,167,91
+2024-09-01,Sep-24,2024,9,SE,Southeast,Hemlibra,Hemophilia A,605,122,68
+2024-09-01,Sep-24,2024,9,SE,Southeast,Tecentriq,Oncology,913,107,56
+2024-09-01,Sep-24,2024,9,SW,Southwest,Ocrevus IV,Multiple Sclerosis,915,129,70
+2024-09-01,Sep-24,2024,9,SW,Southwest,Hemlibra,Hemophilia A,459,90,47
+2024-09-01,Sep-24,2024,9,SW,Southwest,Tecentriq,Oncology,698,85,44
+2024-09-01,Sep-24,2024,9,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,620,90,48
+2024-09-01,Sep-24,2024,9,MW,Mountain West,Hemlibra,Hemophilia A,322,67,36
+2024-09-01,Sep-24,2024,9,MW,Mountain West,Tecentriq,Oncology,474,53,27
+2024-10-01,Oct-24,2024,10,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1607,233,124
+2024-10-01,Oct-24,2024,10,NE,Northeast Corridor,Hemlibra,Hemophilia A,896,184,90
+2024-10-01,Oct-24,2024,10,NE,Northeast Corridor,Tecentriq,Oncology,1338,156,76
+2024-10-01,Oct-24,2024,10,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1895,289,153
+2024-10-01,Oct-24,2024,10,PAC,Pacific West,Hemlibra,Hemophilia A,1011,194,99
+2024-10-01,Oct-24,2024,10,PAC,Pacific West,Tecentriq,Oncology,1500,171,92
+2024-10-01,Oct-24,2024,10,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1284,183,97
+2024-10-01,Oct-24,2024,10,GL,Great Lakes,Hemlibra,Hemophilia A,676,142,70
+2024-10-01,Oct-24,2024,10,GL,Great Lakes,Tecentriq,Oncology,1025,122,60
+2024-10-01,Oct-24,2024,10,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1101,161,88
+2024-10-01,Oct-24,2024,10,SE,Southeast,Hemlibra,Hemophilia A,597,123,64
+2024-10-01,Oct-24,2024,10,SE,Southeast,Tecentriq,Oncology,906,107,57
+2024-10-01,Oct-24,2024,10,SW,Southwest,Ocrevus IV,Multiple Sclerosis,874,134,72
+2024-10-01,Oct-24,2024,10,SW,Southwest,Hemlibra,Hemophilia A,460,94,46
+2024-10-01,Oct-24,2024,10,SW,Southwest,Tecentriq,Oncology,687,83,44
+2024-10-01,Oct-24,2024,10,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,598,84,45
+2024-10-01,Oct-24,2024,10,MW,Mountain West,Hemlibra,Hemophilia A,323,64,34
+2024-10-01,Oct-24,2024,10,MW,Mountain West,Tecentriq,Oncology,475,56,30
+2024-11-01,Nov-24,2024,11,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1571,222,120
+2024-11-01,Nov-24,2024,11,NE,Northeast Corridor,Hemlibra,Hemophilia A,885,180,94
+2024-11-01,Nov-24,2024,11,NE,Northeast Corridor,Tecentriq,Oncology,1283,143,75
+2024-11-01,Nov-24,2024,11,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1813,274,139
+2024-11-01,Nov-24,2024,11,PAC,Pacific West,Hemlibra,Hemophilia A,1027,207,102
+2024-11-01,Nov-24,2024,11,PAC,Pacific West,Tecentriq,Oncology,1527,178,96
+2024-11-01,Nov-24,2024,11,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1221,184,98
+2024-11-01,Nov-24,2024,11,GL,Great Lakes,Hemlibra,Hemophilia A,687,142,71
+2024-11-01,Nov-24,2024,11,GL,Great Lakes,Tecentriq,Oncology,1027,114,60
+2024-11-01,Nov-24,2024,11,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1102,161,83
+2024-11-01,Nov-24,2024,11,SE,Southeast,Hemlibra,Hemophilia A,626,124,67
+2024-11-01,Nov-24,2024,11,SE,Southeast,Tecentriq,Oncology,926,108,54
+2024-11-01,Nov-24,2024,11,SW,Southwest,Ocrevus IV,Multiple Sclerosis,828,122,61
+2024-11-01,Nov-24,2024,11,SW,Southwest,Hemlibra,Hemophilia A,473,96,50
+2024-11-01,Nov-24,2024,11,SW,Southwest,Tecentriq,Oncology,689,80,41
+2024-11-01,Nov-24,2024,11,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,589,84,43
+2024-11-01,Nov-24,2024,11,MW,Mountain West,Hemlibra,Hemophilia A,335,65,32
+2024-11-01,Nov-24,2024,11,MW,Mountain West,Tecentriq,Oncology,485,54,27
+2024-12-01,Dec-24,2024,12,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1444,209,109
+2024-12-01,Dec-24,2024,12,NE,Northeast Corridor,Hemlibra,Hemophilia A,896,180,98
+2024-12-01,Dec-24,2024,12,NE,Northeast Corridor,Tecentriq,Oncology,1317,153,82
+2024-12-01,Dec-24,2024,12,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1649,241,119
+2024-12-01,Dec-24,2024,12,PAC,Pacific West,Hemlibra,Hemophilia A,1007,188,102
+2024-12-01,Dec-24,2024,12,PAC,Pacific West,Tecentriq,Oncology,1483,164,87
+2024-12-01,Dec-24,2024,12,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1153,163,79
+2024-12-01,Dec-24,2024,12,GL,Great Lakes,Hemlibra,Hemophilia A,677,128,62
+2024-12-01,Dec-24,2024,12,GL,Great Lakes,Tecentriq,Oncology,1009,113,61
+2024-12-01,Dec-24,2024,12,SE,Southeast,Ocrevus IV,Multiple Sclerosis,992,146,74
+2024-12-01,Dec-24,2024,12,SE,Southeast,Hemlibra,Hemophilia A,617,116,57
+2024-12-01,Dec-24,2024,12,SE,Southeast,Tecentriq,Oncology,873,102,51
+2024-12-01,Dec-24,2024,12,SW,Southwest,Ocrevus IV,Multiple Sclerosis,778,112,59
+2024-12-01,Dec-24,2024,12,SW,Southwest,Hemlibra,Hemophilia A,472,93,47
+2024-12-01,Dec-24,2024,12,SW,Southwest,Tecentriq,Oncology,696,78,39
+2024-12-01,Dec-24,2024,12,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,532,80,41
+2024-12-01,Dec-24,2024,12,MW,Mountain West,Hemlibra,Hemophilia A,337,68,34
+2024-12-01,Dec-24,2024,12,MW,Mountain West,Tecentriq,Oncology,472,52,25
+2025-01-01,Jan-25,2025,1,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1516,224,111
+2025-01-01,Jan-25,2025,1,NE,Northeast Corridor,Hemlibra,Hemophilia A,912,175,93
+2025-01-01,Jan-25,2025,1,NE,Northeast Corridor,Tecentriq,Oncology,1246,145,72
+2025-01-01,Jan-25,2025,1,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1725,254,131
+2025-01-01,Jan-25,2025,1,PAC,Pacific West,Hemlibra,Hemophilia A,1055,205,102
+2025-01-01,Jan-25,2025,1,PAC,Pacific West,Tecentriq,Oncology,1452,170,87
+2025-01-01,Jan-25,2025,1,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1172,175,94
+2025-01-01,Jan-25,2025,1,GL,Great Lakes,Hemlibra,Hemophilia A,729,142,73
+2025-01-01,Jan-25,2025,1,GL,Great Lakes,Tecentriq,Oncology,999,113,56
+2025-01-01,Jan-25,2025,1,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1040,153,78
+2025-01-01,Jan-25,2025,1,SE,Southeast,Hemlibra,Hemophilia A,625,125,65
+2025-01-01,Jan-25,2025,1,SE,Southeast,Tecentriq,Oncology,899,107,52
+2025-01-01,Jan-25,2025,1,SW,Southwest,Ocrevus IV,Multiple Sclerosis,792,112,55
+2025-01-01,Jan-25,2025,1,SW,Southwest,Hemlibra,Hemophilia A,480,96,51
+2025-01-01,Jan-25,2025,1,SW,Southwest,Tecentriq,Oncology,682,80,43
+2025-01-01,Jan-25,2025,1,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,564,79,40
+2025-01-01,Jan-25,2025,1,MW,Mountain West,Hemlibra,Hemophilia A,350,67,36
+2025-01-01,Jan-25,2025,1,MW,Mountain West,Tecentriq,Oncology,482,53,27
+2025-02-01,Feb-25,2025,2,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1627,232,122
+2025-02-01,Feb-25,2025,2,NE,Northeast Corridor,Hemlibra,Hemophilia A,945,180,90
+2025-02-01,Feb-25,2025,2,NE,Northeast Corridor,Tecentriq,Oncology,1330,154,82
+2025-02-01,Feb-25,2025,2,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1853,255,127
+2025-02-01,Feb-25,2025,2,PAC,Pacific West,Hemlibra,Hemophilia A,1077,203,105
+2025-02-01,Feb-25,2025,2,PAC,Pacific West,Tecentriq,Oncology,1532,169,91
+2025-02-01,Feb-25,2025,2,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1259,176,94
+2025-02-01,Feb-25,2025,2,GL,Great Lakes,Hemlibra,Hemophilia A,730,142,72
+2025-02-01,Feb-25,2025,2,GL,Great Lakes,Tecentriq,Oncology,1013,118,58
+2025-02-01,Feb-25,2025,2,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1114,164,80
+2025-02-01,Feb-25,2025,2,SE,Southeast,Hemlibra,Hemophilia A,644,123,64
+2025-02-01,Feb-25,2025,2,SE,Southeast,Tecentriq,Oncology,906,104,56
+2025-02-01,Feb-25,2025,2,SW,Southwest,Ocrevus IV,Multiple Sclerosis,865,125,62
+2025-02-01,Feb-25,2025,2,SW,Southwest,Hemlibra,Hemophilia A,494,89,45
+2025-02-01,Feb-25,2025,2,SW,Southwest,Tecentriq,Oncology,704,79,39
+2025-02-01,Feb-25,2025,2,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,602,85,42
+2025-02-01,Feb-25,2025,2,MW,Mountain West,Hemlibra,Hemophilia A,345,67,33
+2025-02-01,Feb-25,2025,2,MW,Mountain West,Tecentriq,Oncology,486,53,26
+2025-03-01,Mar-25,2025,3,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1685,246,120
+2025-03-01,Mar-25,2025,3,NE,Northeast Corridor,Hemlibra,Hemophilia A,922,165,88
+2025-03-01,Mar-25,2025,3,NE,Northeast Corridor,Tecentriq,Oncology,1318,141,74
+2025-03-01,Mar-25,2025,3,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1939,265,134
+2025-03-01,Mar-25,2025,3,PAC,Pacific West,Hemlibra,Hemophilia A,1041,185,96
+2025-03-01,Mar-25,2025,3,PAC,Pacific West,Tecentriq,Oncology,1534,180,96
+2025-03-01,Mar-25,2025,3,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1300,183,88
+2025-03-01,Mar-25,2025,3,GL,Great Lakes,Hemlibra,Hemophilia A,701,130,63
+2025-03-01,Mar-25,2025,3,GL,Great Lakes,Tecentriq,Oncology,999,114,60
+2025-03-01,Mar-25,2025,3,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1177,168,81
+2025-03-01,Mar-25,2025,3,SE,Southeast,Hemlibra,Hemophilia A,636,121,61
+2025-03-01,Mar-25,2025,3,SE,Southeast,Tecentriq,Oncology,898,105,54
+2025-03-01,Mar-25,2025,3,SW,Southwest,Ocrevus IV,Multiple Sclerosis,903,122,61
+2025-03-01,Mar-25,2025,3,SW,Southwest,Hemlibra,Hemophilia A,496,93,49
+2025-03-01,Mar-25,2025,3,SW,Southwest,Tecentriq,Oncology,709,79,41
+2025-03-01,Mar-25,2025,3,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,625,90,46
+2025-03-01,Mar-25,2025,3,MW,Mountain West,Hemlibra,Hemophilia A,349,67,36
+2025-03-01,Mar-25,2025,3,MW,Mountain West,Tecentriq,Oncology,479,54,26
+2025-04-01,Apr-25,2025,4,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1694,235,124
+2025-04-01,Apr-25,2025,4,NE,Northeast Corridor,Hemlibra,Hemophilia A,912,159,80
+2025-04-01,Apr-25,2025,4,NE,Northeast Corridor,Tecentriq,Oncology,1360,146,73
+2025-04-01,Apr-25,2025,4,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,2003,291,154
+2025-04-01,Apr-25,2025,4,PAC,Pacific West,Hemlibra,Hemophilia A,1069,204,108
+2025-04-01,Apr-25,2025,4,PAC,Pacific West,Tecentriq,Oncology,1549,179,86
+2025-04-01,Apr-25,2025,4,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1341,196,99
+2025-04-01,Apr-25,2025,4,GL,Great Lakes,Hemlibra,Hemophilia A,718,130,67
+2025-04-01,Apr-25,2025,4,GL,Great Lakes,Tecentriq,Oncology,1058,115,56
+2025-04-01,Apr-25,2025,4,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1159,159,80
+2025-04-01,Apr-25,2025,4,SE,Southeast,Hemlibra,Hemophilia A,639,113,60
+2025-04-01,Apr-25,2025,4,SE,Southeast,Tecentriq,Oncology,947,109,54
+2025-04-01,Apr-25,2025,4,SW,Southwest,Ocrevus IV,Multiple Sclerosis,917,126,61
+2025-04-01,Apr-25,2025,4,SW,Southwest,Hemlibra,Hemophilia A,491,94,45
+2025-04-01,Apr-25,2025,4,SW,Southwest,Tecentriq,Oncology,725,84,40
+2025-04-01,Apr-25,2025,4,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,646,93,49
+2025-04-01,Apr-25,2025,4,MW,Mountain West,Hemlibra,Hemophilia A,352,66,33
+2025-04-01,Apr-25,2025,4,MW,Mountain West,Tecentriq,Oncology,489,54,28
+2025-05-01,May-25,2025,5,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1708,248,122
+2025-05-01,May-25,2025,5,NE,Northeast Corridor,Hemlibra,Hemophilia A,960,169,85
+2025-05-01,May-25,2025,5,NE,Northeast Corridor,Tecentriq,Oncology,1365,153,77
+2025-05-01,May-25,2025,5,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1947,277,131
+2025-05-01,May-25,2025,5,PAC,Pacific West,Hemlibra,Hemophilia A,1064,197,101
+2025-05-01,May-25,2025,5,PAC,Pacific West,Tecentriq,Oncology,1580,177,84
+2025-05-01,May-25,2025,5,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1326,185,92
+2025-05-01,May-25,2025,5,GL,Great Lakes,Hemlibra,Hemophilia A,717,135,65
+2025-05-01,May-25,2025,5,GL,Great Lakes,Tecentriq,Oncology,1037,118,58
+2025-05-01,May-25,2025,5,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1168,165,78
+2025-05-01,May-25,2025,5,SE,Southeast,Hemlibra,Hemophilia A,636,113,54
+2025-05-01,May-25,2025,5,SE,Southeast,Tecentriq,Oncology,931,98,51
+2025-05-01,May-25,2025,5,SW,Southwest,Ocrevus IV,Multiple Sclerosis,915,122,64
+2025-05-01,May-25,2025,5,SW,Southwest,Hemlibra,Hemophilia A,494,87,44
+2025-05-01,May-25,2025,5,SW,Southwest,Tecentriq,Oncology,716,76,38
+2025-05-01,May-25,2025,5,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,642,88,42
+2025-05-01,May-25,2025,5,MW,Mountain West,Hemlibra,Hemophilia A,341,61,30
+2025-05-01,May-25,2025,5,MW,Mountain West,Tecentriq,Oncology,493,53,28
+2025-06-01,Jun-25,2025,6,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1650,234,111
+2025-06-01,Jun-25,2025,6,NE,Northeast Corridor,Hemlibra,Hemophilia A,949,173,89
+2025-06-01,Jun-25,2025,6,NE,Northeast Corridor,Tecentriq,Oncology,1363,153,79
+2025-06-01,Jun-25,2025,6,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1903,263,136
+2025-06-01,Jun-25,2025,6,PAC,Pacific West,Hemlibra,Hemophilia A,1070,185,92
+2025-06-01,Jun-25,2025,6,PAC,Pacific West,Tecentriq,Oncology,1578,166,85
+2025-06-01,Jun-25,2025,6,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1293,173,87
+2025-06-01,Jun-25,2025,6,GL,Great Lakes,Hemlibra,Hemophilia A,729,127,66
+2025-06-01,Jun-25,2025,6,GL,Great Lakes,Tecentriq,Oncology,1024,109,56
+2025-06-01,Jun-25,2025,6,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1158,169,89
+2025-06-01,Jun-25,2025,6,SE,Southeast,Hemlibra,Hemophilia A,647,115,55
+2025-06-01,Jun-25,2025,6,SE,Southeast,Tecentriq,Oncology,924,106,51
+2025-06-01,Jun-25,2025,6,SW,Southwest,Ocrevus IV,Multiple Sclerosis,881,125,63
+2025-06-01,Jun-25,2025,6,SW,Southwest,Hemlibra,Hemophilia A,510,89,46
+2025-06-01,Jun-25,2025,6,SW,Southwest,Tecentriq,Oncology,703,74,35
+2025-06-01,Jun-25,2025,6,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,609,83,39
+2025-06-01,Jun-25,2025,6,MW,Mountain West,Hemlibra,Hemophilia A,359,62,31
+2025-06-01,Jun-25,2025,6,MW,Mountain West,Tecentriq,Oncology,484,50,26
+2025-07-01,Jul-25,2025,7,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1679,225,116
+2025-07-01,Jul-25,2025,7,NE,Northeast Corridor,Hemlibra,Hemophilia A,953,166,84
+2025-07-01,Jul-25,2025,7,NE,Northeast Corridor,Tecentriq,Oncology,1332,151,74
+2025-07-01,Jul-25,2025,7,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1921,274,138
+2025-07-01,Jul-25,2025,7,PAC,Pacific West,Hemlibra,Hemophilia A,1089,185,94
+2025-07-01,Jul-25,2025,7,PAC,Pacific West,Tecentriq,Oncology,1526,159,77
+2025-07-01,Jul-25,2025,7,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1299,177,83
+2025-07-01,Jul-25,2025,7,GL,Great Lakes,Hemlibra,Hemophilia A,719,121,58
+2025-07-01,Jul-25,2025,7,GL,Great Lakes,Tecentriq,Oncology,990,105,51
+2025-07-01,Jul-25,2025,7,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1140,162,83
+2025-07-01,Jul-25,2025,7,SE,Southeast,Hemlibra,Hemophilia A,638,106,55
+2025-07-01,Jul-25,2025,7,SE,Southeast,Tecentriq,Oncology,893,93,47
+2025-07-01,Jul-25,2025,7,SW,Southwest,Ocrevus IV,Multiple Sclerosis,905,124,64
+2025-07-01,Jul-25,2025,7,SW,Southwest,Hemlibra,Hemophilia A,493,86,42
+2025-07-01,Jul-25,2025,7,SW,Southwest,Tecentriq,Oncology,713,76,39
+2025-07-01,Jul-25,2025,7,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,631,89,46
+2025-07-01,Jul-25,2025,7,MW,Mountain West,Hemlibra,Hemophilia A,345,57,27
+2025-07-01,Jul-25,2025,7,MW,Mountain West,Tecentriq,Oncology,476,52,27
+2025-08-01,Aug-25,2025,8,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1648,222,106
+2025-08-01,Aug-25,2025,8,NE,Northeast Corridor,Hemlibra,Hemophilia A,961,169,88
+2025-08-01,Aug-25,2025,8,NE,Northeast Corridor,Tecentriq,Oncology,1293,141,70
+2025-08-01,Aug-25,2025,8,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1900,268,126
+2025-08-01,Aug-25,2025,8,PAC,Pacific West,Hemlibra,Hemophilia A,1070,179,90
+2025-08-01,Aug-25,2025,8,PAC,Pacific West,Tecentriq,Oncology,1519,169,89
+2025-08-01,Aug-25,2025,8,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1243,171,85
+2025-08-01,Aug-25,2025,8,GL,Great Lakes,Hemlibra,Hemophilia A,742,128,67
+2025-08-01,Aug-25,2025,8,GL,Great Lakes,Tecentriq,Oncology,998,104,54
+2025-08-01,Aug-25,2025,8,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1113,148,70
+2025-08-01,Aug-25,2025,8,SE,Southeast,Hemlibra,Hemophilia A,644,106,51
+2025-08-01,Aug-25,2025,8,SE,Southeast,Tecentriq,Oncology,885,96,49
+2025-08-01,Aug-25,2025,8,SW,Southwest,Ocrevus IV,Multiple Sclerosis,875,122,59
+2025-08-01,Aug-25,2025,8,SW,Southwest,Hemlibra,Hemophilia A,513,91,48
+2025-08-01,Aug-25,2025,8,SW,Southwest,Tecentriq,Oncology,705,78,40
+2025-08-01,Aug-25,2025,8,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,602,83,40
+2025-08-01,Aug-25,2025,8,MW,Mountain West,Hemlibra,Hemophilia A,350,57,28
+2025-08-01,Aug-25,2025,8,MW,Mountain West,Tecentriq,Oncology,483,54,27
+2025-09-01,Sep-25,2025,9,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1569,205,98
+2025-09-01,Sep-25,2025,9,NE,Northeast Corridor,Hemlibra,Hemophilia A,959,155,78
+2025-09-01,Sep-25,2025,9,NE,Northeast Corridor,Tecentriq,Oncology,1341,144,75
+2025-09-01,Sep-25,2025,9,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1781,244,125
+2025-09-01,Sep-25,2025,9,PAC,Pacific West,Hemlibra,Hemophilia A,1118,191,92
+2025-09-01,Sep-25,2025,9,PAC,Pacific West,Tecentriq,Oncology,1477,160,77
+2025-09-01,Sep-25,2025,9,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1209,164,77
+2025-09-01,Sep-25,2025,9,GL,Great Lakes,Hemlibra,Hemophilia A,745,125,59
+2025-09-01,Sep-25,2025,9,GL,Great Lakes,Tecentriq,Oncology,1001,111,53
+2025-09-01,Sep-25,2025,9,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1072,141,75
+2025-09-01,Sep-25,2025,9,SE,Southeast,Hemlibra,Hemophilia A,682,113,57
+2025-09-01,Sep-25,2025,9,SE,Southeast,Tecentriq,Oncology,916,96,47
+2025-09-01,Sep-25,2025,9,SW,Southwest,Ocrevus IV,Multiple Sclerosis,836,112,53
+2025-09-01,Sep-25,2025,9,SW,Southwest,Hemlibra,Hemophilia A,515,90,46
+2025-09-01,Sep-25,2025,9,SW,Southwest,Tecentriq,Oncology,693,71,34
+2025-09-01,Sep-25,2025,9,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,586,76,40
+2025-09-01,Sep-25,2025,9,MW,Mountain West,Hemlibra,Hemophilia A,367,62,32
+2025-09-01,Sep-25,2025,9,MW,Mountain West,Tecentriq,Oncology,493,51,25
+2025-10-01,Oct-25,2025,10,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1544,208,105
+2025-10-01,Oct-25,2025,10,NE,Northeast Corridor,Hemlibra,Hemophilia A,967,164,85
+2025-10-01,Oct-25,2025,10,NE,Northeast Corridor,Tecentriq,Oncology,1314,131,63
+2025-10-01,Oct-25,2025,10,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1761,228,113
+2025-10-01,Oct-25,2025,10,PAC,Pacific West,Hemlibra,Hemophilia A,1146,198,103
+2025-10-01,Oct-25,2025,10,PAC,Pacific West,Tecentriq,Oncology,1473,156,78
+2025-10-01,Oct-25,2025,10,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1155,162,76
+2025-10-01,Oct-25,2025,10,GL,Great Lakes,Hemlibra,Hemophilia A,759,127,66
+2025-10-01,Oct-25,2025,10,GL,Great Lakes,Tecentriq,Oncology,1027,105,55
+2025-10-01,Oct-25,2025,10,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1050,137,66
+2025-10-01,Oct-25,2025,10,SE,Southeast,Hemlibra,Hemophilia A,659,109,56
+2025-10-01,Oct-25,2025,10,SE,Southeast,Tecentriq,Oncology,897,95,49
+2025-10-01,Oct-25,2025,10,SW,Southwest,Ocrevus IV,Multiple Sclerosis,802,107,55
+2025-10-01,Oct-25,2025,10,SW,Southwest,Hemlibra,Hemophilia A,505,85,42
+2025-10-01,Oct-25,2025,10,SW,Southwest,Tecentriq,Oncology,678,72,34
+2025-10-01,Oct-25,2025,10,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,570,80,40
+2025-10-01,Oct-25,2025,10,MW,Mountain West,Hemlibra,Hemophilia A,368,60,28
+2025-10-01,Oct-25,2025,10,MW,Mountain West,Tecentriq,Oncology,481,50,25
+2025-11-01,Nov-25,2025,11,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1480,198,94
+2025-11-01,Nov-25,2025,11,NE,Northeast Corridor,Hemlibra,Hemophilia A,975,154,78
+2025-11-01,Nov-25,2025,11,NE,Northeast Corridor,Tecentriq,Oncology,1307,138,70
+2025-11-01,Nov-25,2025,11,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1695,238,124
+2025-11-01,Nov-25,2025,11,PAC,Pacific West,Hemlibra,Hemophilia A,1125,179,86
+2025-11-01,Nov-25,2025,11,PAC,Pacific West,Tecentriq,Oncology,1471,157,80
+2025-11-01,Nov-25,2025,11,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1170,161,77
+2025-11-01,Nov-25,2025,11,GL,Great Lakes,Hemlibra,Hemophilia A,763,124,65
+2025-11-01,Nov-25,2025,11,GL,Great Lakes,Tecentriq,Oncology,1026,105,52
+2025-11-01,Nov-25,2025,11,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1037,134,69
+2025-11-01,Nov-25,2025,11,SE,Southeast,Hemlibra,Hemophilia A,683,105,54
+2025-11-01,Nov-25,2025,11,SE,Southeast,Tecentriq,Oncology,917,94,47
+2025-11-01,Nov-25,2025,11,SW,Southwest,Ocrevus IV,Multiple Sclerosis,791,101,53
+2025-11-01,Nov-25,2025,11,SW,Southwest,Hemlibra,Hemophilia A,522,84,41
+2025-11-01,Nov-25,2025,11,SW,Southwest,Tecentriq,Oncology,693,76,38
+2025-11-01,Nov-25,2025,11,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,542,76,39
+2025-11-01,Nov-25,2025,11,MW,Mountain West,Hemlibra,Hemophilia A,360,57,28
+2025-11-01,Nov-25,2025,11,MW,Mountain West,Tecentriq,Oncology,486,51,26
+2025-12-01,Dec-25,2025,12,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1350,183,91
+2025-12-01,Dec-25,2025,12,NE,Northeast Corridor,Hemlibra,Hemophilia A,974,158,79
+2025-12-01,Dec-25,2025,12,NE,Northeast Corridor,Tecentriq,Oncology,1301,134,67
+2025-12-01,Dec-25,2025,12,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1579,206,98
+2025-12-01,Dec-25,2025,12,PAC,Pacific West,Hemlibra,Hemophilia A,1154,185,88
+2025-12-01,Dec-25,2025,12,PAC,Pacific West,Tecentriq,Oncology,1476,163,86
+2025-12-01,Dec-25,2025,12,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1030,144,72
+2025-12-01,Dec-25,2025,12,GL,Great Lakes,Hemlibra,Hemophilia A,775,123,61
+2025-12-01,Dec-25,2025,12,GL,Great Lakes,Tecentriq,Oncology,982,107,52
+2025-12-01,Dec-25,2025,12,SE,Southeast,Ocrevus IV,Multiple Sclerosis,939,129,63
+2025-12-01,Dec-25,2025,12,SE,Southeast,Hemlibra,Hemophilia A,688,112,58
+2025-12-01,Dec-25,2025,12,SE,Southeast,Tecentriq,Oncology,883,96,49
+2025-12-01,Dec-25,2025,12,SW,Southwest,Ocrevus IV,Multiple Sclerosis,714,96,50
+2025-12-01,Dec-25,2025,12,SW,Southwest,Hemlibra,Hemophilia A,526,85,44
+2025-12-01,Dec-25,2025,12,SW,Southwest,Tecentriq,Oncology,686,70,34
+2025-12-01,Dec-25,2025,12,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,503,69,36
+2025-12-01,Dec-25,2025,12,MW,Mountain West,Hemlibra,Hemophilia A,366,57,29
+2025-12-01,Dec-25,2025,12,MW,Mountain West,Tecentriq,Oncology,476,52,25
+2026-01-01,Jan-26,2026,1,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1418,182,90
+2026-01-01,Jan-26,2026,1,NE,Northeast Corridor,Hemlibra,Hemophilia A,994,160,76
+2026-01-01,Jan-26,2026,1,NE,Northeast Corridor,Tecentriq,Oncology,1242,126,67
+2026-01-01,Jan-26,2026,1,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1618,210,102
+2026-01-01,Jan-26,2026,1,PAC,Pacific West,Hemlibra,Hemophilia A,1173,181,87
+2026-01-01,Jan-26,2026,1,PAC,Pacific West,Tecentriq,Oncology,1425,157,80
+2026-01-01,Jan-26,2026,1,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1054,135,69
+2026-01-01,Jan-26,2026,1,GL,Great Lakes,Hemlibra,Hemophilia A,774,126,60
+2026-01-01,Jan-26,2026,1,GL,Great Lakes,Tecentriq,Oncology,973,98,48
+2026-01-01,Jan-26,2026,1,SE,Southeast,Ocrevus IV,Multiple Sclerosis,990,131,62
+2026-01-01,Jan-26,2026,1,SE,Southeast,Hemlibra,Hemophilia A,696,112,58
+2026-01-01,Jan-26,2026,1,SE,Southeast,Tecentriq,Oncology,852,89,43
+2026-01-01,Jan-26,2026,1,SW,Southwest,Ocrevus IV,Multiple Sclerosis,738,100,51
+2026-01-01,Jan-26,2026,1,SW,Southwest,Hemlibra,Hemophilia A,538,88,42
+2026-01-01,Jan-26,2026,1,SW,Southwest,Tecentriq,Oncology,677,71,37
+2026-01-01,Jan-26,2026,1,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,509,67,34
+2026-01-01,Jan-26,2026,1,MW,Mountain West,Hemlibra,Hemophilia A,367,55,26
+2026-01-01,Jan-26,2026,1,MW,Mountain West,Tecentriq,Oncology,478,49,23
+2026-02-01,Feb-26,2026,2,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1530,207,99
+2026-02-01,Feb-26,2026,2,NE,Northeast Corridor,Hemlibra,Hemophilia A,1023,162,79
+2026-02-01,Feb-26,2026,2,NE,Northeast Corridor,Tecentriq,Oncology,1309,141,73
+2026-02-01,Feb-26,2026,2,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1738,220,106
+2026-02-01,Feb-26,2026,2,PAC,Pacific West,Hemlibra,Hemophilia A,1196,190,98
+2026-02-01,Feb-26,2026,2,PAC,Pacific West,Tecentriq,Oncology,1523,160,78
+2026-02-01,Feb-26,2026,2,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1182,156,74
+2026-02-01,Feb-26,2026,2,GL,Great Lakes,Hemlibra,Hemophilia A,786,122,57
+2026-02-01,Feb-26,2026,2,GL,Great Lakes,Tecentriq,Oncology,1005,108,51
+2026-02-01,Feb-26,2026,2,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1012,135,65
+2026-02-01,Feb-26,2026,2,SE,Southeast,Hemlibra,Hemophilia A,696,111,54
+2026-02-01,Feb-26,2026,2,SE,Southeast,Tecentriq,Oncology,886,96,45
+2026-02-01,Feb-26,2026,2,SW,Southwest,Ocrevus IV,Multiple Sclerosis,795,100,50
+2026-02-01,Feb-26,2026,2,SW,Southwest,Hemlibra,Hemophilia A,529,83,44
+2026-02-01,Feb-26,2026,2,SW,Southwest,Tecentriq,Oncology,675,74,39
+2026-02-01,Feb-26,2026,2,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,553,73,37
+2026-02-01,Feb-26,2026,2,MW,Mountain West,Hemlibra,Hemophilia A,373,59,31
+2026-02-01,Feb-26,2026,2,MW,Mountain West,Tecentriq,Oncology,481,52,25
+2026-03-01,Mar-26,2026,3,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1560,206,104
+2026-03-01,Mar-26,2026,3,NE,Northeast Corridor,Hemlibra,Hemophilia A,1002,153,80
+2026-03-01,Mar-26,2026,3,NE,Northeast Corridor,Tecentriq,Oncology,1304,140,72
+2026-03-01,Mar-26,2026,3,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1770,233,115
+2026-03-01,Mar-26,2026,3,PAC,Pacific West,Hemlibra,Hemophilia A,1156,172,91
+2026-03-01,Mar-26,2026,3,PAC,Pacific West,Tecentriq,Oncology,1504,150,72
+2026-03-01,Mar-26,2026,3,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1199,155,75
+2026-03-01,Mar-26,2026,3,GL,Great Lakes,Hemlibra,Hemophilia A,756,112,56
+2026-03-01,Mar-26,2026,3,GL,Great Lakes,Tecentriq,Oncology,1006,103,49
+2026-03-01,Mar-26,2026,3,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1106,139,69
+2026-03-01,Mar-26,2026,3,SE,Southeast,Hemlibra,Hemophilia A,688,98,46
+2026-03-01,Mar-26,2026,3,SE,Southeast,Tecentriq,Oncology,877,89,42
+2026-03-01,Mar-26,2026,3,SW,Southwest,Ocrevus IV,Multiple Sclerosis,848,109,57
+2026-03-01,Mar-26,2026,3,SW,Southwest,Hemlibra,Hemophilia A,543,84,41
+2026-03-01,Mar-26,2026,3,SW,Southwest,Tecentriq,Oncology,683,68,33
+2026-03-01,Mar-26,2026,3,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,588,74,39
+2026-03-01,Mar-26,2026,3,MW,Mountain West,Hemlibra,Hemophilia A,372,53,27
+2026-03-01,Mar-26,2026,3,MW,Mountain West,Tecentriq,Oncology,471,50,24
+2026-04-01,Apr-26,2026,4,NE,Northeast Corridor,Ocrevus IV,Multiple Sclerosis,1577,198,104
+2026-04-01,Apr-26,2026,4,NE,Northeast Corridor,Hemlibra,Hemophilia A,1020,152,77
+2026-04-01,Apr-26,2026,4,NE,Northeast Corridor,Tecentriq,Oncology,1333,144,68
+2026-04-01,Apr-26,2026,4,PAC,Pacific West,Ocrevus IV,Multiple Sclerosis,1818,227,109
+2026-04-01,Apr-26,2026,4,PAC,Pacific West,Hemlibra,Hemophilia A,1178,170,87
+2026-04-01,Apr-26,2026,4,PAC,Pacific West,Tecentriq,Oncology,1528,164,87
+2026-04-01,Apr-26,2026,4,GL,Great Lakes,Ocrevus IV,Multiple Sclerosis,1253,168,85
+2026-04-01,Apr-26,2026,4,GL,Great Lakes,Hemlibra,Hemophilia A,763,113,58
+2026-04-01,Apr-26,2026,4,GL,Great Lakes,Tecentriq,Oncology,1023,106,54
+2026-04-01,Apr-26,2026,4,SE,Southeast,Ocrevus IV,Multiple Sclerosis,1096,139,69
+2026-04-01,Apr-26,2026,4,SE,Southeast,Hemlibra,Hemophilia A,701,101,49
+2026-04-01,Apr-26,2026,4,SE,Southeast,Tecentriq,Oncology,915,100,50
+2026-04-01,Apr-26,2026,4,SW,Southwest,Ocrevus IV,Multiple Sclerosis,831,105,52
+2026-04-01,Apr-26,2026,4,SW,Southwest,Hemlibra,Hemophilia A,546,77,40
+2026-04-01,Apr-26,2026,4,SW,Southwest,Tecentriq,Oncology,707,71,37
+2026-04-01,Apr-26,2026,4,MW,Mountain West,Ocrevus IV,Multiple Sclerosis,589,77,40
+2026-04-01,Apr-26,2026,4,MW,Mountain West,Hemlibra,Hemophilia A,368,53,27
+2026-04-01,Apr-26,2026,4,MW,Mountain West,Tecentriq,Oncology,492,49,23

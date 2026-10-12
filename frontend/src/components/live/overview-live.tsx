@@ -32,7 +32,7 @@ export function OverviewLive({ slug }: { slug: string }) {
         {!open.length ? <Card className="p-4 text-sm text-muted-foreground">No open bugs. Nice.</Card> : (
           <Card className="divide-y divide-border">
             {open.slice(0, 5).map((i) => (
-              <Link key={i.id} href={`/apps/${slug}/issues/${i.id}`} className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-foreground/[0.03]">
+              <Link key={i.id} href={`/apps/${slug}/issues/${i.id}`} className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-secondary/60">
                 <SeverityBadge severity={i.severity} /><span className="min-w-0 flex-1 truncate">{i.title}</span>
                 <Badge tone={TONE[i.status]}>{ISSUE_STATUS[i.status]?.label ?? i.status}</Badge><span className="text-xs tabular-nums text-muted-foreground">{i.occurrences} run{i.occurrences === 1 ? "" : "s"}</span>
               </Link>

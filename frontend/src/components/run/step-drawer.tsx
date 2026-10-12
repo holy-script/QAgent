@@ -62,15 +62,15 @@ export function StepDrawer({ step, view, onClose, runId }: { step: Step; view: R
               <div className="flex gap-1" role="group" aria-label="Screenshot">
                 {(["before", "after"] as const).map((k) => (
                   <button key={k} onClick={() => setSide(k)} aria-pressed={side === k}
-                    className={cn("rounded-md border px-2.5 py-1 text-xs capitalize", side === k ? "border-brand bg-brand/10 text-brand" : "border-border text-muted-foreground hover:bg-foreground/5")}>{k}</button>
+                    className={cn("rounded-md border px-2.5 py-1 text-xs capitalize", side === k ? "border-brand bg-brand/10 text-brand" : "border-border text-muted-foreground hover:bg-secondary")}>{k}</button>
                 ))}
               </div>
             )}
             {shown && (
               <div className="ml-auto flex items-center gap-1" role="group" aria-label="Zoom">
-                <button onClick={() => zoomTo(zoom - 0.5)} disabled={zoom <= 1} aria-label="Zoom out" className="rounded-md border border-border p-1.5 text-muted-foreground hover:bg-foreground/5 disabled:opacity-40"><Minus className="size-3.5" /></button>
-                <button onClick={() => setZoom(1)} aria-label="Fit to width" className="w-14 rounded-md border border-border py-1 text-xs tabular-nums hover:bg-foreground/5">{zoom === 1 ? "Fit" : `${Math.round(zoom * 100)}%`}</button>
-                <button onClick={() => zoomTo(zoom + 0.5)} disabled={zoom >= 4} aria-label="Zoom in" className="rounded-md border border-border p-1.5 text-muted-foreground hover:bg-foreground/5 disabled:opacity-40"><Plus className="size-3.5" /></button>
+                <button onClick={() => zoomTo(zoom - 0.5)} disabled={zoom <= 1} aria-label="Zoom out" className="rounded-md border border-border p-1.5 text-muted-foreground hover:bg-secondary disabled:opacity-40"><Minus className="size-3.5" /></button>
+                <button onClick={() => setZoom(1)} aria-label="Fit to width" className="w-14 rounded-md border border-border py-1 text-xs tabular-nums hover:bg-secondary">{zoom === 1 ? "Fit" : `${Math.round(zoom * 100)}%`}</button>
+                <button onClick={() => zoomTo(zoom + 0.5)} disabled={zoom >= 4} aria-label="Zoom in" className="rounded-md border border-border p-1.5 text-muted-foreground hover:bg-secondary disabled:opacity-40"><Plus className="size-3.5" /></button>
               </div>
             )}
           </div>

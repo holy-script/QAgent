@@ -40,7 +40,7 @@ export default function IssuePage() {
           <div className="flex flex-wrap gap-2">
             <Button onClick={copy} data-tour="bug-copy"><ClipboardCopy className="size-4" />{copied ? "Copied" : "Copy for my issue tracker"}</Button>
             {(["md", "html", "pdf"] as const).map((f) => (
-              <a key={f} href={exportUrl(f)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-lg border border-border bg-foreground/[0.03] px-3.5 py-2 text-sm hover:bg-foreground/[0.06]">
+              <a key={f} href={exportUrl(f)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-lg border border-border bg-foreground/[0.03] px-3.5 py-2 text-sm hover:bg-secondary">
                 <Download className="size-4" />{f.toUpperCase()}
               </a>
             ))}

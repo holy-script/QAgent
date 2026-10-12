@@ -35,7 +35,7 @@ export default function RunReport() {
         <span className="font-mono text-xs text-muted-foreground">{runId}</span>
         <div className="ml-auto flex gap-2">
           {(["md", "html", "pdf"] as const).map((f) => (
-            <a key={f} href={exportUrl(f)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-lg border border-border bg-foreground/[0.03] px-3 py-2 text-sm hover:bg-foreground/[0.06]"><Download className="size-4" />{f.toUpperCase()}</a>
+            <a key={f} href={exportUrl(f)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-lg border border-border bg-foreground/[0.03] px-3 py-2 text-sm hover:bg-secondary"><Download className="size-4" />{f.toUpperCase()}</a>
           ))}
           <Button onClick={() => regen.mutate()} disabled={regen.isPending} aria-label="Rebuild the report"><RefreshCw className="size-4" />{regen.isPending ? "…" : "Rebuild"}</Button>
         </div>

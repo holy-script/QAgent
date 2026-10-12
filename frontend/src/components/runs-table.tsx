@@ -43,7 +43,7 @@ export function RunsTable({ slug, runs }: { slug: string; runs: Run[] }) {
       )}
       <SimpleTable head={["", "Run", "Test plan", "Mode", "Result", "Problems", "Steps", "AI speed", "AI cost", "Started", ""]}>
         {runs.map((r) => (
-          <TableRow key={r.id} className={cn("hover:bg-foreground/[0.03]", picked.has(r.id) && "bg-secondary/70")}>
+          <TableRow key={r.id} className={cn("hover:bg-secondary/60", picked.has(r.id) && "bg-secondary/70")}>
             <TableCell className="w-10 px-4 py-2.5">
               <Checkbox checked={picked.has(r.id)} disabled={isLive(r)} onCheckedChange={() => toggle(r.id)} aria-label={`Select run ${r.id.slice(0, 8)}`} />
             </TableCell>

@@ -133,7 +133,7 @@ export function Dashboard() {
         <Card className="relative min-w-0 overflow-hidden bg-hero p-5 text-white xl:col-span-4">
           <span className="grid size-9 place-items-center rounded-lg bg-white/15"><Lightbulb className="size-[18px] text-[#f3d58a]" /></span>
           <h3 className="mt-3 text-base font-semibold">{next.title}</h3>
-          <p className="mt-1 text-sm text-white/80">{next.text}</p>
+          <p className="mt-1 text-sm text-white/90">{next.text}</p>
           {next.href && next.cta && <Link href={next.href} className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">{next.cta}<ArrowRight className="size-4" /></Link>}
         </Card>
       </div>

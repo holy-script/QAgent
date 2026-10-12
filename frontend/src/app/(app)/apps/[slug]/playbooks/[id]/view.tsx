@@ -101,7 +101,7 @@ export default function ReviewPlaybook() {
         <div className="flex items-center gap-2 text-sm font-medium"><History className="size-4" />Earlier versions</div>
         {pb.versions.map((x: PlaybookVersion) => (
           <button key={x.id} onClick={() => { setSel(x.id); setDraft(null); }}
-            className={cn("w-full rounded-lg border p-3 text-left text-sm transition", x.id === v.id ? "border-brand bg-brand/10" : "border-border hover:bg-foreground/5")}>
+            className={cn("w-full rounded-lg border p-3 text-left text-sm transition", x.id === v.id ? "border-brand bg-brand/10" : "border-border hover:bg-secondary")}>
             <div className="flex items-center justify-between"><span>Version {x.version_no}</span>{x.id === pb.current_version_id && <Badge tone="ok">in use</Badge>}</div>
             <div className="mt-0.5 text-xs text-foreground/70">{ago(x.created_at)} · {x.content_hash.slice(0, 7)}</div>
           </button>

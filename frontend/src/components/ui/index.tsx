@@ -65,7 +65,7 @@ export const SeverityBadge = ({ severity }: { severity: string }) => <Badge tone
 export function InfoTip({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <Tooltip>
-      <TooltipTrigger render={<button type="button" aria-label="What is this?" className={cn("inline-flex align-middle text-muted-foreground/70 hover:text-foreground", className)} />}>
+      <TooltipTrigger render={<button type="button" aria-label="What is this?" className={cn("inline-flex align-middle text-muted-foreground hover:text-foreground", className)} />}>
         <CircleHelp className="size-3.5" />
       </TooltipTrigger>
       <TooltipContent className="max-w-xs text-balance">{children}</TooltipContent>
@@ -184,7 +184,7 @@ export const Field = ({ label, hint, children }: { label: string; hint?: string;
     {hint && <span className="block text-xs text-muted-foreground">{hint}</span>}
   </label>
 );
-export const inputCls = "w-full rounded-lg border border-input bg-card px-3 py-2 text-sm shadow-xs outline-none transition placeholder:text-muted-foreground/70 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30";
+export const inputCls = "w-full rounded-lg border border-input bg-card px-3 py-2 text-sm shadow-xs outline-none transition placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30";
 
 export { ago, fmtBytes, fmtMs, fmtUsd } from "./format";
 

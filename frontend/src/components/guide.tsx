@@ -43,7 +43,7 @@ export function GuidePanel({ slug }: { slug: string }) {
         <span className="grid size-10 place-items-center rounded-xl bg-white/15"><Compass className="size-5" /></span>
         <div className="min-w-0 flex-1">
           <h2 className="text-base font-semibold">Setup guide</h2>
-          <p className="text-sm text-white/80">{g.done} of {g.total} steps done. Follow them in order; each one takes you to the right place and points at what to do.</p>
+          <p className="text-sm text-white/90">{g.done} of {g.total} steps done. Follow them in order; each one takes you to the right place and points at what to do.</p>
         </div>
         {g.next && <Link href={hrefFor(g.next.id)} className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90"><Play className="size-4" />{g.done === 0 ? "Start the guide" : `Continue: ${g.next.title}`}</Link>}
       </div>
@@ -53,13 +53,13 @@ export function GuidePanel({ slug }: { slug: string }) {
           const Icon = ICON[state];
           return (
             <li key={step.id} className="flex flex-wrap items-center gap-3 px-5 py-3">
-              <Icon className={cn("size-5 shrink-0", state === "done" ? "text-ok" : "text-muted-foreground/70")} aria-hidden />
+              <Icon className={cn("size-5 shrink-0", state === "done" ? "text-ok" : "text-muted-foreground")} aria-hidden />
               <div className="min-w-0 flex-1">
                 <div className={cn("text-sm font-medium", state !== "todo" && "text-muted-foreground")}>{i + 1}. {step.title}{step.optional && <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-[11px] font-normal text-muted-foreground">optional</span>}<span className="sr-only"> ({state === "done" ? "done" : state === "skipped" ? "skipped" : "to do"})</span></div>
                 <div className="text-xs text-muted-foreground">{step.why}</div>
               </div>
               {state === "todo" && <Link href={hrefFor(step.id)} className="rounded-lg border border-brand/25 bg-card px-3 py-1.5 text-sm text-secondary-foreground shadow-xs hover:bg-secondary">Take me there</Link>}
-              {state === "todo" && step.optional && <button onClick={() => skipStep(slug, step.id)} className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-muted-foreground hover:bg-muted"><SkipForward className="size-3.5" />Skip</button>}
+              {state === "todo" && step.optional && <button onClick={() => skipStep(slug, step.id)} className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-muted-foreground hover:bg-secondary"><SkipForward className="size-3.5" />Skip</button>}
               {state === "skipped" && <button onClick={() => unskipStep(slug, step.id)} className="text-xs text-muted-foreground underline">Undo skip</button>}
             </li>
           );

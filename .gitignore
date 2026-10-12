@@ -45,3 +45,9 @@ playwright/.cache/
 # Local artifact fallback
 backend/.artifacts/
 .artifacts/
+
+# EcoForecast demo: the app repos are third-party code run locally (see demo-ecoforecast/DEMO.md); only our PRD, runbook and test files are tracked
+demo-ecoforecast/Ecosystem-Forecast-main/
+demo-ecoforecast/Ecosystem-Forecast-Backend-main/
+demo-ecoforecast/.venv-eco/
+demo-ecoforecast/.run/

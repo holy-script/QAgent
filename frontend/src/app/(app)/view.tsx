@@ -13,7 +13,7 @@ export default function Home() {
       <div className="bg-hero relative flex flex-wrap items-center justify-between gap-4 overflow-hidden rounded-2xl px-6 py-7 shadow-(--shadow-card) sm:px-8">
         <div className="max-w-2xl">
           <h1 className="text-3xl font-semibold tracking-tight">Your apps</h1>
-          <p className="mt-1.5 text-sm text-white/85 sm:text-base">QAgent tests websites the way a person would: it opens a real browser, clicks through your app, and tells you what is broken.</p>
+          <p className="mt-1.5 text-sm text-white/95 sm:text-base">QAgent tests websites the way a person would: it opens a real browser, clicks through your app, and tells you what is broken.</p>
         </div>
         <LinkButton href="/apps/new" variant="primary" data-tour="add-app" className="h-10 px-4 text-sm shadow-md"><Plus className="size-4" />Add an app</LinkButton>
       </div>

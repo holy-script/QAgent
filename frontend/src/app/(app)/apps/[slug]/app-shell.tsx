@@ -46,7 +46,7 @@ function AppShell({ children }: { children: ReactNode }) {
             <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary text-sm font-bold text-primary-foreground shadow">{app.name.slice(0, 2).toUpperCase()}</span>
             <div className="min-w-0">
               <h1 className="truncate text-base font-semibold leading-tight">{app.name}</h1>
-              <div className="mt-0.5 flex items-center gap-1 text-[11px] text-white/80"><Globe className="size-3 shrink-0" /><span className="truncate">{app.base_url}</span></div>
+              <div className="mt-0.5 flex items-center gap-1 text-[11px] text-white/90"><Globe className="size-3 shrink-0" /><span className="truncate">{app.base_url}</span></div>
             </div>
           </div>
           <div className="p-2"><SideNav items={items} /></div>
@@ -66,7 +66,7 @@ function AppShell({ children }: { children: ReactNode }) {
             <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary text-sm font-bold text-primary-foreground shadow">{app.name.slice(0, 2).toUpperCase()}</span>
             <div className="min-w-0">
               <h1 className="truncate text-xl font-semibold tracking-tight">{app.name}</h1>
-              <div className="flex items-center gap-1.5 text-sm text-white/80"><Globe className="size-3.5 shrink-0" /><span className="truncate">{app.base_url}</span></div>
+              <div className="flex items-center gap-1.5 text-sm text-white/90"><Globe className="size-3.5 shrink-0" /><span className="truncate">{app.base_url}</span></div>
             </div>
           </div>
           <Tabs tabs={items} />

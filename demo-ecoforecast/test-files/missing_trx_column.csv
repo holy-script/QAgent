@@ -1,0 +1,313 @@
+date,month_label,year,month,ecosystem_id,ecosystem_name,product
+2022-01,Jan-22,2022,1,NE,Northeast Corridor,Ocrevus IV
+2022-01,Jan-22,2022,1,PAC,Pacific West,Ocrevus IV
+2022-01,Jan-22,2022,1,GL,Great Lakes,Ocrevus IV
+2022-01,Jan-22,2022,1,SE,Southeast,Ocrevus IV
+2022-01,Jan-22,2022,1,SW,Southwest,Ocrevus IV
+2022-01,Jan-22,2022,1,MW,Mountain West,Ocrevus IV
+2022-02,Feb-22,2022,2,NE,Northeast Corridor,Ocrevus IV
+2022-02,Feb-22,2022,2,PAC,Pacific West,Ocrevus IV
+2022-02,Feb-22,2022,2,GL,Great Lakes,Ocrevus IV
+2022-02,Feb-22,2022,2,SE,Southeast,Ocrevus IV
+2022-02,Feb-22,2022,2,SW,Southwest,Ocrevus IV
+2022-02,Feb-22,2022,2,MW,Mountain West,Ocrevus IV
+2022-03,Mar-22,2022,3,NE,Northeast Corridor,Ocrevus IV
+2022-03,Mar-22,2022,3,PAC,Pacific West,Ocrevus IV
+2022-03,Mar-22,2022,3,GL,Great Lakes,Ocrevus IV
+2022-03,Mar-22,2022,3,SE,Southeast,Ocrevus IV
+2022-03,Mar-22,2022,3,SW,Southwest,Ocrevus IV
+2022-03,Mar-22,2022,3,MW,Mountain West,Ocrevus IV
+2022-04,Apr-22,2022,4,NE,Northeast Corridor,Ocrevus IV
+2022-04,Apr-22,2022,4,PAC,Pacific West,Ocrevus IV
+2022-04,Apr-22,2022,4,GL,Great Lakes,Ocrevus IV
+2022-04,Apr-22,2022,4,SE,Southeast,Ocrevus IV
+2022-04,Apr-22,2022,4,SW,Southwest,Ocrevus IV
+2022-04,Apr-22,2022,4,MW,Mountain West,Ocrevus IV
+2022-05,May-22,2022,5,NE,Northeast Corridor,Ocrevus IV
+2022-05,May-22,2022,5,PAC,Pacific West,Ocrevus IV
+2022-05,May-22,2022,5,GL,Great Lakes,Ocrevus IV
+2022-05,May-22,2022,5,SE,Southeast,Ocrevus IV
+2022-05,May-22,2022,5,SW,Southwest,Ocrevus IV
+2022-05,May-22,2022,5,MW,Mountain West,Ocrevus IV
+2022-06,Jun-22,2022,6,NE,Northeast Corridor,Ocrevus IV
+2022-06,Jun-22,2022,6,PAC,Pacific West,Ocrevus IV
+2022-06,Jun-22,2022,6,GL,Great Lakes,Ocrevus IV
+2022-06,Jun-22,2022,6,SE,Southeast,Ocrevus IV
+2022-06,Jun-22,2022,6,SW,Southwest,Ocrevus IV
+2022-06,Jun-22,2022,6,MW,Mountain West,Ocrevus IV
+2022-07,Jul-22,2022,7,NE,Northeast Corridor,Ocrevus IV
+2022-07,Jul-22,2022,7,PAC,Pacific West,Ocrevus IV
+2022-07,Jul-22,2022,7,GL,Great Lakes,Ocrevus IV
+2022-07,Jul-22,2022,7,SE,Southeast,Ocrevus IV
+2022-07,Jul-22,2022,7,SW,Southwest,Ocrevus IV
+2022-07,Jul-22,2022,7,MW,Mountain West,Ocrevus IV
+2022-08,Aug-22,2022,8,NE,Northeast Corridor,Ocrevus IV
+2022-08,Aug-22,2022,8,PAC,Pacific West,Ocrevus IV
+2022-08,Aug-22,2022,8,GL,Great Lakes,Ocrevus IV
+2022-08,Aug-22,2022,8,SE,Southeast,Ocrevus IV
+2022-08,Aug-22,2022,8,SW,Southwest,Ocrevus IV
+2022-08,Aug-22,2022,8,MW,Mountain West,Ocrevus IV
+2022-09,Sep-22,2022,9,NE,Northeast Corridor,Ocrevus IV
+2022-09,Sep-22,2022,9,PAC,Pacific West,Ocrevus IV
+2022-09,Sep-22,2022,9,GL,Great Lakes,Ocrevus IV
+2022-09,Sep-22,2022,9,SE,Southeast,Ocrevus IV
+2022-09,Sep-22,2022,9,SW,Southwest,Ocrevus IV
+2022-09,Sep-22,2022,9,MW,Mountain West,Ocrevus IV
+2022-10,Oct-22,2022,10,NE,Northeast Corridor,Ocrevus IV
+2022-10,Oct-22,2022,10,PAC,Pacific West,Ocrevus IV
+2022-10,Oct-22,2022,10,GL,Great Lakes,Ocrevus IV
+2022-10,Oct-22,2022,10,SE,Southeast,Ocrevus IV
+2022-10,Oct-22,2022,10,SW,Southwest,Ocrevus IV
+2022-10,Oct-22,2022,10,MW,Mountain West,Ocrevus IV
+2022-11,Nov-22,2022,11,NE,Northeast Corridor,Ocrevus IV
+2022-11,Nov-22,2022,11,PAC,Pacific West,Ocrevus IV
+2022-11,Nov-22,2022,11,GL,Great Lakes,Ocrevus IV
+2022-11,Nov-22,2022,11,SE,Southeast,Ocrevus IV
+2022-11,Nov-22,2022,11,SW,Southwest,Ocrevus IV
+2022-11,Nov-22,2022,11,MW,Mountain West,Ocrevus IV
+2022-12,Dec-22,2022,12,NE,Northeast Corridor,Ocrevus IV
+2022-12,Dec-22,2022,12,PAC,Pacific West,Ocrevus IV
+2022-12,Dec-22,2022,12,GL,Great Lakes,Ocrevus IV
+2022-12,Dec-22,2022,12,SE,Southeast,Ocrevus IV
+2022-12,Dec-22,2022,12,SW,Southwest,Ocrevus IV
+2022-12,Dec-22,2022,12,MW,Mountain West,Ocrevus IV
+2023-01,Jan-23,2023,1,NE,Northeast Corridor,Ocrevus IV
+2023-01,Jan-23,2023,1,PAC,Pacific West,Ocrevus IV
+2023-01,Jan-23,2023,1,GL,Great Lakes,Ocrevus IV
+2023-01,Jan-23,2023,1,SE,Southeast,Ocrevus IV
+2023-01,Jan-23,2023,1,SW,Southwest,Ocrevus IV
+2023-01,Jan-23,2023,1,MW,Mountain West,Ocrevus IV
+2023-02,Feb-23,2023,2,NE,Northeast Corridor,Ocrevus IV
+2023-02,Feb-23,2023,2,PAC,Pacific West,Ocrevus IV
+2023-02,Feb-23,2023,2,GL,Great Lakes,Ocrevus IV
+2023-02,Feb-23,2023,2,SE,Southeast,Ocrevus IV
+2023-02,Feb-23,2023,2,SW,Southwest,Ocrevus IV
+2023-02,Feb-23,2023,2,MW,Mountain West,Ocrevus IV
+2023-03,Mar-23,2023,3,NE,Northeast Corridor,Ocrevus IV
+2023-03,Mar-23,2023,3,PAC,Pacific West,Ocrevus IV
+2023-03,Mar-23,2023,3,GL,Great Lakes,Ocrevus IV
+2023-03,Mar-23,2023,3,SE,Southeast,Ocrevus IV
+2023-03,Mar-23,2023,3,SW,Southwest,Ocrevus IV
+2023-03,Mar-23,2023,3,MW,Mountain West,Ocrevus IV
+2023-04,Apr-23,2023,4,NE,Northeast Corridor,Ocrevus IV
+2023-04,Apr-23,2023,4,PAC,Pacific West,Ocrevus IV
+2023-04,Apr-23,2023,4,GL,Great Lakes,Ocrevus IV
+2023-04,Apr-23,2023,4,SE,Southeast,Ocrevus IV
+2023-04,Apr-23,2023,4,SW,Southwest,Ocrevus IV
+2023-04,Apr-23,2023,4,MW,Mountain West,Ocrevus IV
+2023-05,May-23,2023,5,NE,Northeast Corridor,Ocrevus IV
+2023-05,May-23,2023,5,PAC,Pacific West,Ocrevus IV
+2023-05,May-23,2023,5,GL,Great Lakes,Ocrevus IV
+2023-05,May-23,2023,5,SE,Southeast,Ocrevus IV
+2023-05,May-23,2023,5,SW,Southwest,Ocrevus IV
+2023-05,May-23,2023,5,MW,Mountain West,Ocrevus IV
+2023-06,Jun-23,2023,6,NE,Northeast Corridor,Ocrevus IV
+2023-06,Jun-23,2023,6,PAC,Pacific West,Ocrevus IV
+2023-06,Jun-23,2023,6,GL,Great Lakes,Ocrevus IV
+2023-06,Jun-23,2023,6,SE,Southeast,Ocrevus IV
+2023-06,Jun-23,2023,6,SW,Southwest,Ocrevus IV
+2023-06,Jun-23,2023,6,MW,Mountain West,Ocrevus IV
+2023-07,Jul-23,2023,7,NE,Northeast Corridor,Ocrevus IV
+2023-07,Jul-23,2023,7,PAC,Pacific West,Ocrevus IV
+2023-07,Jul-23,2023,7,GL,Great Lakes,Ocrevus IV
+2023-07,Jul-23,2023,7,SE,Southeast,Ocrevus IV
+2023-07,Jul-23,2023,7,SW,Southwest,Ocrevus IV
+2023-07,Jul-23,2023,7,MW,Mountain West,Ocrevus IV
+2023-08,Aug-23,2023,8,NE,Northeast Corridor,Ocrevus IV
+2023-08,Aug-23,2023,8,PAC,Pacific West,Ocrevus IV
+2023-08,Aug-23,2023,8,GL,Great Lakes,Ocrevus IV
+2023-08,Aug-23,2023,8,SE,Southeast,Ocrevus IV
+2023-08,Aug-23,2023,8,SW,Southwest,Ocrevus IV
+2023-08,Aug-23,2023,8,MW,Mountain West,Ocrevus IV
+2023-09,Sep-23,2023,9,NE,Northeast Corridor,Ocrevus IV
+2023-09,Sep-23,2023,9,PAC,Pacific West,Ocrevus IV
+2023-09,Sep-23,2023,9,GL,Great Lakes,Ocrevus IV
+2023-09,Sep-23,2023,9,SE,Southeast,Ocrevus IV
+2023-09,Sep-23,2023,9,SW,Southwest,Ocrevus IV
+2023-09,Sep-23,2023,9,MW,Mountain West,Ocrevus IV
+2023-10,Oct-23,2023,10,NE,Northeast Corridor,Ocrevus IV
+2023-10,Oct-23,2023,10,PAC,Pacific West,Ocrevus IV
+2023-10,Oct-23,2023,10,GL,Great Lakes,Ocrevus IV
+2023-10,Oct-23,2023,10,SE,Southeast,Ocrevus IV
+2023-10,Oct-23,2023,10,SW,Southwest,Ocrevus IV
+2023-10,Oct-23,2023,10,MW,Mountain West,Ocrevus IV
+2023-11,Nov-23,2023,11,NE,Northeast Corridor,Ocrevus IV
+2023-11,Nov-23,2023,11,PAC,Pacific West,Ocrevus IV
+2023-11,Nov-23,2023,11,GL,Great Lakes,Ocrevus IV
+2023-11,Nov-23,2023,11,SE,Southeast,Ocrevus IV
+2023-11,Nov-23,2023,11,SW,Southwest,Ocrevus IV
+2023-11,Nov-23,2023,11,MW,Mountain West,Ocrevus IV
+2023-12,Dec-23,2023,12,NE,Northeast Corridor,Ocrevus IV
+2023-12,Dec-23,2023,12,PAC,Pacific West,Ocrevus IV
+2023-12,Dec-23,2023,12,GL,Great Lakes,Ocrevus IV
+2023-12,Dec-23,2023,12,SE,Southeast,Ocrevus IV
+2023-12,Dec-23,2023,12,SW,Southwest,Ocrevus IV
+2023-12,Dec-23,2023,12,MW,Mountain West,Ocrevus IV
+2024-01,Jan-24,2024,1,NE,Northeast Corridor,Ocrevus IV
+2024-01,Jan-24,2024,1,PAC,Pacific West,Ocrevus IV
+2024-01,Jan-24,2024,1,GL,Great Lakes,Ocrevus IV
+2024-01,Jan-24,2024,1,SE,Southeast,Ocrevus IV
+2024-01,Jan-24,2024,1,SW,Southwest,Ocrevus IV
+2024-01,Jan-24,2024,1,MW,Mountain West,Ocrevus IV
+2024-02,Feb-24,2024,2,NE,Northeast Corridor,Ocrevus IV
+2024-02,Feb-24,2024,2,PAC,Pacific West,Ocrevus IV
+2024-02,Feb-24,2024,2,GL,Great Lakes,Ocrevus IV
+2024-02,Feb-24,2024,2,SE,Southeast,Ocrevus IV
+2024-02,Feb-24,2024,2,SW,Southwest,Ocrevus IV
+2024-02,Feb-24,2024,2,MW,Mountain West,Ocrevus IV
+2024-03,Mar-24,2024,3,NE,Northeast Corridor,Ocrevus IV
+2024-03,Mar-24,2024,3,PAC,Pacific West,Ocrevus IV
+2024-03,Mar-24,2024,3,GL,Great Lakes,Ocrevus IV
+2024-03,Mar-24,2024,3,SE,Southeast,Ocrevus IV
+2024-03,Mar-24,2024,3,SW,Southwest,Ocrevus IV
+2024-03,Mar-24,2024,3,MW,Mountain West,Ocrevus IV
+2024-04,Apr-24,2024,4,NE,Northeast Corridor,Ocrevus IV
+2024-04,Apr-24,2024,4,PAC,Pacific West,Ocrevus IV
+2024-04,Apr-24,2024,4,GL,Great Lakes,Ocrevus IV
+2024-04,Apr-24,2024,4,SE,Southeast,Ocrevus IV
+2024-04,Apr-24,2024,4,SW,Southwest,Ocrevus IV
+2024-04,Apr-24,2024,4,MW,Mountain West,Ocrevus IV
+2024-05,May-24,2024,5,NE,Northeast Corridor,Ocrevus IV
+2024-05,May-24,2024,5,PAC,Pacific West,Ocrevus IV
+2024-05,May-24,2024,5,GL,Great Lakes,Ocrevus IV
+2024-05,May-24,2024,5,SE,Southeast,Ocrevus IV
+2024-05,May-24,2024,5,SW,Southwest,Ocrevus IV
+2024-05,May-24,2024,5,MW,Mountain West,Ocrevus IV
+2024-06,Jun-24,2024,6,NE,Northeast Corridor,Ocrevus IV
+2024-06,Jun-24,2024,6,PAC,Pacific West,Ocrevus IV
+2024-06,Jun-24,2024,6,GL,Great Lakes,Ocrevus IV
+2024-06,Jun-24,2024,6,SE,Southeast,Ocrevus IV
+2024-06,Jun-24,2024,6,SW,Southwest,Ocrevus IV
+2024-06,Jun-24,2024,6,MW,Mountain West,Ocrevus IV
+2024-07,Jul-24,2024,7,NE,Northeast Corridor,Ocrevus IV
+2024-07,Jul-24,2024,7,PAC,Pacific West,Ocrevus IV
+2024-07,Jul-24,2024,7,GL,Great Lakes,Ocrevus IV
+2024-07,Jul-24,2024,7,SE,Southeast,Ocrevus IV
+2024-07,Jul-24,2024,7,SW,Southwest,Ocrevus IV
+2024-07,Jul-24,2024,7,MW,Mountain West,Ocrevus IV
+2024-08,Aug-24,2024,8,NE,Northeast Corridor,Ocrevus IV
+2024-08,Aug-24,2024,8,PAC,Pacific West,Ocrevus IV
+2024-08,Aug-24,2024,8,GL,Great Lakes,Ocrevus IV
+2024-08,Aug-24,2024,8,SE,Southeast,Ocrevus IV
+2024-08,Aug-24,2024,8,SW,Southwest,Ocrevus IV
+2024-08,Aug-24,2024,8,MW,Mountain West,Ocrevus IV
+2024-09,Sep-24,2024,9,NE,Northeast Corridor,Ocrevus IV
+2024-09,Sep-24,2024,9,PAC,Pacific West,Ocrevus IV
+2024-09,Sep-24,2024,9,GL,Great Lakes,Ocrevus IV
+2024-09,Sep-24,2024,9,SE,Southeast,Ocrevus IV
+2024-09,Sep-24,2024,9,SW,Southwest,Ocrevus IV
+2024-09,Sep-24,2024,9,MW,Mountain West,Ocrevus IV
+2024-10,Oct-24,2024,10,NE,Northeast Corridor,Ocrevus IV
+2024-10,Oct-24,2024,10,PAC,Pacific West,Ocrevus IV
+2024-10,Oct-24,2024,10,GL,Great Lakes,Ocrevus IV
+2024-10,Oct-24,2024,10,SE,Southeast,Ocrevus IV
+2024-10,Oct-24,2024,10,SW,Southwest,Ocrevus IV
+2024-10,Oct-24,2024,10,MW,Mountain West,Ocrevus IV
+2024-11,Nov-24,2024,11,NE,Northeast Corridor,Ocrevus IV
+2024-11,Nov-24,2024,11,PAC,Pacific West,Ocrevus IV
+2024-11,Nov-24,2024,11,GL,Great Lakes,Ocrevus IV
+2024-11,Nov-24,2024,11,SE,Southeast,Ocrevus IV
+2024-11,Nov-24,2024,11,SW,Southwest,Ocrevus IV
+2024-11,Nov-24,2024,11,MW,Mountain West,Ocrevus IV
+2024-12,Dec-24,2024,12,NE,Northeast Corridor,Ocrevus IV
+2024-12,Dec-24,2024,12,PAC,Pacific West,Ocrevus IV
+2024-12,Dec-24,2024,12,GL,Great Lakes,Ocrevus IV
+2024-12,Dec-24,2024,12,SE,Southeast,Ocrevus IV
+2024-12,Dec-24,2024,12,SW,Southwest,Ocrevus IV
+2024-12,Dec-24,2024,12,MW,Mountain West,Ocrevus IV
+2025-01,Jan-25,2025,1,NE,Northeast Corridor,Ocrevus IV
+2025-01,Jan-25,2025,1,PAC,Pacific West,Ocrevus IV
+2025-01,Jan-25,2025,1,GL,Great Lakes,Ocrevus IV
+2025-01,Jan-25,2025,1,SE,Southeast,Ocrevus IV
+2025-01,Jan-25,2025,1,SW,Southwest,Ocrevus IV
+2025-01,Jan-25,2025,1,MW,Mountain West,Ocrevus IV
+2025-02,Feb-25,2025,2,NE,Northeast Corridor,Ocrevus IV
+2025-02,Feb-25,2025,2,PAC,Pacific West,Ocrevus IV
+2025-02,Feb-25,2025,2,GL,Great Lakes,Ocrevus IV
+2025-02,Feb-25,2025,2,SE,Southeast,Ocrevus IV
+2025-02,Feb-25,2025,2,SW,Southwest,Ocrevus IV
+2025-02,Feb-25,2025,2,MW,Mountain West,Ocrevus IV
+2025-03,Mar-25,2025,3,NE,Northeast Corridor,Ocrevus IV
+2025-03,Mar-25,2025,3,PAC,Pacific West,Ocrevus IV
+2025-03,Mar-25,2025,3,GL,Great Lakes,Ocrevus IV
+2025-03,Mar-25,2025,3,SE,Southeast,Ocrevus IV
+2025-03,Mar-25,2025,3,SW,Southwest,Ocrevus IV
+2025-03,Mar-25,2025,3,MW,Mountain West,Ocrevus IV
+2025-04,Apr-25,2025,4,NE,Northeast Corridor,Ocrevus IV
+2025-04,Apr-25,2025,4,PAC,Pacific West,Ocrevus IV
+2025-04,Apr-25,2025,4,GL,Great Lakes,Ocrevus IV
+2025-04,Apr-25,2025,4,SE,Southeast,Ocrevus IV
+2025-04,Apr-25,2025,4,SW,Southwest,Ocrevus IV
+2025-04,Apr-25,2025,4,MW,Mountain West,Ocrevus IV
+2025-05,May-25,2025,5,NE,Northeast Corridor,Ocrevus IV
+2025-05,May-25,2025,5,PAC,Pacific West,Ocrevus IV
+2025-05,May-25,2025,5,GL,Great Lakes,Ocrevus IV
+2025-05,May-25,2025,5,SE,Southeast,Ocrevus IV
+2025-05,May-25,2025,5,SW,Southwest,Ocrevus IV
+2025-05,May-25,2025,5,MW,Mountain West,Ocrevus IV
+2025-06,Jun-25,2025,6,NE,Northeast Corridor,Ocrevus IV
+2025-06,Jun-25,2025,6,PAC,Pacific West,Ocrevus IV
+2025-06,Jun-25,2025,6,GL,Great Lakes,Ocrevus IV
+2025-06,Jun-25,2025,6,SE,Southeast,Ocrevus IV
+2025-06,Jun-25,2025,6,SW,Southwest,Ocrevus IV
+2025-06,Jun-25,2025,6,MW,Mountain West,Ocrevus IV
+2025-07,Jul-25,2025,7,NE,Northeast Corridor,Ocrevus IV
+2025-07,Jul-25,2025,7,PAC,Pacific West,Ocrevus IV
+2025-07,Jul-25,2025,7,GL,Great Lakes,Ocrevus IV
+2025-07,Jul-25,2025,7,SE,Southeast,Ocrevus IV
+2025-07,Jul-25,2025,7,SW,Southwest,Ocrevus IV
+2025-07,Jul-25,2025,7,MW,Mountain West,Ocrevus IV
+2025-08,Aug-25,2025,8,NE,Northeast Corridor,Ocrevus IV
+2025-08,Aug-25,2025,8,PAC,Pacific West,Ocrevus IV
+2025-08,Aug-25,2025,8,GL,Great Lakes,Ocrevus IV
+2025-08,Aug-25,2025,8,SE,Southeast,Ocrevus IV
+2025-08,Aug-25,2025,8,SW,Southwest,Ocrevus IV
+2025-08,Aug-25,2025,8,MW,Mountain West,Ocrevus IV
+2025-09,Sep-25,2025,9,NE,Northeast Corridor,Ocrevus IV
+2025-09,Sep-25,2025,9,PAC,Pacific West,Ocrevus IV
+2025-09,Sep-25,2025,9,GL,Great Lakes,Ocrevus IV
+2025-09,Sep-25,2025,9,SE,Southeast,Ocrevus IV
+2025-09,Sep-25,2025,9,SW,Southwest,Ocrevus IV
+2025-09,Sep-25,2025,9,MW,Mountain West,Ocrevus IV
+2025-10,Oct-25,2025,10,NE,Northeast Corridor,Ocrevus IV
+2025-10,Oct-25,2025,10,PAC,Pacific West,Ocrevus IV
+2025-10,Oct-25,2025,10,GL,Great Lakes,Ocrevus IV
+2025-10,Oct-25,2025,10,SE,Southeast,Ocrevus IV
+2025-10,Oct-25,2025,10,SW,Southwest,Ocrevus IV
+2025-10,Oct-25,2025,10,MW,Mountain West,Ocrevus IV
+2025-11,Nov-25,2025,11,NE,Northeast Corridor,Ocrevus IV
+2025-11,Nov-25,2025,11,PAC,Pacific West,Ocrevus IV
+2025-11,Nov-25,2025,11,GL,Great Lakes,Ocrevus IV
+2025-11,Nov-25,2025,11,SE,Southeast,Ocrevus IV
+2025-11,Nov-25,2025,11,SW,Southwest,Ocrevus IV
+2025-11,Nov-25,2025,11,MW,Mountain West,Ocrevus IV
+2025-12,Dec-25,2025,12,NE,Northeast Corridor,Ocrevus IV
+2025-12,Dec-25,2025,12,PAC,Pacific West,Ocrevus IV
+2025-12,Dec-25,2025,12,GL,Great Lakes,Ocrevus IV
+2025-12,Dec-25,2025,12,SE,Southeast,Ocrevus IV
+2025-12,Dec-25,2025,12,SW,Southwest,Ocrevus IV
+2025-12,Dec-25,2025,12,MW,Mountain West,Ocrevus IV
+2026-01,Jan-26,2026,1,NE,Northeast Corridor,Ocrevus IV
+2026-01,Jan-26,2026,1,PAC,Pacific West,Ocrevus IV
+2026-01,Jan-26,2026,1,GL,Great Lakes,Ocrevus IV
+2026-01,Jan-26,2026,1,SE,Southeast,Ocrevus IV
+2026-01,Jan-26,2026,1,SW,Southwest,Ocrevus IV
+2026-01,Jan-26,2026,1,MW,Mountain West,Ocrevus IV
+2026-02,Feb-26,2026,2,NE,Northeast Corridor,Ocrevus IV
+2026-02,Feb-26,2026,2,PAC,Pacific West,Ocrevus IV
+2026-02,Feb-26,2026,2,GL,Great Lakes,Ocrevus IV
+2026-02,Feb-26,2026,2,SE,Southeast,Ocrevus IV
+2026-02,Feb-26,2026,2,SW,Southwest,Ocrevus IV
+2026-02,Feb-26,2026,2,MW,Mountain West,Ocrevus IV
+2026-03,Mar-26,2026,3,NE,Northeast Corridor,Ocrevus IV
+2026-03,Mar-26,2026,3,PAC,Pacific West,Ocrevus IV
+2026-03,Mar-26,2026,3,GL,Great Lakes,Ocrevus IV
+2026-03,Mar-26,2026,3,SE,Southeast,Ocrevus IV
+2026-03,Mar-26,2026,3,SW,Southwest,Ocrevus IV
+2026-03,Mar-26,2026,3,MW,Mountain West,Ocrevus IV
+2026-04,Apr-26,2026,4,NE,Northeast Corridor,Ocrevus IV
+2026-04,Apr-26,2026,4,PAC,Pacific West,Ocrevus IV
+2026-04,Apr-26,2026,4,GL,Great Lakes,Ocrevus IV
+2026-04,Apr-26,2026,4,SE,Southeast,Ocrevus IV
+2026-04,Apr-26,2026,4,SW,Southwest,Ocrevus IV
+2026-04,Apr-26,2026,4,MW,Mountain West,Ocrevus IV

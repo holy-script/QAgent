@@ -30,7 +30,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 <span className="grid size-8 place-items-center rounded-lg bg-primary text-primary-foreground shadow"><Activity className="size-[18px]" /></span>
                 <span className="text-base">QAgent</span>
               </Link>
-              <span className="ml-auto flex items-center gap-3 text-xs text-white/85">
+              <span className="ml-auto flex items-center gap-3 text-xs text-white/95">
                 <Link href="/help" className="hover:text-white hover:underline" data-tour="help">How it works</Link>
                 <TourButton />
                 <kbd className="hidden rounded-md border bg-card px-1.5 py-0.5 font-sans sm:inline" data-tour="search">Ctrl K to search</kbd>

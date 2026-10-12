@@ -35,10 +35,10 @@ function StepThumb({ s, on, onClick }: { s: Step; on: boolean; onClick: () => vo
   const ring = s.status === "failed" ? "border-bad/60" : s.status === "ok" ? "border-ok/40" : "border-brand pulse-ring";
   const last = s.decisions.at(-1);
   return (
-    <button onClick={onClick} className={cn("slide-in w-56 shrink-0 overflow-hidden rounded-lg border bg-secondary text-left transition hover:brightness-125", ring, on && "ring-2 ring-brand")}>
+    <button onClick={onClick} className={cn("slide-in w-56 shrink-0 overflow-hidden rounded-lg border bg-secondary text-left transition hover:border-brand/50 hover:shadow-md", ring, on && "ring-2 ring-brand")}>
       <div className="relative aspect-[8/5] bg-muted">
         {s.screenshot && <img src={s.screenshot} alt={`Step ${s.seq}: ${s.intent}`} className="size-full object-cover" loading="lazy" />}
-        <span className="absolute left-1.5 top-1.5 rounded bg-foreground/70 px-1.5 text-[11px] tabular-nums">#{s.seq}</span>
+        <span className="absolute left-1.5 top-1.5 rounded bg-foreground/80 px-1.5 text-[11px] text-white tabular-nums">#{s.seq}</span>
         <span className="absolute right-1.5 top-1.5">
           {s.status === "ok" && <Check className="size-4 rounded-full bg-ok p-0.5 text-primary-foreground" />}
           {s.status === "failed" && <X className="size-4 rounded-full bg-bad p-0.5 text-primary-foreground" />}

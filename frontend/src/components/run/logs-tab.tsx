@@ -16,7 +16,7 @@ export function LogsTab({ view, live, onOpen }: { view: RunView; live: boolean; 
     <div className="space-y-3">
       <div className="flex gap-1" role="group" aria-label="Minimum level">
         {LEVELS.map((l, i) => (
-          <button key={l} aria-pressed={min === i} onClick={() => setMin(i)} className={cn("rounded-md border px-2.5 py-1 text-xs", min === i ? "border-brand bg-brand/10 text-brand" : "border-border text-muted-foreground hover:bg-foreground/5")}>{l}{i > 0 && "+"}</button>
+          <button key={l} aria-pressed={min === i} onClick={() => setMin(i)} className={cn("rounded-md border px-2.5 py-1 text-xs", min === i ? "border-brand bg-brand/10 text-brand" : "border-border text-muted-foreground hover:bg-secondary")}>{l}{i > 0 && "+"}</button>
         ))}
       </div>
       {!rows.length ? <Empty title="Nothing logged" hint="Warnings and errors from the agent and the browser appear here." /> : (

@@ -75,7 +75,7 @@ function RunBody({ slug, run, replay, onReplay }: { slug: string; run: Run; repl
               <div className="flex overflow-hidden rounded-lg border border-border" role="group" aria-label="Playback speed">
                 {SPEEDS.map((s) => (
                   <button key={s} onClick={() => setSpeed(s)} aria-pressed={speed === s}
-                    className={`px-2.5 py-2 text-xs tabular-nums ${speed === s ? "bg-brand/20 text-brand" : "text-muted-foreground hover:bg-foreground/5"}`}>{s}×</button>
+                    className={`px-2.5 py-2 text-xs tabular-nums ${speed === s ? "bg-brand/20 text-brand" : "text-muted-foreground hover:bg-secondary"}`}>{s}×</button>
                 ))}
               </div>
               <Button variant="danger" onClick={() => api.stopRun(live.id)}><Square className="size-4" />Stop run</Button>

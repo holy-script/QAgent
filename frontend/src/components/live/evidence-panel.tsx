@@ -53,7 +53,7 @@ export function EvidencePanel({ findingId, slug, onClose }: { findingId: string;
                 <div className="flex gap-1">
                   {images.map((e) => (
                     <button key={e!.id} onClick={() => setShot(e!.kind)}
-                      className={cn("rounded-md border px-2.5 py-1 text-xs", current.kind === e!.kind ? "border-brand bg-brand/10 text-brand" : "border-border text-muted-foreground hover:bg-foreground/5")}>
+                      className={cn("rounded-md border px-2.5 py-1 text-xs", current.kind === e!.kind ? "border-brand bg-brand/10 text-brand" : "border-border text-muted-foreground hover:bg-secondary")}>
                       {LABEL[e!.kind]}
                     </button>
                   ))}

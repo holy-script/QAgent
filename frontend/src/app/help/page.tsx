@@ -25,7 +25,7 @@ export default function Help() {
         <h2 className="font-medium">Guided setup and tours</h2>
         <p className="mt-1 text-sm text-muted-foreground">The Setup guide on an app&apos;s Overview takes you step by step from nothing to your first results. Tours are short walk-throughs that point at the real screen. Open one here, or press <b>Tour</b> in the top bar on any page to get the tour for that page.</p>
         <div className="mt-3 flex flex-wrap gap-2">
-          <Link href="/?tour=home" className="rounded-lg border px-3 py-1.5 text-sm hover:bg-foreground/5">Home and dashboard</Link>
+          <Link href="/?tour=home" className="rounded-lg border px-3 py-1.5 text-sm hover:bg-secondary">Home and dashboard</Link>
           <span className="self-center text-xs text-muted-foreground">Then open an app, a run, a test plan or a bug and press Tour for the rest.</span>
         </div>
       </Card>

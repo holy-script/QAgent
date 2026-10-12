@@ -22,7 +22,7 @@ export default function FlowHistoryPage() {
       </div>
       <SimpleTable head={["Run", "Mode", "Result", "Findings", "Duration", "When"]}>
             {flow.runs.map((r) => (
-              <TableRow key={r.run_id} className="hover:bg-foreground/[0.03]">
+              <TableRow key={r.run_id} className="hover:bg-secondary/60">
                 <TableCell className="px-4 py-2.5"><Link className="font-mono text-brand hover:underline" href={`/apps/${slug}/runs/${r.run_id}`}>{r.run_id.slice(0, 10)}</Link></TableCell>
                 <TableCell className="px-4 py-2.5"><Badge tone={r.mode === "hybrid" ? "violet" : "neutral"}>{r.mode}</Badge></TableCell>
                 <TableCell className="px-4 py-2.5"><StatusPill status={r.status} /></TableCell>

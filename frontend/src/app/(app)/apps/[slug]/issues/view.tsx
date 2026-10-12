@@ -24,7 +24,7 @@ export default function Issues() {
         <div><h2 className="font-medium">Bugs found</h2><p className="text-sm text-muted-foreground">Every problem a run finds becomes a bug. The same problem across runs is one bug, marked Fixed once a later run no longer finds it.</p></div>
         <div role="group" aria-label="Status" className="ml-auto flex overflow-hidden rounded-lg border border-border">
           {FILTERS.map((f) => (
-            <button key={f} onClick={() => setStatus(f)} aria-pressed={status === f} className={cn("px-3 py-1.5 text-xs", status === f ? "bg-brand/15 text-brand" : "text-muted-foreground hover:bg-foreground/5")}>{FILTER_LABEL[f]}</button>
+            <button key={f} onClick={() => setStatus(f)} aria-pressed={status === f} className={cn("px-3 py-1.5 text-xs", status === f ? "bg-brand/15 text-brand" : "text-muted-foreground hover:bg-secondary")}>{FILTER_LABEL[f]}</button>
           ))}
         </div>
       </div>
@@ -33,7 +33,7 @@ export default function Issues() {
       ) : (
         <SimpleTable head={["Bug", "Status", "How serious", "Journey", "Check", "Found in", "Updated"]}>
               {data.map((i) => (
-                <TableRow key={i.id} className="hover:bg-foreground/[0.03]">
+                <TableRow key={i.id} className="hover:bg-secondary/60">
                   <TableCell className="max-w-md px-4 py-2.5"><Link href={`/apps/${slug}/issues/${i.id}`} className="font-medium hover:text-brand">{i.title}</Link></TableCell>
                   <TableCell className="px-4 py-2.5"><Badge tone={TONE[i.status]} title={ISSUE_STATUS[i.status]?.hint}>{ISSUE_STATUS[i.status]?.label ?? i.status}</Badge></TableCell>
                   <TableCell className="px-4 py-2.5"><SeverityBadge severity={i.severity} /></TableCell>

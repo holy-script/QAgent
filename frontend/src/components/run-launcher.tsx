@@ -34,7 +34,7 @@ export function RunLauncher({ slug }: { slug: string }) {
           <div className="grid gap-2" role="radiogroup" aria-label="How should decisions be made?">
             {MODES.map((m) => (
               <button key={m.id} role="radio" aria-checked={mode === m.id} onClick={() => setMode(m.id)}
-                className={cn("rounded-lg border p-2.5 text-left transition", mode === m.id ? "border-brand bg-brand/10" : "border-border hover:bg-foreground/5")}>
+                className={cn("rounded-lg border p-2.5 text-left transition", mode === m.id ? "border-brand bg-brand/10" : "border-border hover:bg-secondary")}>
                 <div className="text-sm font-medium">{m.label}{m.id === "hybrid" && <span className="ml-1.5 text-xs font-normal text-brand">recommended</span>}</div>
                 <div className="text-xs leading-snug text-muted-foreground">{m.hint}</div>
               </button>

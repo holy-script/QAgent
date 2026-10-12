@@ -17,7 +17,7 @@ export function NetworkTab({ view, onOpen }: { view: RunView; onOpen: (flow: str
         <SimpleTable className="font-mono text-xs" head={["Journey · step", "Method", "Address", "Status", "Time", "Size sent / received"]}>
               {rows.map((c) => (
                 <Fragment key={c.id}>
-                  <TableRow className={cn("cursor-pointer hover:bg-foreground/[0.03]", c.status >= 400 && "bg-bad/5")} onClick={() => setOpen(open === c.id ? null : c.id)}>
+                  <TableRow className={cn("cursor-pointer hover:bg-secondary/60", c.status >= 400 && "bg-bad/5")} onClick={() => setOpen(open === c.id ? null : c.id)}>
                     <TableCell className="px-4 py-2"><button className="text-brand hover:underline" onClick={(e) => { e.stopPropagation(); onOpen(c.flow_key, c.step_seq); }}>{c.flow_key} · {c.step_seq}</button></TableCell>
                     <TableCell className="px-4 py-2">{c.method}</TableCell>
                     <TableCell className="max-w-xs truncate px-4 py-2">{c.url}</TableCell>
