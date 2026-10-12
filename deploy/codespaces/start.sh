@@ -4,9 +4,9 @@
 set -u
 cd "$(dirname "$0")/../../backend"
 pkill -f "uvicorn qagent.api.main" 2>/dev/null; pkill -f "uvicorn main:app" 2>/dev/null; sleep 1
-nohup uv run uvicorn main:app --app-dir ../demo-shop --host 127.0.0.1 --port 8001 --log-level warning > /tmp/qagent-shop.log 2>&1 &
+setsid nohup uv run uvicorn main:app --app-dir ../demo-shop --host 127.0.0.1 --port 8001 --log-level warning > /tmp/qagent-shop.log 2>&1 &
 uv run alembic upgrade head > /tmp/qagent-migrate.log 2>&1 || { echo "migration failed, see /tmp/qagent-migrate.log"; tail -5 /tmp/qagent-migrate.log; }
-nohup uv run uvicorn qagent.api.main:app --host 0.0.0.0 --port 8000 --workers 1 --proxy-headers --forwarded-allow-ips='*' > /tmp/qagent-api.log 2>&1 &
+setsid nohup uv run uvicorn qagent.api.main:app --host 0.0.0.0 --port 8000 --workers 1 --proxy-headers --forwarded-allow-ips='*' > /tmp/qagent-api.log 2>&1 &
 # Make the port public again after every (re)start. Needs a token with the "codespace" scope as the Codespaces secret GH_PAT.
 if [ -n "${CODESPACE_NAME:-}" ] && [ -n "${GH_PAT:-}" ] && command -v gh >/dev/null; then
   GITHUB_TOKEN="$GH_PAT" gh codespace ports visibility 8000:public -c "$CODESPACE_NAME" >/dev/null 2>&1 && echo "port 8000 is public" || echo "could not set port 8000 public (check GH_PAT)"
