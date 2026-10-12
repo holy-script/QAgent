@@ -71,6 +71,11 @@ class Settings(BaseSettings):
     fixed_clock_iso: str = "2026-01-15T10:00:00+00:00"
     browser_path: Optional[str] = Field(default=None, alias="QAGENT_BROWSER_PATH")
     browser_headless: bool = Field(default=True, alias="QAGENT_HEADLESS")
+    # Reuse a real signed-in Chrome (Microsoft SSO and the like). Set ONE of these; both are local-machine only.
+    #   QAGENT_CDP_URL       attach to a running Chrome started with --remote-debugging-port (and its own --user-data-dir)
+    #   QAGENT_USER_DATA_DIR launch Chrome on a persistent profile folder; sign in once with `python -m qagent.browser.profile`
+    cdp_url: Optional[str] = Field(default=None, alias="QAGENT_CDP_URL")
+    user_data_dir: Optional[str] = Field(default=None, alias="QAGENT_USER_DATA_DIR")
 
     # Team login. One shared account, kept in config on purpose (simple auth for now). Override with env vars.
     auth_email: str = Field(default="admin@chryselys.com", alias="AUTH_EMAIL")
@@ -88,6 +93,11 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> List[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    @property
+    def session_mode(self) -> bool:
+        """True when journeys run inside an existing browser profile instead of a fresh, isolated context."""
+        return bool(self.cdp_url or self.user_data_dir)
 
     @property
     def allowed_hosts_list(self) -> List[str]:

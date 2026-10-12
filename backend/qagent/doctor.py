@@ -93,7 +93,7 @@ async def check_browser() -> Result:
         page = await sb.start()
         await page.set_content("<h1>doctor</h1>")
         shot = await page.screenshot(type="jpeg")
-        return "browser", len(shot) > 100, f"{sb.browser.version} via {sb.browser_source}, screenshot {len(shot)} bytes"
+        return "browser", len(shot) > 100, f"{sb.browser_version} via {sb.browser_source}, screenshot {len(shot)} bytes"
     except Exception as exc:
         return "browser", False, f"{type(exc).__name__}"
     finally:

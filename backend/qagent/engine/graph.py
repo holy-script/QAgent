@@ -342,8 +342,9 @@ class EngineRunner:
             statuses: Dict[str, str] = {}
             for f in setup:
                 statuses[f.key] = await self._run_flow(f)
-            if others and setup:
+            if others and (setup or settings.session_mode):
                 # They share one signed-in session (and so one server-side cart, settings...): one at a time keeps them apart.
+                # An existing browser profile is one session too, so journeys run one at a time there.
                 for f in others:
                     statuses[f.key] = await self._run_flow(f)
             elif others:
@@ -568,7 +569,7 @@ class EngineRunner:
             if self.spec.inject_traceparent:
                 sandbox.traceparent_provider = lambda: f"00-{ctx.trace_id}-{handler.current_span_id}-01"
             page = await sandbox.start(storage_state=None if flow.role == "setup" else self.shared_state)
-            self.browser_version = self.browser_version or sandbox.browser.version
+            self.browser_version = self.browser_version or sandbox.browser_version
             recorder = NetworkRecorder(page, ctx.flow_run_id, sandbox=sandbox)
             await self._reset_for_flow(page)
             await page.goto(self.spec.base_url, timeout=10000)
