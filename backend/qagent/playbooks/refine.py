@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional
 
 from qagent.decision.claude import BedrockClient
 
-MAX_CHARS = 20_000
+MAX_CHARS = 200_000
 
 REFINE_TOOL = {
     "toolSpec": {
@@ -41,5 +41,7 @@ async def refine_text(text: str, kind: str, client: Optional[BedrockClient] = No
     if kind not in KINDS:
         raise ValueError(f"unknown kind '{kind}'")
     client = client or BedrockClient()
-    out = await client.converse_tool(KINDS[kind], text[:MAX_CHARS], REFINE_TOOL, max_tokens=3000)
+    # A rewrite is about as long as its input, so the answer gets room to match (about 4 characters per token).
+    max_tokens = min(32_000, max(3_000, len(text) // 3))
+    out = await client.converse_tool(KINDS[kind], text[:MAX_CHARS], REFINE_TOOL, max_tokens=max_tokens, timeout=300.0)
     return {"text": out["input"]["text"], "notes": out["input"].get("notes") or None, "usage": out.get("usage", {})}

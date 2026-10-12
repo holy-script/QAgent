@@ -48,7 +48,7 @@ class BedrockClient:
         return f"https://bedrock-runtime.{self.region}.amazonaws.com/model/{self.model_id}/converse"
 
     async def converse_tool(self, system: str, user: str, tool: Dict[str, Any], max_tokens: int = 512,
-                            images: Optional[List[bytes]] = None) -> Dict[str, Any]:
+                            images: Optional[List[bytes]] = None, timeout: float = 60.0) -> Dict[str, Any]:
         """Calls the model with `tool` forced; returns {"input": tool_args, "usage": {...}}."""
         if not self.api_key:
             raise RuntimeError("BEDROCK_API_KEY is not set")
@@ -64,7 +64,7 @@ class BedrockClient:
         }
         headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
         backoff = 1.0
-        async with httpx.AsyncClient(timeout=60.0) as client:
+        async with httpx.AsyncClient(timeout=timeout) as client:
             for attempt in range(4):
                 resp = await client.post(self.url, headers=headers, json=body)
                 if resp.status_code in (429, 500, 502, 503, 529) and attempt < 3:

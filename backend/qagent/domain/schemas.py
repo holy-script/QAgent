@@ -329,7 +329,7 @@ class NormalizeRequest(BaseModel):
 
 
 class RefineRequest(BaseModel):
-    text: str = Field(min_length=1, max_length=20000)
+    text: str = Field(min_length=1, max_length=200000)
     kind: str = Field(default="tidy", description="tidy | description | prd | notes")
 
 

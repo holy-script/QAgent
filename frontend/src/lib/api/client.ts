@@ -42,6 +42,7 @@ function detailOf(text: string): string {
   try {
     const d = JSON.parse(text).detail;
     if (d?.errors) return d.errors.join("\n");
+    if (Array.isArray(d)) return d.map((e: { msg?: string; type?: string }) => (e.type === "string_too_long" ? "That text is too long for this tool (200,000 characters at most)." : e.msg ?? "Invalid input")).join("\n"); // never echo the input back
     return typeof d === "string" ? d : text;
   } catch { return text; }
 }

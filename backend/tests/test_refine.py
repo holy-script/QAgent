@@ -10,7 +10,7 @@ class FakeClaude:
     model_id = "fake"
     seen = None
 
-    async def converse_tool(self, system, user, tool, max_tokens=512, images=None):
+    async def converse_tool(self, system, user, tool, max_tokens=512, images=None, timeout=60.0):
         FakeClaude.seen = (system, user)
         return {"input": {"text": "Cleaned: " + user.strip(), "notes": "check the tax rate"}, "usage": {"inputTokens": 10, "outputTokens": 5}}
 
@@ -47,3 +47,25 @@ async def test_endpoint_validates_and_reports_missing_key(api: AsyncClient, monk
         raise RuntimeError("down")
     monkeypatch.setattr(text_route, "refine_text", boom)
     assert (await api.post("/text/refine", json={"text": "x", "kind": "tidy"})).status_code == 502
+
+
+@pytest.mark.asyncio
+async def test_long_documents_are_accepted_and_the_answer_gets_room(api: AsyncClient, monkeypatch):  # noqa: F811
+    monkeypatch.setattr(text_route.settings, "bedrock_api_key", "k")
+    seen = {}
+
+    class Big:
+        model_id = "fake"
+
+        async def converse_tool(self, system, user, tool, max_tokens=512, images=None, timeout=60.0):
+            seen.update(len=len(user), max_tokens=max_tokens, timeout=timeout)
+            return {"input": {"text": "ok"}, "usage": {}}
+
+    monkeypatch.setattr(refine, "BedrockClient", lambda: Big())
+    long_prd = "word " * 30_000                      # 150,000 characters: far over the old 20,000 limit
+    r = await api.post("/text/refine", json={"text": long_prd, "kind": "prd"})
+    assert r.status_code == 200 and seen["len"] == 150_000
+    assert seen["max_tokens"] == 32_000 and seen["timeout"] >= 300   # capped at the model's room, long timeout
+    await api.post("/text/refine", json={"text": "short", "kind": "tidy"})
+    assert seen["max_tokens"] == 3_000
+    assert (await api.post("/text/refine", json={"text": "x" * 200_001, "kind": "tidy"})).status_code == 422

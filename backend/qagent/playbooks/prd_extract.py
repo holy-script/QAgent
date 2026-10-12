@@ -36,7 +36,7 @@ async def extract_requirements(prd: str, existing_keys: Optional[List[str]] = No
     REQ- IDs that do not collide with existing ones, and leaves acceptance to the user (one by one).
     """
     client = client or BedrockClient()
-    out = await client.converse_tool(SYSTEM, prd[:40000], EXTRACT_TOOL, max_tokens=3000)
+    out = await client.converse_tool(SYSTEM, prd[:150000], EXTRACT_TOOL, max_tokens=3000)
     haystack = " ".join(prd.split()).lower()
     taken = {int(k.split("-")[1]) for k in (existing_keys or []) if k.startswith("REQ-") and k.split("-")[1].isdigit()}
     n = max(taken, default=0)
