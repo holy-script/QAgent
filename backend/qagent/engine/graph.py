@@ -1284,7 +1284,7 @@ class EngineRunner:
                         outcome = await expectations.run_expectation_live(
                             self.judge, flow.key, n, text, severity, flow.covers, page_text, shots, hints, examples, page,
                             journey=(flow.goal or "; ".join(flow.steps)) + ("\nSteps already done: " + " | ".join(ctx.done[-25:]) if ctx.done else "")
-                            + ("\nFiles the browser downloaded during this journey: " + ", ".join(ctx.downloads) if ctx.downloads else "\nNo file was downloaded during this journey."), console_logs=rt.sandbox.console_logs,
+                            + ("\nFiles the browser downloaded during this journey (a download can start several seconds after the click that caused it, so it may be listed after a later step; a file named like a deck or report belongs to the Generate or Export click before it): " + ", ".join(ctx.downloads) if ctx.downloads else "\nNo file was downloaded during this journey."), console_logs=rt.sandbox.console_logs,
                             state_js=PAGE_STATE_JS, network_calls=rt.recorder.calls, snapshots=ctx.snapshots)
                     except Exception as exc:
                         await self._log(ctx, seq, "warning", "checks",
