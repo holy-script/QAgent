@@ -136,6 +136,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/text/refine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Refine
+         * @description Claude tidies dictated or rough text for a purpose (tidy, description, prd, notes). Nothing is saved.
+         */
+        post: operations["refine_text_refine_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/apps": {
         parameters: {
             query?: never;
@@ -1915,6 +1935,24 @@ export interface components {
              */
             markdown: string;
         };
+        /** RefineRequest */
+        RefineRequest: {
+            /** Text */
+            text: string;
+            /**
+             * Kind
+             * @description tidy | description | prd | notes
+             * @default tidy
+             */
+            kind: string;
+        };
+        /** RefineResponse */
+        RefineResponse: {
+            /** Text */
+            text: string;
+            /** Notes */
+            notes?: string | null;
+        };
         /** ReplayRequest */
         ReplayRequest: {
             /**
@@ -2498,6 +2536,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DashboardResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    refine_text_refine_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefineRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefineResponse"];
                 };
             };
             /** @description Validation Error */

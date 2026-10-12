@@ -13,6 +13,9 @@ test("add an app, see it listed, then delete it by typing its name", async ({ pa
   await page.getByLabel("Website address").fill("http://localhost:9000");
   await page.getByRole("button", { name: "Add app" }).click();
   await expect(page.getByRole("heading", { name: "Scratch Shop" })).toBeVisible();
+  // a new app starts the setup guide: it points at the product document on the Settings page
+  await expect(page.locator(".driver-popover").getByText("Welcome! Let's set your app up")).toBeVisible();
+  await page.keyboard.press("Escape");
 
   await page.getByRole("navigation", { name: "Sections" }).getByRole("link", { name: "Settings" }).click(); // demo data lives in memory, so navigate in-app
   await page.getByRole("button", { name: /Delete Scratch Shop/ }).click();
@@ -191,5 +194,109 @@ test.describe("guided tours", () => {
     await context.addInitScript(() => { localStorage.removeItem("qagent_tours"); Object.defineProperty(navigator, "webdriver", { get: () => false }); });
     await page.goto("/");
     await expect(popover(page).getByText("Welcome to QAgent")).toBeVisible({ timeout: 8000 });
+  });
+});
+
+
+// ---- dictation: a fake browser recogniser lets the tests "speak" ----
+// Plain JavaScript on purpose: it is injected into the page as text, so it must not rely on compiler helpers.
+const FAKE_RECOGNISER = `
+  var Fake = function () { this.lang = ""; this.continuous = false; this.interimResults = false; };
+  Fake.prototype.start = function () { window.__rec = this; };
+  Fake.prototype.stop = function () { if (this.onend) this.onend(); };
+  Fake.prototype.abort = function () { if (this.onend) this.onend(); };
+  // newer Chromium has both names, so replace both
+  Object.defineProperty(window, "SpeechRecognition", { value: Fake, configurable: true, writable: true });
+  Object.defineProperty(window, "webkitSpeechRecognition", { value: Fake, configurable: true, writable: true });
+  window.__say = function (text, final) {
+    var result = [{ transcript: text }]; result.isFinal = final !== false;
+    window.__rec.onresult({ resultIndex: 0, results: [result] });
+  };
+`;
+
+test.describe("dictation", () => {
+  test("speaking fills a field, shows what is being heard, and AI tidy-up can be undone", async ({ page }) => {
+    await page.addInitScript({ content: FAKE_RECOGNISER });
+    await page.goto("/apps/new");
+    const box = page.getByRole("textbox", { name: "What does it do?" });
+    await page.getByRole("button", { name: "Dictate", exact: true }).click();
+    await page.evaluate(() => (window as unknown as { __say: (t: string, f: boolean) => void }).__say("um it is a shop that sells mugs", false));
+    await expect(page.getByText("um it is a shop that sells mugs")).toBeVisible();      // shown while it is still being heard
+    await page.evaluate(() => (window as unknown as { __say: (t: string) => void }).__say("um it is a shop that sells mugs"));
+    await page.evaluate(() => (window as unknown as { __say: (t: string) => void }).__say("new line and people pay by card"));
+    await expect(box).toHaveValue("um it is a shop that sells mugs\nand people pay by card");
+    await page.getByRole("button", { name: /Stop dictat/i }).click();
+
+    await page.getByRole("button", { name: "Tidy up with AI" }).click();
+    await expect(box).toHaveValue("It is a shop that sells mugs and people pay by card.");
+    await page.getByRole("button", { name: "Undo" }).click();
+    await expect(box).toHaveValue("um it is a shop that sells mugs\nand people pay by card");
+  });
+
+  test("the product document can be dictated, organised by AI, or imported from a file", async ({ page }) => {
+    await page.addInitScript({ content: FAKE_RECOGNISER });
+    await page.goto(APP);
+    await page.getByRole("navigation", { name: "Sections" }).getByRole("link", { name: "Settings" }).click();
+    const prd = page.getByRole("textbox", { name: "Product document" });
+    await page.getByRole("button", { name: "Dictate", exact: true }).nth(1).click();
+    await page.evaluate(() => (window as unknown as { __say: (t: string) => void }).__say("It is a shop. Users add mugs. They pay by card."));
+    await expect(prd).toHaveValue(/Users add mugs/);
+    await page.getByRole("button", { name: "Organise with AI" }).click();
+    await expect(prd).toHaveValue(/## Features and requirements\n1\. Users add mugs\./);
+    await page.getByLabel("Choose a text file to import").setInputFiles({ name: "notes.md", mimeType: "text/markdown", buffer: Buffer.from("## Extra\nOne more thing.") });
+    await expect(prd).toHaveValue(/## Extra\nOne more thing\.$/);
+  });
+
+  test("browsers without speech recognition get a clear message instead of a broken button", async ({ page }) => {
+    await page.addInitScript({ content: `Object.defineProperty(window, "SpeechRecognition", { value: undefined, configurable: true }); Object.defineProperty(window, "webkitSpeechRecognition", { value: undefined, configurable: true });` });
+    await page.goto("/apps/new");
+    await expect(page.getByRole("button", { name: "Dictate", exact: true })).toBeDisabled();
+    await expect(page.getByText("Dictation needs Chrome, Edge or Safari.")).toBeVisible();
+  });
+});
+
+// ---- guided setup ----
+test.describe("guided setup", () => {
+  test("the Overview lists the steps in order, and Take me there points at the right control", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(APP);
+    const guide = page.getByLabel("Setup guide");
+    await expect(guide.getByText(/\d of 6 steps done/)).toBeVisible();
+    await expect(guide.getByText("1. Describe your app")).toBeVisible();
+    await expect(guide.getByText("3. Create a test plan")).toBeVisible();
+    await guide.getByRole("link", { name: "Take me there" }).first().click();
+    await expect(page).toHaveURL(/settings\?guide=describe/);
+    const pop = page.locator(".driver-popover");
+    await expect(pop.getByText("Describe your app")).toBeVisible();
+    await expect(pop.getByRole("button", { name: /Next: Add test files/ })).toBeVisible();
+    await pop.getByRole("button", { name: /Next: Add test files/ }).click();
+    await expect(pop.getByText("Add test files")).toBeVisible();
+    await pop.getByRole("button", { name: "Close" }).click();
+    await expect(pop).toHaveCount(0);
+    await expect(page).not.toHaveURL(/guide=/);
+  });
+
+  test("finishing a step ticks it off, optional steps can be skipped, and the side card shows what is next", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(APP);
+    const guide = page.getByLabel("Setup guide");
+    await page.getByRole("navigation", { name: "Sections" }).getByRole("link", { name: "Settings" }).click();
+    await page.getByRole("textbox", { name: "Product document" }).fill("Users can browse, add to cart and pay.");
+    await page.getByRole("button", { name: "Save settings" }).click();
+    await expect(page.getByText("Saved")).toBeVisible();
+    await page.getByRole("navigation", { name: "Sections" }).getByRole("link", { name: "Overview" }).click();
+    await expect(guide.getByText("1. Describe your app (done)")).toBeVisible();
+    await expect(page.getByRole("link", { name: /Next: Add test files/ })).toBeVisible();
+    await guide.getByRole("button", { name: "Skip" }).first().click();
+    await expect(guide.getByText(/2\. Add test files.*\(skipped\)/)).toBeVisible();
+    await expect(page.getByRole("link", { name: /Next: Read what it found/ })).toBeVisible(); // the demo app already has a test plan and runs
+    await guide.getByRole("button", { name: "Undo skip" }).click();
+    await expect(guide.getByText(/2\. Add test files.*\(to do\)/)).toBeVisible();
+  });
+
+  test("on a phone the guide is a card under the tabs", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 800 });
+    await page.goto(APP);
+    await expect(page.getByRole("link", { name: /Next: Describe your app/ })).toBeVisible();
   });
 });

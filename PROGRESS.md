@@ -66,7 +66,7 @@ make test         # 55 backend tests
 - **Deleting**: app and run deletion cascade through the database and object storage; confirmation dialogs (type the app name for an app).
 - **Reliability**: orphaned runs are marked failed on restart; uploads retry with backoff and emit `artifact.uploaded`.
 - **Editor**: CodeMirror 6 with Markdown highlighting, item IDs and bindings coloured, problems underlined on their line, edit-in-place for existing items (unseen fields are preserved).
-- **Tests and demo data**: every page and feature has demo data (in-browser fixtures with a scripted live run). Backend 91 pytest tests, frontend 43 unit tests, 63 Playwright tests (all pages x both themes, accessibility, phone width, auth, key journeys). CI runs all of them.
+- **Tests and demo data**: every page and feature has demo data (in-browser fixtures with a scripted live run). Backend 94 pytest tests, frontend 47 unit tests, 69 Playwright tests (all pages x both themes, accessibility, phone width, auth, key journeys). CI runs all of them.
 - **Done**: credential rotation (not needed, closed), `qagent-artifacts` bucket created and configured.
 
 - **Tape and cost**: judge verdicts and report calls are recorded as `model_calls` (new table, migration `b7e2c4a91d30`), so "Repeat exactly" answers judgements and reports from the recording with no model calls. Judge, planner and report cost roll into the run total with a breakdown; `GET /runs/{id}/tape` lists every call and the run page has an **AI calls** tab.
@@ -80,6 +80,8 @@ make test         # 55 backend tests
 - **Richer UI**: the blue secondary now carries the header, app side panel, card headers, hero banners and chart series (gold stays for actions). Dashboard has stat cards with sparklines, hover/keyboard charts (runs per day, AI cost area, clean-run gauge), severity bars and a "what to do next" card.
 - **Hugging Face Spaces**: single-container image and publish script in `deploy/hf/`, steps in `deploy/HUGGINGFACE.md` (not built here: no Docker daemon).
 - **Codespaces backend**: `.devcontainer/` + `deploy/codespaces/` run the API and demo shop in a Codespace (`deploy/CODESPACES.md`); verified locally with Docker, not in a real Codespace.
+- **Dictation**: a Dictate button (with a language picker, "new line" / "new paragraph" commands, live preview of what is being heard) on the app description, product document, test plan editor (text and guided forms) and the new-app form, using the browser's speech recognition (Chrome, Edge, Safari). "Tidy up with AI" / "Organise with AI" (`POST /text/refine`: tidy, description, prd, notes) rewrites rough or dictated text, with Undo; the product document can also be imported from a .md/.txt file. Demo mode has a simple local stand-in for the AI.
+- **Guided setup**: a six-step guide per app in the recommended order (describe the app, add test files if needed, create a test plan, run, read the results, repeat after a fix). Steps tick themselves off from real data; optional steps can be skipped. "Take me there" opens the right page and points at the control (driver.js); creating an app starts the guide. Shown as a panel on the Overview and a progress card in the side panel (under the tabs on a phone).
 - **Deploy**: `docker-compose.yml` + `deploy/` run Caddy, the web app and the backend (one worker) on one machine behind one address. See `deploy/README.md`. Not yet exercised on a real VM.
 
 ## Known gaps

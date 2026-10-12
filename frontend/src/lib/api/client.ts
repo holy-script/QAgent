@@ -1,6 +1,7 @@
 import type { App, AppInput, FlowHistory, Mode, Playbook, PlaybookVersion, RetentionStatus, Run, TestFile, SseEnvelope } from "./types";
 import { buildRunEvents, makeRun, seedApps, seedPlaybooks, seedRuns, versionFrom } from "./fixtures";
 import { validateMarkdown } from "../playbook-validate";
+import { mockRefine, type RefineKind } from "../refine-mock";
 import { toApp, toFlowHistory, toPlaybook, toRun } from "./adapter";
 
 /** Unset → in-browser mock backed by fixtures (F0–F5). Set → real API (F6). */
@@ -215,6 +216,11 @@ export const api = {
     db.live.delete(id);
   },
 
+  /** AI tidy-up of dictated or rough text (nothing is saved). */
+  async refineText(text: string, kind: RefineKind): Promise<{ text: string; notes: string | null }> {
+    if (!USE_MOCK) return http(`/text/refine`, { method: "POST", body: JSON.stringify({ text, kind }) });
+    return delay(mockRefine(text, kind));
+  },
   async listFiles(slug: string): Promise<TestFile[]> {
     if (!USE_MOCK) return http<TestFile[]>(`/apps/${slug}/files`);
     return delay([...mockFiles(slug), ...MOCK_BUILTIN]);

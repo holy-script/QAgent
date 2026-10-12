@@ -4,7 +4,7 @@ import { RunLauncher } from "@/components/run-launcher";
 import { RunsTable } from "@/components/runs-table";
 import { Card, ErrorState, Loading, Metric, fmtMs } from "@/components/ui";
 import { useApp, useRuns } from "@/lib/api/hooks";
-import { GettingStarted } from "@/components/getting-started";
+import { GuidePanel } from "@/components/guide";
 import { OverviewLive } from "@/components/live/overview-live";
 
 export default function Overview() {
@@ -20,7 +20,7 @@ export default function Overview() {
   return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
       <div className="min-w-0 space-y-6">
-        <GettingStarted slug={slug} />
+        <GuidePanel slug={slug} />
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4 2xl:grid-cols-4">
           <Metric label="Test runs" value={runs.length} info="Each run walks every journey in a test plan in a real browser." />
           <Metric label="Runs without problems" info="Share of finished runs in which every check passed." value={passRate == null ? "–" : `${passRate}%`} tone={passRate == null ? undefined : passRate >= 80 ? "ok" : "bad"} />

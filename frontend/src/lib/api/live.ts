@@ -77,3 +77,6 @@ export const useTape = (runId: string) =>
 /** Home dashboard: totals, trends, bugs and app health across every app. */
 export const useDashboard = (days: number) =>
   useQuery({ queryKey: ["dashboard", days], queryFn: () => pick(() => mockLive.dashboard(days), () => http<Dashboard>(`/dashboard?days=${days}`)), refetchInterval: 15_000 });
+
+/** The app's test files (built-in samples included). */
+export const useFiles = (slug: string) => useQuery({ queryKey: ["files", slug], queryFn: () => api.listFiles(slug) });

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 import { ErrorState, Loading, SideNav, Tabs, type NavItem } from "@/components/ui";
+import { GuideProgress, GuideTracker } from "@/components/guide";
 import { api } from "@/lib/api/client";
 import { useApp } from "@/lib/api/hooks";
 import { useIssues } from "@/lib/api/live";
@@ -38,6 +39,7 @@ function AppShell({ children }: { children: ReactNode }) {
   return (
     // On wide screens the sections move to a side list, so the page gets the full height and more width.
     <div className="lg:grid lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-8">
+      <GuideTracker slug={slug} />
       <aside className="hidden lg:block">
         <div className="sticky top-20 overflow-hidden rounded-2xl border bg-gradient-to-b from-secondary to-card shadow-(--shadow-card)">
           <div className="bg-hero on-blue flex items-center gap-3 px-4 py-4">
@@ -48,6 +50,7 @@ function AppShell({ children }: { children: ReactNode }) {
             </div>
           </div>
           <div className="p-2"><SideNav items={items} /></div>
+          <div className="border-t p-2"><GuideProgress slug={slug} /></div>
         </div>
       </aside>
       <div className="min-w-0 space-y-5">
@@ -67,6 +70,7 @@ function AppShell({ children }: { children: ReactNode }) {
             </div>
           </div>
           <Tabs tabs={items} />
+          <GuideProgress slug={slug} />
         </div>
         {children}
       </div>

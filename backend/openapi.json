@@ -228,6 +228,48 @@
         }
       }
     },
+    "/text/refine": {
+      "post": {
+        "tags": [
+          "Text"
+        ],
+        "summary": "Refine",
+        "description": "Claude tidies dictated or rough text for a purpose (tidy, description, prd, notes). Nothing is saved.",
+        "operationId": "refine_text_refine_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefineRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefineResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/apps": {
       "get": {
         "tags": [
@@ -5042,6 +5084,51 @@
         },
         "type": "object",
         "title": "PrdExtractResponse"
+      },
+      "RefineRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 20000,
+            "minLength": 1,
+            "title": "Text"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind",
+            "description": "tidy | description | prd | notes",
+            "default": "tidy"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "RefineRequest"
+      },
+      "RefineResponse": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "RefineResponse"
       },
       "ReplayRequest": {
         "properties": {

@@ -328,6 +328,16 @@ class NormalizeRequest(BaseModel):
     raw_text: str
 
 
+class RefineRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=20000)
+    kind: str = Field(default="tidy", description="tidy | description | prd | notes")
+
+
+class RefineResponse(BaseModel):
+    text: str
+    notes: Optional[str] = None
+
+
 class NormalizeResponse(BaseModel):
     markdown: str
     flows: List[Dict[str, Any]] = Field(default_factory=list)

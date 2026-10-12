@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { DictatableInput, DictatableTextarea } from "@/components/dictation";
 import { Button, Card, Field, inputCls } from "@/components/ui";
 import { useCreateApp } from "@/lib/api/hooks";
 
@@ -21,14 +22,14 @@ export default function NewApp() {
         <form className="space-y-5" onSubmit={async (e) => {
           e.preventDefault();
           const app = await create.mutateAsync({ ...f, name: f.name.trim() });
-          router.push(`/apps/${app.slug}`);
+          router.push(`/apps/${app.slug}/settings?guide=describe`); // the setup guide starts right away
         }}>
-          <Field label="Name" hint="Any name you will recognise, e.g. “Online shop (staging)”."><input className={inputCls} value={f.name} onChange={set("name")} placeholder="Demo Shop" required autoFocus /></Field>
+          <Field label="Name" hint="Any name you will recognise, e.g. “Online shop (staging)”."><DictatableInput value={f.name} onChange={(v) => setF((p) => ({ ...p, name: v }))} placeholder="Demo Shop" required autoFocus aria-label="Name" /></Field>
           <Field label="Website address" hint="Where QAgent starts. For safety, test runs can only visit this site (and any extra sites you allow in Settings).">
             <input className={inputCls} value={f.base_url} onChange={set("base_url")} inputMode="url" required />
             {f.base_url && urlError && <span className="block text-xs text-bad">{urlError}</span>}
           </Field>
-          <Field label="What does it do? (optional)"><textarea className={inputCls} rows={3} value={f.description} onChange={set("description")} placeholder="A short description for your teammates" /></Field>
+          <Field label="What does it do? (optional)"><DictatableTextarea rows={3} value={f.description} onChange={(v) => setF((p) => ({ ...p, description: v }))} refine="description" tidyLabel="Tidy up with AI" placeholder="A short description for your teammates. You can dictate it." aria-label="What does it do?" /></Field>
           {create.error && <p role="alert" className="text-sm text-bad">{create.error.message}</p>}
           <div className="flex justify-end gap-2">
             <Button type="button" onClick={() => router.back()}>Cancel</Button>

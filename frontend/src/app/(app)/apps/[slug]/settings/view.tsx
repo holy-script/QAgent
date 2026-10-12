@@ -9,6 +9,7 @@ import { useRef, useState } from "react";
 import { Badge, Button, Card, ErrorState, Field, Loading, SimpleTable, fmtBytes, inputCls } from "@/components/ui";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Upload } from "lucide-react";
+import { DictatableTextarea } from "@/components/dictation";
 import { MAX_FILE_BYTES, api } from "@/lib/api/client";
 import { useApp } from "@/lib/api/hooks";
 import type { App, Mode } from "@/lib/api/types";
@@ -47,8 +48,8 @@ function Form({ app }: { app: App }) {
       }}>
         <Field label="Name"><input className={inputCls} value={f.name} onChange={set("name")} /></Field>
         <Field label="Website address" hint="Where test runs start."><input className={inputCls} value={f.base_url} onChange={set("base_url")} /></Field>
-        <Field label="Description"><textarea className={inputCls} rows={2} value={f.description} onChange={set("description")} /></Field>
-        <Field label="Product document (optional)" hint="Paste your requirements or product spec. The test plan editor can suggest requirements from it."><textarea className={`${inputCls} font-mono text-xs`} rows={6} value={f.prd} onChange={set("prd")} /></Field>
+        <Field label="Description"><DictatableTextarea rows={2} value={f.description} onChange={(v) => setF((p) => ({ ...p, description: v }))} refine="description" aria-label="Description" /></Field>
+        <div data-tour="settings-prd"><Field label="Product document (optional)" hint="Paste your requirements or product spec, import a .md or .txt file, or just talk: dictate it, then let AI organise it. The test plan editor can suggest requirements from it."><DictatableTextarea rows={8} value={f.prd} onChange={(v) => setF((p) => ({ ...p, prd: v }))} refine="prd" tidyLabel="Organise with AI" importFile className="font-mono text-xs" aria-label="Product document" /></Field></div>
         <Field label="Other sites tests may visit" hint="Comma-separated. For safety the browser refuses to go anywhere that is not your app or listed here."><input className={inputCls} value={f.hosts} onChange={set("hosts")} /></Field>
         <Field label="Default mode" hint="How decisions are made when you run a test. Smart is recommended.">
           <SelectField label="Default mode" value={f.default_mode} onChange={(v) => setF({ ...f, default_mode: v as Mode })}
@@ -156,7 +157,7 @@ function TestFiles({ app }: { app: App }) {
   });
   const remove = useMutation({ mutationFn: (id: string) => api.deleteFile(app.slug, id), onSuccess: () => { refresh(); toast.success("File removed"); } });
   return (
-    <Card className="space-y-4 p-6">
+    <Card className="space-y-4 p-6" data-tour="test-files">
       <div>
         <h2 className="font-medium">Test files</h2>
         <p className="text-sm text-muted-foreground">When a page asks for a file (a profile photo, a spreadsheet to import), QAgent attaches one of these. Say which in the test plan with <code className="rounded bg-muted px-1">file: report.pdf</code> under Test data, or by naming it in the step. Without either, it picks a file that matches what the field accepts. Files up to {MAX_FILE_BYTES / (1024 * 1024)} MB.</p>

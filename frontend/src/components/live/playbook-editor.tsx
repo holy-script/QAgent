@@ -1,8 +1,10 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { AlertCircle, AlertTriangle, CheckCircle2, Pencil, Plus, Sparkles, Trash2, Wand2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { Badge, Button, Card, Field, SelectField, cn, inputCls } from "@/components/ui";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Dictate, DictatableInput, DictatableTextarea } from "@/components/dictation";
+import { Badge, Button, Card, Field, SelectField, cn } from "@/components/ui";
+import { appendDictation } from "@/lib/dictation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useExtractPrd, useNormalize, useValidate, type Validation } from "@/lib/api/live";
@@ -34,6 +36,8 @@ export function PlaybookEditor({ value, onChange, slug, onValidation }: { value:
   const uncovered = ((v?.coverage as any)?.uncovered ?? []) as string[];
   const flowKeys = items.filter((i) => i.category === "flow").map((i) => i.key);
   const [normalize, setNormalize] = useState<string | null>(null);
+  const valueRef = useRef(value);
+  useEffect(() => { valueRef.current = value; }, [value]);
   const norm = useNormalize();
 
   return (
@@ -47,6 +51,7 @@ export function PlaybookEditor({ value, onChange, slug, onValidation }: { value:
         <Button onClick={() => norm.mutate(value, { onSuccess: (r) => setNormalize(r.markdown) })} disabled={!value.trim() || norm.isPending} title="Paste rough notes, and AI rewrites them into a proper test plan. You review the changes before anything is replaced.">
           <Wand2 className="size-4" />{norm.isPending ? "Rewriting…" : "Rewrite my notes as a test plan"}
         </Button>
+        <Dictate label="Dictate" onText={(chunk) => onChange(appendDictation(valueRef.current, chunk))} />
         <span className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
           {isFetching ? "Validating…" : errors.length ? <><AlertCircle className="size-4 text-bad" />{errors.length} problem{errors.length > 1 ? "s" : ""} to fix</> : value.trim() ? <><CheckCircle2 className="size-4 text-ok" />Valid</> : null}
         </span>
@@ -141,8 +146,8 @@ function AddCard({ cat, items, flowKeys, onAdd, initial, editKey, extra, onCance
         {spec.filter((f) => !f.show || f.show(v)).map((f) => (
           <div key={f.name} className={cn(["area", "lines", "scope"].includes(f.kind) && "md:col-span-2")}>
             <Field label={f.label + (f.required ? " *" : "")} hint={f.hint}>
-              {f.kind === "text" && <input className={inputCls} value={v[f.name]} placeholder={f.placeholder} onChange={(e) => set(f.name, e.target.value)} />}
-              {(f.kind === "area" || f.kind === "lines") && <textarea className={cn(inputCls, "min-h-20", f.kind === "lines" && "font-mono text-xs")} value={v[f.name]} placeholder={f.placeholder} onChange={(e) => set(f.name, e.target.value)} />}
+              {f.kind === "text" && <DictatableInput value={v[f.name]} placeholder={f.placeholder} onChange={(x) => set(f.name, x)} aria-label={f.label} />}
+              {(f.kind === "area" || f.kind === "lines") && <DictatableTextarea className={cn("min-h-20", f.kind === "lines" && "font-mono text-xs")} value={v[f.name]} placeholder={f.placeholder} onChange={(x) => set(f.name, x)} aria-label={f.label} />}
               {f.kind === "select" && <SelectField label={f.label} value={v[f.name]} onChange={(x) => set(f.name, x)} options={(f.options ?? []).map((o) => ({ value: o, label: o }))} />}
               {f.kind === "scope" && (
                 <div className="flex flex-wrap gap-3 pt-1">

@@ -2,10 +2,12 @@
 import { driver, type DriveStep } from "driver.js";
 import "driver.js/dist/driver.css";
 import { CircleHelp } from "lucide-react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, createContext, useCallback, useContext, useEffect, useMemo, useRef, type ReactNode } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useGuide } from "@/components/guide";
+import { GUIDE_STEPS, nextStep } from "@/lib/guide";
 import { TOURS, tourForPath, type TourDef } from "@/lib/tours";
 
 const SEEN_KEY = "qagent_tours";
@@ -59,6 +61,13 @@ function TourTriggers({ start }: { start: (id?: string) => Promise<void> }) {
   const pathname = usePathname();
   const params = useSearchParams();
   const requested = params.get("tour");
+  const guideId = params.get("guide");
+  const slug = pathname.match(/^\/apps\/([^/]+)/)?.[1];
+  if (guideId && slug && GUIDE_STEPS.some((s) => s.id === guideId)) return <GuideSpotlight key={`${slug}:${guideId}`} slug={slug} stepId={guideId} />;
+  return <TourAuto pathname={pathname} requested={requested} start={start} />;
+}
+
+function TourAuto({ pathname, requested, start }: { pathname: string; requested: string | null; start: (id?: string) => Promise<void> }) {
   useEffect(() => {
     if (requested && TOURS[requested]) { const t = setTimeout(() => void start(requested), 600); return () => clearTimeout(t); }
     if (typeof navigator !== "undefined" && navigator.webdriver) return; // automated browsers (tests) are never interrupted
@@ -82,4 +91,47 @@ export function TourButton() {
       <CircleHelp className="size-3.5" /><span className="hidden sm:inline">Tour</span>
     </Button>
   );
+}
+
+/** The guided setup's pointer: waits for the step's target to appear, then points at it with "Next step". */
+function GuideSpotlight({ slug, stepId }: { slug: string; stepId: string }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const g = useGuide(slug);
+  const started = useRef(false);
+  const alive = useRef(true);
+  const moving = useRef(false);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
+  useEffect(() => {
+    if (!g.ready || started.current) return;
+    started.current = true;
+    const step = GUIDE_STEPS.find((x) => x.id === stepId)!;
+    const upcoming = nextStep(g.states, stepId);
+    const welcome = g.done === 0 && stepId === "describe" ? "Welcome! Let's set your app up in a few steps. " : "";
+    const close = () => router.replace(pathname);
+    (async () => {
+      for (let i = 0; i < 40 && !visible(step.target); i++) await new Promise((r) => setTimeout(r, 100));
+      if (!alive.current) return;
+      const el = visible(step.target);
+      el?.scrollIntoView({ block: "center", behavior: "smooth" });
+      const d = driver({
+        allowClose: true, overlayOpacity: 0.5, stagePadding: 8, stageRadius: 12, popoverClass: "qagent-tour", showProgress: false,
+        steps: [{
+          element: el ?? undefined,
+          popover: {
+            title: step.title, description: welcome + step.spotlight, side: "bottom", align: "start",
+            showButtons: ["next", "close"], onCloseClick: () => { d.destroy(); close(); }, nextBtnText: upcoming ? `Next: ${upcoming.title} →` : "Done",
+            onNextClick: () => {
+              moving.current = true;
+              d.destroy();
+              if (upcoming) router.push(`${upcoming.path(slug, g.latestRun)}?guide=${upcoming.id}`); else close();
+            },
+          },
+        }],
+        onDestroyed: () => { if (alive.current && !moving.current) close(); },
+      });
+      d.drive();
+    })();
+  }, [g, stepId, slug, router, pathname]);
+  return null;
 }

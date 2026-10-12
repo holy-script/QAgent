@@ -22,8 +22,8 @@ export default function Help() {
         </ol>
       </Card>
       <Card className="p-5">
-        <h2 className="font-medium">Guided tours</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Short walk-throughs that point at the real screen. Open one here, or press <b>Tour</b> in the top bar on any page to get the tour for that page.</p>
+        <h2 className="font-medium">Guided setup and tours</h2>
+        <p className="mt-1 text-sm text-muted-foreground">The Setup guide on an app&apos;s Overview takes you step by step from nothing to your first results. Tours are short walk-throughs that point at the real screen. Open one here, or press <b>Tour</b> in the top bar on any page to get the tour for that page.</p>
         <div className="mt-3 flex flex-wrap gap-2">
           <Link href="/?tour=home" className="rounded-lg border px-3 py-1.5 text-sm hover:bg-foreground/5">Home and dashboard</Link>
           <span className="self-center text-xs text-muted-foreground">Then open an app, a run, a test plan or a bug and press Tour for the rest.</span>
@@ -46,6 +46,7 @@ export default function Help() {
           <li>QAgent only visits your app and the extra sites you allow in Settings, so a run cannot wander off.</li>
           <li>Calculations such as totals are checked by plain code, never guessed by AI. AI is used to choose what to click, to judge things that have no fixed rule, and to write the reports.</li>
           <li>When an AI judges something, the report says so, and the problem is never rated more serious than medium unless a fixed rule also failed.</li>
+          <li>Rather talk than type? Press <b>Dictate</b> next to a text box (Chrome, Edge or Safari), then <b>Tidy up with AI</b> to clean it up. You can undo it.</li>
           <li>Press <kbd className="rounded border bg-card px-1">Ctrl</kbd> + <kbd className="rounded border bg-card px-1">K</kbd> anywhere to jump to an app, a run or a bug.</li>
         </ul>
       </section>

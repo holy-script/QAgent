@@ -2,7 +2,9 @@
 import { Upload } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { Dictate } from "@/components/dictation";
 import { Button, Card } from "@/components/ui";
+import { appendDictation } from "@/lib/dictation";
 import { useSavePlaybook } from "@/lib/api/hooks";
 import { SAMPLE_PLAYBOOK } from "@/lib/api/fixtures";
 import { USE_MOCK } from "@/lib/api/client";
@@ -21,12 +23,13 @@ export default function UploadPlaybook() {
   return (
     <div className="mx-auto max-w-3xl space-y-4">
       <div><h2 className="text-lg font-medium">Add a test plan</h2><p className="text-sm text-muted-foreground">Describe what to test. Start from the sample, upload a file, or paste your own notes and use “Rewrite my notes” to turn them into a test plan.</p></div>
-      <Card className="space-y-4 p-5">
+      <Card className="space-y-4 p-5" data-tour="new-plan">
         <div className="flex flex-wrap items-center gap-2">
           <input ref={file} type="file" accept=".md,text/markdown,text/plain" hidden
             onChange={async (e) => { const f = e.target.files?.[0]; if (f) setMd(await f.text()); e.target.value = ""; }} />
           <Button onClick={() => file.current?.click()}><Upload className="size-4" />Upload a file</Button>
           <Button onClick={() => setMd(SAMPLE_PLAYBOOK)}>Start from a sample</Button>
+          {USE_MOCK && <Dictate onText={(chunk) => setMd((m) => appendDictation(m, chunk))} />}
           <span className="text-xs text-muted-foreground">or paste text below. You can review everything before it is saved.</span>
         </div>
         {USE_MOCK ? (

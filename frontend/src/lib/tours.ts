@@ -21,6 +21,7 @@ export const TOURS: Record<string, TourDef> = {
     id: "app", label: "An app",
     steps: [
       { title: "An app's workspace", text: "Everything about one app lives here. The list on the left (tabs on a phone) moves between its parts." },
+      { target: "guide-progress", title: "Setup guide", text: "New here? This card shows the next step in the recommended order: describe the app, add test files if needed, write a test plan, run it, read the results, then repeat after a fix. It takes you to the right page and points at what to do.", side: "right" },
       { target: "nav-overview", title: "Overview", text: "The summary: recent runs, requirement status, open bugs, and the “Run a test” box.", side: "right" },
       { target: "nav-plans", title: "Test plans", text: "A test plan says what to check: requirements, journeys through the app, and expectations. You write it as simple text, or build it with forms.", side: "right" },
       { target: "nav-runs", title: "Runs", text: "Every time a plan is run is recorded here, with results, speed and cost.", side: "right" },
