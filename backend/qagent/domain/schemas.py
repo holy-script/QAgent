@@ -388,6 +388,15 @@ class UpdateAppRequest(BaseModel):
     retention_keep_last: Optional[int] = Field(default=None, ge=0, le=1000)
 
 
+class AppFileResponse(BaseModel):
+    id: str
+    name: str
+    content_type: str
+    size_bytes: int
+    created_at: str
+    builtin: bool = False
+
+
 class RetentionStatus(BaseModel):
     retention_days: Optional[int] = None
     retention_keep_last: int = 10

@@ -1,4 +1,4 @@
-import type { App, AppInput, FlowHistory, Mode, Playbook, PlaybookVersion, RetentionStatus, Run, SseEnvelope } from "./types";
+import type { App, AppInput, FlowHistory, Mode, Playbook, PlaybookVersion, RetentionStatus, Run, TestFile, SseEnvelope } from "./types";
 import { buildRunEvents, makeRun, seedApps, seedPlaybooks, seedRuns, versionFrom } from "./fixtures";
 import { validateMarkdown } from "../playbook-validate";
 import { toApp, toFlowHistory, toPlaybook, toRun } from "./adapter";
@@ -19,6 +19,12 @@ export async function http<T>(path: string, init?: RequestInit): Promise<T> {
   if (!res.ok) throw new ApiError(res.status, detailOf(await res.text().catch(() => "")) || res.statusText);
   return res.json();
 }
+export const MAX_FILE_BYTES = 10 * 1024 * 1024;
+const MOCK_BUILTIN: TestFile[] = [["sample.png", "image/png", 74], ["sample.pdf", "application/pdf", 214], ["sample.txt", "text/plain", 25], ["sample.csv", "text/csv", 24], ["sample.json", "application/json", 17]]
+  .map(([name, content_type, size_bytes]) => ({ id: `builtin:${name}`, name: name as string, content_type: content_type as string, size_bytes: size_bytes as number, created_at: "", builtin: true }));
+const mockFileStore = new Map<string, TestFile[]>();
+const mockFiles = (slug: string): TestFile[] => { if (!mockFileStore.has(slug)) mockFileStore.set(slug, []); return mockFileStore.get(slug)!; };
+
 /** Same rule as the backend: finished runs older than the policy, except the newest `keep_last`. */
 export function expiredMock(a: App, runs: Run[]): Run[] {
   if (!a.retention_days) return [];
@@ -207,6 +213,29 @@ export const api = {
     if (!USE_MOCK) { await http(`/runs/${id}`, { method: "DELETE" }); return; }
     db.runs = db.runs.filter((r) => r.id !== id);
     db.live.delete(id);
+  },
+
+  async listFiles(slug: string): Promise<TestFile[]> {
+    if (!USE_MOCK) return http<TestFile[]>(`/apps/${slug}/files`);
+    return delay([...mockFiles(slug), ...MOCK_BUILTIN]);
+  },
+  async uploadFile(slug: string, file: File): Promise<TestFile> {
+    if (file.size > MAX_FILE_BYTES) throw new ApiError(413, `Files can be at most ${MAX_FILE_BYTES / (1024 * 1024)} MB`);
+    if (!USE_MOCK) {
+      const res = await fetch(`${API_URL}/apps/${slug}/files?name=${encodeURIComponent(file.name)}`, { method: "POST", body: file, credentials: "include", headers: { "Content-Type": file.type || "application/octet-stream", "X-File-Type": file.type || "" } });
+      if (!res.ok) throw new ApiError(res.status, detailOf(await res.text().catch(() => "")) || res.statusText);
+      return res.json();
+    }
+    const list = mockFiles(slug);
+    const rec: TestFile = { id: "f-" + uid(), name: file.name, content_type: file.type || "application/octet-stream", size_bytes: file.size, created_at: new Date().toISOString(), builtin: false };
+    const i = list.findIndex((f) => f.name.toLowerCase() === rec.name.toLowerCase());
+    if (i >= 0) list[i] = { ...rec, id: list[i].id }; else list.push(rec);
+    return delay(i >= 0 ? list[i] : rec);
+  },
+  async deleteFile(slug: string, id: string): Promise<void> {
+    if (!USE_MOCK) { await http(`/apps/${slug}/files/${id}`, { method: "DELETE" }); return; }
+    const list = mockFiles(slug);
+    list.splice(0, list.length, ...list.filter((f) => f.id !== id));
   },
 
   /** How many runs the app's clean-up policy would remove right now. */

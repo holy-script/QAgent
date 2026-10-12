@@ -26,6 +26,7 @@ from qagent.checks.base import CheckOutcome
 from qagent.checks.resolver import BindingResolver
 from qagent.checks.ux_judged import Judge
 from qagent.config import settings
+from qagent.browser import uploads
 from qagent.decision.base import Decider
 from qagent.decision.ledger import LedgerClient, TapedJudge, current_flow_run
 from qagent.decision.planner import plan_flow, step_hints
@@ -39,6 +40,7 @@ from qagent.engine.gating import evaluate_gate
 from qagent.engine.state import FlowState
 from qagent.engine.tracing import Span, logger
 from qagent.reports.findings import final_severity, fingerprint
+from qagent.storage.objects import object_store
 from qagent.storage.persistence_sink import PersistenceSink
 from qagent.storage.upload_queue import upload_queue
 
@@ -791,19 +793,50 @@ class EngineRunner:
         executor = BrowserExecutor(page)
         started = time.perf_counter()
         outcome: Dict[str, Any] = {"status": "success", "error": None}
-        for _ in range(repeat_count(state["intent"])):
-            outcome = await executor.execute(chosen, value)
+        upload_files: List[Dict[str, Any]] = []
+        uploaded: List[Dict[str, Any]] = []
+        if chosen.action_type == "upload":
+            try:
+                upload_files = await self._files_for(state["intent"], chosen, ctx.flow.test_data)
+                uploaded = [{"name": f["name"], "size": len(f["buffer"]), "content_type": f["mimeType"]} for f in upload_files]
+                await self._log(ctx, state["idx"], "info", "act",
+                                "uploading " + ", ".join(f"{u['name']} ({u['size']} bytes)" for u in uploaded))
+            except LookupError as exc:
+                outcome = {"status": "failed", "error": str(exc)}
+        for _ in range(repeat_count(state["intent"]) if outcome["status"] == "success" else 0):
+            outcome = await executor.execute(chosen, value, upload_files)
             if outcome["status"] != "success":
                 break
         timings["act_ms"] = (time.perf_counter() - started) * 1000.0
         await self.sink.emit(QAgentEventType.ACTION_EXECUTED, {
             **base, "action_id": chosen.id, "action_label": chosen.label, "status": outcome["status"],
-            "duration_ms": timings["act_ms"], "error": outcome["error"], "target_bbox": bbox,
+            "duration_ms": timings["act_ms"], "error": outcome["error"], "target_bbox": bbox, "uploaded": uploaded,
         })
         update = {"acted": True, "timings": timings, "target_bbox": bbox}
         if outcome["status"] != "success":
             update.update(self._fail(rt, f"step {state['idx']}: action failed: {outcome['error']}"))
         return update
+
+    async def _files_for(self, intent: str, chosen: CandidateAction, test_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """The files this step uploads, read from the app's test files or the built-in samples."""
+        available = list(dict.fromkeys([*self.spec.files, *uploads.BUILTIN]))
+        names = uploads.choose_files(intent, chosen.label, test_data, available)
+        if not names:
+            raise LookupError("this step uploads a file, but the app has no test files")
+        out: List[Dict[str, Any]] = []
+        for name in names:
+            stored = next((v for k, v in self.spec.files.items() if k.lower() == name.lower()), None)
+            if stored is not None:
+                data = await asyncio.to_thread(object_store.get_bytes, stored["key"])
+                if data is None:
+                    raise LookupError(f"test file '{name}' could not be read from storage")
+                out.append(uploads.payload(name, data, stored.get("content_type")))
+                continue
+            builtin = next((v for k, v in uploads.BUILTIN.items() if k.lower() == name.lower()), None)
+            if builtin is None:
+                raise LookupError(f"test file '{name}' does not exist; add it under Settings > Test files")
+            out.append(uploads.payload(name, builtin[0], builtin[1]))
+        return out
 
     async def _settle(self, state: FlowState, config: RunnableConfig) -> FlowState:
         """Waits for the page to settle; wait frames are captured only while it is still busy."""

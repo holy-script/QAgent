@@ -1,14 +1,16 @@
 import asyncio
+import hashlib
 import re
 from typing import List
 from urllib.parse import urlparse
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from qagent.api.deps import get_session
+from qagent.browser import uploads
 from qagent.api.mappers import app_out, iso, run_out
 from qagent.config import settings
 from qagent.runs.manager import RunManager, get_run_manager
@@ -17,7 +19,7 @@ from qagent.storage.purge import purge_app
 from qagent.storage.retention import apply_retention, expired_runs
 from qagent.domain import models as m
 from qagent.domain.schemas import (
-    PrdExtractResponse, AppResponse, AppSummaryResponse, CreateAppRequest, RetentionResult, RetentionStatus, RunResponse,
+    AppFileResponse, PrdExtractResponse, AppResponse, AppSummaryResponse, CreateAppRequest, RetentionResult, RetentionStatus, RunResponse,
     UpdateAppRequest,
 )
 
@@ -103,6 +105,61 @@ async def delete_app(app_id: str, session: AsyncSession = Depends(get_session),
     await session.commit()
     removed_files = await asyncio.to_thread(object_store.delete_prefix, f"apps/{app.id}/")
     return {"deleted": counts, "files_removed": removed_files}
+
+
+def _file_out(f: m.AppFile) -> AppFileResponse:
+    return AppFileResponse(id=f.id, name=f.name, content_type=f.content_type, size_bytes=f.size_bytes,
+                           created_at=iso(f.created_at) or "")
+
+
+@router.get("/{app_id}/files", response_model=List[AppFileResponse])
+async def list_app_files(app_id: str, session: AsyncSession = Depends(get_session)):
+    """Test files the app's upload steps can use, plus the built-in samples every app has."""
+    app = await _find(session, app_id)
+    own = (await session.execute(select(m.AppFile).where(m.AppFile.app_id == app.id).order_by(m.AppFile.name))).scalars().all()
+    shadowed = {f.name.lower() for f in own}
+    builtin = [AppFileResponse(id=f"builtin:{n}", name=n, content_type=c, size_bytes=len(b), created_at="", builtin=True)
+               for n, (b, c) in uploads.BUILTIN.items() if n.lower() not in shadowed]
+    return [_file_out(f) for f in own] + builtin
+
+
+@router.post("/{app_id}/files", response_model=AppFileResponse, status_code=201)
+async def add_app_file(app_id: str, request: Request, name: str, session: AsyncSession = Depends(get_session)):
+    """Stores a test file. Send the raw file as the request body and its name as `?name=`. Same name replaces."""
+    app = await _find(session, app_id)
+    clean = re.sub(r"[^\w.\- ]", "_", name.strip().split("/")[-1].split("\\")[-1])[:120]
+    if not clean or clean.startswith("."):
+        raise HTTPException(status_code=422, detail="Give the file a name, for example report.pdf")
+    data = await request.body()
+    if not data:
+        raise HTTPException(status_code=422, detail="The file is empty")
+    if len(data) > uploads.MAX_FILE_BYTES:
+        raise HTTPException(status_code=413, detail=f"Files can be at most {uploads.MAX_FILE_BYTES // (1024 * 1024)} MB")
+    existing = (await session.execute(select(m.AppFile).where(m.AppFile.app_id == app.id))).scalars().all()
+    same = next((f for f in existing if f.name.lower() == clean.lower()), None)
+    if same is None and len(existing) >= uploads.MAX_FILES_PER_APP:
+        raise HTTPException(status_code=409, detail=f"An app can keep {uploads.MAX_FILES_PER_APP} test files; delete some first")
+    ctype = request.headers.get("x-file-type") or uploads.guess_type(clean)
+    record = same or m.AppFile(app_id=app.id, name=clean, object_key="")
+    record.content_type, record.size_bytes = ctype, len(data)
+    record.sha256 = hashlib.sha256(data).hexdigest()
+    record.object_key = f"apps/{app.id}/files/{record.id}/{clean}"
+    await asyncio.to_thread(object_store.put_object, record.object_key, data, ctype)
+    session.add(record)
+    await session.commit()
+    return _file_out(record)
+
+
+@router.delete("/{app_id}/files/{file_id}")
+async def delete_app_file(app_id: str, file_id: str, session: AsyncSession = Depends(get_session)):
+    app = await _find(session, app_id)
+    record = await session.get(m.AppFile, file_id)
+    if record is None or record.app_id != app.id:
+        raise HTTPException(status_code=404, detail="File not found")
+    await session.delete(record)
+    await session.commit()
+    await asyncio.to_thread(object_store.delete_prefix, f"apps/{app.id}/files/{record.id}/")
+    return {"deleted": record.name}
 
 
 @router.get("/{app_id}/retention", response_model=RetentionStatus)

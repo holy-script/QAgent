@@ -1,5 +1,5 @@
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from playwright.async_api import Page
 
@@ -12,7 +12,8 @@ class BrowserExecutor:
     def __init__(self, page: Page):
         self.page = page
 
-    async def execute(self, action: CandidateAction, value: Optional[str] = None) -> Dict[str, Any]:
+    async def execute(self, action: CandidateAction, value: Optional[str] = None,
+                      files: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
         start = time.perf_counter()
         status = "success"
         error_msg = None
@@ -26,6 +27,9 @@ class BrowserExecutor:
             elif action.action_type == "fill":
                 await self.page.fill(
                     action.selector, value if value is not None else (action.value or "test"), timeout=3000)
+            elif action.action_type == "upload":
+                # set_input_files works on hidden inputs too, which is how styled "drop zone" buttons are built.
+                await self.page.set_input_files(action.selector, files or [], timeout=3000)
             elif action.action_type == "navigate":
                 await self.page.goto(action.value or action.label, timeout=5000)
         except Exception as e:

@@ -32,6 +32,20 @@ class App(SQLModel, table=True):
     created_at: datetime = Field(default_factory=utc_now)
 
 
+class AppFile(SQLModel, table=True):
+    """A file an app's tests can upload through a page's file field (Settings > Test files)."""
+    __tablename__ = "app_files"
+
+    id: str = Field(default_factory=gen_uuid, primary_key=True)
+    app_id: str = Field(index=True)
+    name: str
+    content_type: str = "application/octet-stream"
+    size_bytes: int = 0
+    object_key: str
+    sha256: str = ""
+    created_at: datetime = Field(default_factory=utc_now)
+
+
 class Playbook(SQLModel, table=True):
     __tablename__ = "playbooks"
 

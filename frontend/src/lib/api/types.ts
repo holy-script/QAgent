@@ -215,3 +215,6 @@ export interface SseEnvelope {
 }
 
 export interface RetentionStatus { retention_days: number | null; retention_keep_last: number; total_runs: number; would_delete: number; oldest_started_at: string | null }
+
+/** A file a test can upload through a page's file field. Built-in samples exist for every app. */
+export interface TestFile { id: string; name: string; content_type: string; size_bytes: number; created_at: string; builtin: boolean }

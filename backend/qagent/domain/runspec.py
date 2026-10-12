@@ -40,6 +40,7 @@ class RunSpec(BaseModel):
     gotchas: List[Dict[str, Any]] = Field(default_factory=list)
     reasoning_examples: List[Dict[str, Any]] = Field(default_factory=list)
     playbook_hash: str = ""
+    files: Dict[str, Dict[str, Any]] = Field(default_factory=dict)  # test files: name -> {key, content_type}
     plan: bool = False                        # Claude writes per-step notes before each journey
     reset_path: Optional[str] = None          # POST once before the run to reset the target app
     inject_traceparent: bool = False

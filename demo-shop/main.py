@@ -1,10 +1,11 @@
-"""Demo shop: a tiny storefront with five deliberately seeded, toggleable bugs.
+"""Demo shop: a tiny storefront with six deliberately seeded, toggleable bugs.
 
 Bug 1  cart badge counts distinct lines instead of total quantity   (DOM check, UI vs API)
 Bug 2  postal code is not validated at checkout                     (edge-case flow + DOM check)
 Bug 3  every 3rd payment request returns 500                        (network check)
 Bug 4  spinner never clears after applying a coupon                 (settle timeout + wait frames)
 Bug 5  tax applied before discount, giving a wrong total            (formula check)
+Bug 6  avatar upload accepts any file type                          (file-upload edge case)
 
 All bugs are on by default. Override with DEMO_BUGS="1,3" at startup, or at
 runtime with POST /__bugs {"1": false}. POST /__reset clears all carts + payment counters (?scope=session: just the caller's).
@@ -36,8 +37,8 @@ PRODUCTS = [
 
 def _default_bugs() -> Dict[int, bool]:
     raw = os.getenv("DEMO_BUGS")
-    enabled = {1, 2, 3, 4, 5} if raw is None else {int(b) for b in re.findall(r"\d+", raw)}
-    return {n: n in enabled for n in range(1, 6)}
+    enabled = {1, 2, 3, 4, 5, 6} if raw is None else {int(b) for b in re.findall(r"\d+", raw)}
+    return {n: n in enabled for n in range(1, 7)}
 
 
 current_sid: ContextVar[str] = ContextVar("current_sid", default="")
@@ -61,7 +62,7 @@ class State:
         self.sessions.pop(current_sid.get(), None)
 
     def _session(self) -> dict:
-        return self.sessions.setdefault(current_sid.get(), {"cart": {}, "coupon": "", "payments": 0})
+        return self.sessions.setdefault(current_sid.get(), {"cart": {}, "coupon": "", "payments": 0, "avatar": None})
 
     @property
     def cart(self) -> Dict[int, int]:
@@ -146,6 +147,39 @@ async def cart(request: Request):
 @app.get("/checkout")
 async def checkout(request: Request):
     return render(request, "checkout.html", cart=cart_snapshot())
+
+
+@app.get("/profile")
+async def profile(request: Request):
+    return render(request, "profile.html", avatar=state._session().get("avatar"))
+
+
+def _multipart_file(body: bytes, content_type: str):
+    """Pulls (filename, content type, bytes) of the first file part out of a multipart body (no extra dependency)."""
+    m = re.search(r"boundary=([^;]+)", content_type)
+    if not m:
+        return None
+    for part in body.split(b"--" + m.group(1).strip('"').encode()):
+        head, _, data = part.partition(b"\r\n\r\n")
+        name = re.search(rb'filename="([^"]*)"', head)
+        if name:
+            ctype = re.search(rb"Content-Type:\s*([^\r\n]+)", head, re.IGNORECASE)
+            return name.group(1).decode(), (ctype.group(1).decode() if ctype else ""), data[:-2] if data.endswith(b"\r\n") else data
+    return None
+
+
+@app.post("/api/avatar")
+async def api_avatar(request: Request):
+    got = _multipart_file(await request.body(), request.headers.get("content-type", ""))
+    if got is None or not got[0]:
+        return JSONResponse({"error": "Choose a file first"}, status_code=400)
+    name, ctype, data = got
+    if not state.bugs[6] and not ctype.startswith("image/"):  # BUG 6: any file type is accepted
+        return JSONResponse({"error": "Only image files are allowed"}, status_code=400)
+    if len(data) > 1_000_000:
+        return JSONResponse({"error": "File is too large (1 MB maximum)"}, status_code=413)
+    state._session()["avatar"] = {"name": name, "size": len(data)}
+    return {"ok": True, "name": name, "size": len(data)}
 
 
 @app.get("/api/products")

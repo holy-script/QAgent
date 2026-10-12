@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import { useState } from "react";
-import { Button, Card, ErrorState, Field, Loading, inputCls } from "@/components/ui";
-import { api } from "@/lib/api/client";
+import { useRef, useState } from "react";
+import { Badge, Button, Card, ErrorState, Field, Loading, SimpleTable, fmtBytes, inputCls } from "@/components/ui";
+import { TableCell, TableRow } from "@/components/ui/table";
+import { Upload } from "lucide-react";
+import { MAX_FILE_BYTES, api } from "@/lib/api/client";
 import { useApp } from "@/lib/api/hooks";
 import type { App, Mode } from "@/lib/api/types";
 
@@ -16,7 +18,7 @@ export default function Settings() {
   const { data: app, error, isPending, refetch } = useApp(slug);
   if (isPending) return <Loading />;
   if (error) return <ErrorState error={error} retry={refetch} />;
-  return <div className="mx-auto max-w-2xl space-y-6"><Form key={app.id} app={app} /><Retention key={`r${app.id}`} app={app} /></div>;
+  return <div className="mx-auto max-w-2xl space-y-6"><Form key={app.id} app={app} /><TestFiles key={`f${app.id}`} app={app} /><Retention key={`r${app.id}`} app={app} /></div>;
 }
 
 const list = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
@@ -138,6 +140,42 @@ function Retention({ app }: { app: App }) {
         <p>Runs older than {st?.retention_days} days (except the newest {st?.retention_keep_last}) are removed with their screenshots, proof and reports. Bugs that only those runs found disappear too.</p>
         <p className="text-muted-foreground">Save the policy first if you changed the numbers above.</p>
       </ConfirmDelete>
+    </Card>
+  );
+}
+
+/** Files a test can upload when a page has a file field (an avatar, a CSV import, an invoice). */
+function TestFiles({ app }: { app: App }) {
+  const qc = useQueryClient();
+  const input = useRef<HTMLInputElement>(null);
+  const files = useQuery({ queryKey: ["files", app.slug], queryFn: () => api.listFiles(app.slug) });
+  const refresh = () => qc.invalidateQueries({ queryKey: ["files", app.slug] });
+  const add = useMutation({
+    mutationFn: async (list: File[]) => { for (const f of list) await api.uploadFile(app.slug, f); return list.length; },
+    onSuccess: (n) => { refresh(); toast.success(n === 1 ? "File added" : `${n} files added`); },
+  });
+  const remove = useMutation({ mutationFn: (id: string) => api.deleteFile(app.slug, id), onSuccess: () => { refresh(); toast.success("File removed"); } });
+  return (
+    <Card className="space-y-4 p-6">
+      <div>
+        <h2 className="font-medium">Test files</h2>
+        <p className="text-sm text-muted-foreground">When a page asks for a file (a profile photo, a spreadsheet to import), QAgent attaches one of these. Say which in the test plan with <code className="rounded bg-muted px-1">file: report.pdf</code> under Test data, or by naming it in the step. Without either, it picks a file that matches what the field accepts. Files up to {MAX_FILE_BYTES / (1024 * 1024)} MB.</p>
+      </div>
+      {files.isPending ? <p className="text-sm text-muted-foreground">Loading files…</p> : files.error ? <ErrorState error={files.error} retry={files.refetch} /> : (
+        <SimpleTable head={["Name", "Type", "Size", ""]}>
+          {files.data.map((f) => (
+            <TableRow key={f.id}>
+              <TableCell className="px-4 font-medium">{f.name} {f.builtin && <Badge tone="neutral">built in</Badge>}</TableCell>
+              <TableCell className="px-4 text-muted-foreground">{f.content_type}</TableCell>
+              <TableCell className="px-4 tabular-nums text-muted-foreground">{fmtBytes(f.size_bytes)}</TableCell>
+              <TableCell className="px-4 text-right">{!f.builtin && <Button variant="danger" onClick={() => remove.mutate(f.id)} aria-label={`Remove ${f.name}`}>Remove</Button>}</TableCell>
+            </TableRow>
+          ))}
+        </SimpleTable>
+      )}
+      {(add.error || remove.error) && <p role="alert" className="text-sm text-bad">{(add.error ?? remove.error)!.message}</p>}
+      <input ref={input} type="file" multiple hidden aria-label="Choose test files" onChange={(e) => { const list = Array.from(e.target.files ?? []); e.target.value = ""; if (list.length) add.mutate(list); }} />
+      <Button onClick={() => input.current?.click()} disabled={add.isPending}><Upload className="size-4" />{add.isPending ? "Adding…" : "Add files"}</Button>
     </Card>
   );
 }

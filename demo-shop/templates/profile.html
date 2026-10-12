@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Profile - Demo Shop{% endblock %}
+{% block content %}
+<h1>Your profile</h1>
+<p>Avatar: <span data-testid="avatar-current" id="avatar-current">{% if avatar %}{{ avatar.name }} ({{ avatar.size }} bytes){% else %}none yet{% endif %}</span></p>
+<label for="avatar">Choose avatar image</label>
+<input type="file" id="avatar" name="avatar" accept="image/*">
+<button data-testid="save-avatar" onclick="saveAvatar()">Save avatar</button>
+<p class="error" data-testid="avatar-error" id="avatar-error"></p>
+<p data-testid="avatar-status" id="avatar-status"></p>
+{% endblock %}
+{% block scripts %}
+<script>
+  async function saveAvatar() {
+    const file = document.getElementById('avatar').files[0];
+    const form = new FormData();
+    if (file) form.append('avatar', file);
+    const res = await fetch('/api/avatar', {method: 'POST', body: form});
+    const data = await res.json();
+    document.getElementById('avatar-error').textContent = res.ok ? '' : data.error;
+    document.getElementById('avatar-status').textContent = res.ok ? 'Avatar updated' : '';
+    if (res.ok) document.getElementById('avatar-current').textContent = data.name + ' (' + data.size + ' bytes)';
+  }
+</script>
+{% endblock %}

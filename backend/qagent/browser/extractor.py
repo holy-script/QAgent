@@ -15,12 +15,21 @@ EXTRACTOR_JS = """
         if (id > 40) break;
         const rect = el.getBoundingClientRect();
         const style = window.getComputedStyle(el);
-        if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') continue;
-        if (rect.width === 0 && rect.height === 0) continue;
+        const isFile = el.tagName.toLowerCase() === 'input' && el.type === 'file';
+        // File inputs are often hidden behind a styled button; they can still receive files, so keep them.
+        if (!isFile && (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0')) continue;
+        if (!isFile && rect.width === 0 && rect.height === 0) continue;
 
         let label = (el.innerText || el.getAttribute('aria-label') || el.getAttribute('placeholder') || el.getAttribute('value') || el.getAttribute('title') || '').trim();
         if (!label && el.tagName.toLowerCase() === 'input') {
-            label = el.getAttribute('name') || el.getAttribute('id') || 'Input field';
+            const own = el.id ? document.querySelector(`label[for="${el.id}"]`) : null;
+            label = (own && own.innerText.trim()) || el.getAttribute('name') || el.getAttribute('id') || 'Input field';
+        }
+        if (isFile) {
+            const own = el.id ? document.querySelector(`label[for="${el.id}"]`) : null;
+            const base = ((own && own.innerText.trim()) || el.getAttribute('aria-label') || el.getAttribute('name') || 'Choose file').trim();
+            const accept = el.getAttribute('accept');
+            label = base + ' (file upload' + (accept ? ', accepts ' + accept : '') + (el.multiple ? ', several files' : '') + ')';
         }
 
         // Build unique or simple selector
@@ -39,8 +48,8 @@ EXTRACTOR_JS = """
             tag: el.tagName.toLowerCase(),
             selector: sel,
             label: label.substring(0, 80),
-            action_type: el.tagName.toLowerCase() === 'input' && (el.type === 'text' || el.type === 'password' || el.type === 'email') ? 'fill' : 'click',
-            value: el.value || null,
+            action_type: isFile ? 'upload' : el.tagName.toLowerCase() === 'input' && (el.type === 'text' || el.type === 'password' || el.type === 'email') ? 'fill' : 'click',
+            value: isFile ? null : (el.value || null),
             bounding_box: {
                 x: rect.x,
                 y: rect.y,
@@ -101,6 +110,8 @@ def extract_candidates_from_html(html: str, max_candidates: int = 40) -> List[Ca
             sel = tag
 
         action_type = "fill" if tag == "input" else "click"
+        if tag == "input" and re.search(r'type=["\']?file', match.group(0), re.IGNORECASE):
+            action_type = "upload"
         candidates.append(CandidateAction(
             id=cid,
             tag=tag,

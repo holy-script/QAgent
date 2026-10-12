@@ -103,3 +103,16 @@ test("each app sets its own clean-up policy and old runs can be removed", async 
   await expect(page.getByText("0 of 3 runs would be deleted right now.")).toBeVisible(); // the demo runs are all newer than a day
   await expect(page.getByRole("button", { name: /Clean up now/ })).toBeDisabled();
 });
+
+test("test files: built-in samples are listed and a new file can be added and removed", async ({ page }) => {
+  await page.goto(APP);
+  await page.getByRole("navigation", { name: "Sections" }).getByRole("link", { name: "Settings" }).click();
+  await expect(page.getByRole("heading", { name: "Test files" })).toBeVisible();
+  await expect(page.getByRole("cell", { name: /sample\.png/ })).toBeVisible();
+  await page.getByLabel("Choose test files").setInputFiles({ name: "invoice.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4 demo") });
+  await expect(page.getByRole("cell", { name: "invoice.pdf", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Remove invoice.pdf" }).click();
+  await expect(page.getByRole("cell", { name: "invoice.pdf", exact: true })).toHaveCount(0);
+  await page.getByLabel("Choose test files").setInputFiles({ name: "huge.bin", mimeType: "application/octet-stream", buffer: Buffer.alloc(11 * 1024 * 1024) });
+  await expect(page.getByRole("alert").filter({ hasText: "at most 10 MB" })).toBeVisible();
+});
