@@ -37,7 +37,7 @@ frontend/src/        Next.js 16 App Router (cacheComponents), shadcn/ui on Base 
 frontend/e2e/        Playwright suite on a production build in demo mode
 demo-shop/           the sample target app (FastAPI + Jinja): 6 planted bugs, /login (admin / s3cret-pass), /profile avatar upload
 playbooks/           checkout.md (the seed plan), uploads.md
-deploy/              HUGGINGFACE.md, CODESPACES.md, DEMO.md, README.md (VM), hf/, codespaces/, ci.github-actions.yml
+deploy/              redeploy.sh + gh-login.sh (live deploy), HUGGINGFACE.md, CODESPACES.md, DEMO.md, README.md (VM), hf/, codespaces/, ci.github-actions.yml
 .devcontainer/       Codespaces dev container (Chromium image + sshd)
 PROGRESS.md          status + feature list (kept current); DUAL_CODER_PLAN.md = original architecture; CONTEXT.md = this file
 ```
@@ -79,19 +79,40 @@ browser -> Vercel (web, /api rewrite) -> GitHub Codespace (API + Chromium + demo
   `AUTH_SECRET`, optional `CREDENTIALS_KEY`, `AUTH_EMAIL`/`AUTH_PASSWORD`. The team login is the one from `backend/qagent/config.py`
   defaults unless overridden. Never commit secrets; `.env` files are ignored.
 
-### Redeploy runbook (what we do after a change)
-1. `git push origin main`.
-2. If there is a new migration: `cd backend && uv run alembic upgrade head` (this migrates the shared Neon DB; the Codespace also
-   runs it on start).
-3. Backend: pull into the Codespace and restart it **through a stop/start** so the lifecycle command runs with the Codespace secrets
-   (restarting from an SSH shell loses the secrets and the API silently falls back to local SQLite):
-   `gh codespace ssh -c <name> -- "cd /workspaces/QAgent && git pull origin main"` (needs a token header since the repo is private),
-   then `gh codespace stop -c <name>`, wait for `Shutdown`, `gh api --method POST user/codespaces/<name>/start`, wait for `Available`,
-   wait ~60 s, `gh codespace ports visibility 8000:public -c <name>`, check `<url>/api/health` (all four *_reachable true).
-4. Web: `cd frontend && vercel --prod --yes` (it occasionally fails once with "Not authorized"; retry).
-5. Smoke: sign in through the Vercel URL, `GET /api/apps`, and open a run page (screenshots must load).
-The `gh` CLI is not installed system-wide: a throw-away copy lives in `/tmp/ghcli` and needs `GH_CONFIG_DIR=/tmp/ghcli/config` (login
-was a device flow; scopes codespace + repo). Recreate it if /tmp was cleared.
+### How to deploy (backend + web) and how the CLIs are signed in
+Two scripts do everything; they were verified end to end:
+```
+deploy/gh-login.sh          # once per machine: gets a throw-away GitHub CLI and signs it in (device flow)
+deploy/redeploy.sh          # both:   pull main into the Codespace, restart it with its secrets, port public, health check, then Vercel
+deploy/redeploy.sh be       # backend only
+deploy/redeploy.sh fe       # web only
+```
+**GitHub CLI (backend side).** `gh` is not installed system-wide (Homebrew fails when the Xcode licence is unaccepted). `deploy/gh-login.sh`
+downloads the official binary from the GitHub releases page into `/tmp/ghcli` and signs in with the device flow
+(`gh auth login -w -s codespace,repo`): it prints a one-time code (also copied to the clipboard); open https://github.com/login/device,
+enter it, approve. Config lives in `/tmp/ghcli/config` (`export GH_CONFIG_DIR=/tmp/ghcli/config`); /tmp is cleared on reboot, so rerun the
+script then. Scopes: `codespace` (start/stop/ports/create) and `repo` (read the private repo). Revoke any time at
+github.com/settings/applications. Everything `redeploy.sh` does for the backend, by hand:
+1. `git push origin main`; if there is a new migration also `cd backend && uv run alembic upgrade head` (shared Neon DB).
+2. Start the Codespace if it is `Shutdown`: `gh api --method POST user/codespaces/<name>/start`; wait for `Available`.
+3. Pull into it. The repo is private, so pass a one-off token header:
+   `gh codespace ssh -c <name> -- "cd /workspaces/QAgent && git -c http.extraheader='Authorization: Basic $(printf 'x-access-token:%s' "$(gh auth token)" | base64)' pull origin main"`
+4. Restart it with **`gh codespace stop -c <name>`, wait for `Shutdown`, then start again** (never just re-run `start.sh` from the SSH shell: that
+   shell has no Codespace secrets and the API would quietly use local SQLite). Wait about 60 s.
+5. `gh codespace ports visibility 8000:public -c <name>` (a restart can reset it; automatic if the Codespace secret `GH_PAT` exists).
+6. Check `https://<name>-8000.app.github.dev/api/health`: postgres, storage, Jev and Bedrock must all be `true`.
+To create a fresh Codespace instead: `gh codespace create -R holy-script/QAgent -b main -m basicLinux32gb --idle-timeout 240m --default-permissions`
+(user secrets are attached automatically if they allow the repo; secrets were set with `gh secret set NAME --user --repos holy-script/QAgent`,
+values piped on stdin). A new Codespace has a new address: update the Vercel env `BACKEND_URL` and redeploy the web app.
+
+**Vercel CLI (web side).** `vercel` IS installed and signed in as `holy-script` (`vercel whoami`; sign in again with `vercel login`).
+The folder `frontend/.vercel/` (git-ignored) links the project `qagent-web`. By hand: `cd frontend && vercel --prod --yes` (retry once if it says
+"Not authorized"), then `vercel ls` until `Ready`. First-time setup, only if the project is ever recreated:
+`vercel link --yes --project qagent-web`, `printf '/api' | vercel env add NEXT_PUBLIC_API_URL production`,
+`printf 'https://<name>-8000.app.github.dev' | vercel env add BACKEND_URL production`. Env vars are read at build time, so change them, then redeploy.
+
+**Smoke test after a deploy:** sign in through https://qagent-web-mu.vercel.app (or `POST /api/auth/login` with a cookie jar), `GET /api/apps`,
+open a run page (screenshots must load), and optionally run a Practice-mode run on the Demo Shop.
 
 ## Commands
 ```
