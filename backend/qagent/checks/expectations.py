@@ -50,7 +50,7 @@ async def run_expectation_live(judge: Any, flow_key: str, n: int, text: str, sev
     is double-checked live before it is reported (a screenshot cannot show that something does not work, or that it does).
     None means the live check stayed inconclusive: nothing is reported either way."""
     verify = bool(getattr(judge, "can_verify", False))
-    question = f"On this page, is the following true: {text}"
+    question = f"Is the following true of the app in this journey (judge it from the screens the journey went through, not only the page you are on now): {text}"
 
     async def live() -> Optional[Verdict]:
         return await judge.verify(question, page_text, page, journey, hints, examples, console_logs, state_js, network_calls, snapshots)

@@ -20,6 +20,8 @@ from qagent.decision.charter import with_charter
 from qagent.decision.claude import usage_cost
 from qagent.domain.schemas import CandidateAction
 
+BEHAVIOUR = re.compile(r"\b(chang\w*|updat\w*|respon\w*|react\w*|recalculat\w*|computed|click\w*|clickable|hover\w*|opens?|navigat\w+|toggle\w*|expand\w*|collaps\w*)\b", re.I)
+
 _STOP = {"the", "and", "that", "with", "for", "are", "was", "not", "any", "all", "this", "shows", "show", "page", "from", "has", "have"}
 
 VERIFY_TOOL = {
@@ -50,7 +52,7 @@ SYSTEM = (
     "happened, an error appeared, the wrong page opened); answer 'true' when your evidence supports it; use 'inconclusive' only "
     "when you tried and still cannot tell. Avoid destructive actions (deleting, paying, submitting real data) and do not repeat "
     "actions that change the journey's state (Fix, Upload, Commit, Generate): the steps already done are listed, so judge statements "
-    "about an earlier moment (such as before the fix) from that list and the page now, or answer inconclusive. When the statement is about an earlier screen (Upload, Explore, Method...), the text listed under 'Earlier screens' is the evidence for it: facts shown there count, and you must not call the statement false just because the page you are on now is a different screen. You have a "
+    "about an earlier moment (such as before the fix) from that list and the page now, or answer inconclusive. When the statement is about an earlier screen (Upload, Explore, Method...), the text listed under 'Earlier screens' is the evidence for it: facts shown there count, and you must not call the statement false just because the page you are on now is a different screen. Words like 'about' or 'around' allow small differences, so do not fail a statement for being exact. If the statement is about changes or reactions (changes, updates, responds, is computed from), you must do it and compare before answering: never answer about what would happen. You have a "
     "limited number of actions, so be efficient and answer as soon as the evidence is clear."
 )
 
@@ -128,6 +130,7 @@ async def verify_live(client: Any, page: Page, statement: str, journey: str = ""
     on_download = lambda d: downloads.append(d.suggested_filename)  # noqa: E731
     page.on("download", on_download)
     trail: List[str] = []
+    nudged = False
     in_tok = out_tok = 0
     cost = 0.0
     verdict: Optional[Verdict] = None
@@ -143,6 +146,10 @@ async def verify_live(client: Any, page: Page, statement: str, journey: str = ""
             cost += usage_cost(usage)
             a = out["input"]
             action, why = a.get("action"), str(a.get("reasoning", "")).strip()
+            if action == "answer" and not trail and not nudged and BEHAVIOUR.search(statement):
+                nudged = True   # a statement about behaviour needs evidence from doing it
+                trail.append("(you answered without trying anything. The statement is about behaviour: do it first (click or type), then answer)")
+                continue
             if action == "answer" or left <= 0:
                 v = a.get("verdict") if action == "answer" else "inconclusive"
                 if v in ("true", "false"):

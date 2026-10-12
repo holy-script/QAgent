@@ -160,3 +160,16 @@ async def test_the_verifier_can_type_into_a_field_and_sees_earlier_screens():
         assert "After step 4" in client.prompts[0] and "6/6 pass" in client.prompts[0] and "Forecast screen only" not in client.prompts[0]
     finally:
         await sb.stop()
+
+
+@pytest.mark.asyncio
+async def test_an_answer_about_behaviour_given_without_trying_anything_is_sent_back_once():
+    sb, page = await on_page()
+    try:
+        client = Script([answer("true", "it would respond"), click(1), answer("true", "I clicked it and the page changed")])
+        verdict = await verify_live(client, page, "The link responds to clicks")
+        assert verdict.passed and len(client.prompts) == 3 and "answered without trying anything" in client.prompts[1]
+        client = Script([answer("true", "the page shows a total")])                   # a plain fact needs no trying
+        assert (await verify_live(client, page, "The page shows a total")).passed and len(client.prompts) == 1
+    finally:
+        await sb.stop()
