@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { API_URL, USE_MOCK, api } from "./api/client";
+import { API_ORIGIN, API_URL, USE_MOCK, api } from "./api/client";
 import type { Run, RunEvent } from "./api/types";
 import { emptyView, reduce, type RunView } from "./run-state";
 import { EVENT_TYPES, EventTranslator } from "./api/adapter";
@@ -29,7 +29,7 @@ export function useRunStream(run: Run, animate: boolean) {
       // The backend sends named SSE events, so each type needs its own listener (onmessage never fires).
       // The browser resends Last-Event-ID on reconnect; we close for good once the run's report is ready.
       const es = new EventSource(`${API_URL}/runs/${run.id}/events`, { withCredentials: true });
-      const tr = new EventTranslator(run, API_URL);
+      const tr = new EventTranslator(run, API_ORIGIN);
       for (const type of EVENT_TYPES) {
         es.addEventListener(type, (m) => {
           const env = JSON.parse((m as MessageEvent).data);

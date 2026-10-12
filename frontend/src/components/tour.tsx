@@ -101,7 +101,22 @@ function GuideSpotlight({ slug, stepId }: { slug: string; stepId: string }) {
   const started = useRef(false);
   const alive = useRef(true);
   const moving = useRef(false);
-  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
+  const instance = useRef<ReturnType<typeof driver> | null>(null);
+  // Leaving the page (for example pressing "Run now") must take the pointer down with it.
+  useEffect(() => {
+    alive.current = true;
+    document.body.classList.add("guide-spotlight");
+    return () => { alive.current = false; document.body.classList.remove("guide-spotlight"); instance.current?.destroy(); instance.current = null; };
+  }, []);
+  // If the user does the step the pointer is showing, the pointer has done its job.
+  const doneNow = g.states.find((s) => s.step.id === stepId)?.state === "done";
+  const wasDone = useRef<boolean | null>(null);
+  useEffect(() => {
+    if (!g.ready) return;
+    // ("results" counts as done just by being on the page, so it must not dismiss itself)
+    if (wasDone.current === false && doneNow && stepId !== "results") { moving.current = true; instance.current?.destroy(); instance.current = null; router.replace(pathname); }
+    wasDone.current = doneNow;
+  }, [doneNow, g.ready, router, pathname, stepId]);
   useEffect(() => {
     if (!g.ready || started.current) return;
     started.current = true;
@@ -130,6 +145,7 @@ function GuideSpotlight({ slug, stepId }: { slug: string; stepId: string }) {
         }],
         onDestroyed: () => { if (alive.current && !moving.current) close(); },
       });
+      instance.current = d;
       d.drive();
     })();
   }, [g, stepId, slug, router, pathname]);

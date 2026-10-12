@@ -48,7 +48,7 @@ export function RunLauncher({ slug }: { slug: string }) {
           )}
           {start.error && <p role="alert" className="text-sm text-bad">{start.error.message}</p>}
           <Button variant="primary" className="w-full" disabled={start.isPending}
-            onClick={async () => { const r = await start.mutateAsync({ versionId: pb.current_version_id, mode, plan: plan && mode !== "stub" }); router.push(`/apps/${slug}/runs/${r.id}`); }}>
+            onClick={async () => { const r = await start.mutateAsync({ versionId: pb.current_version_id, mode, plan: plan && mode !== "stub" }); router.push(`/apps/${slug}/runs/${r.id}${new URLSearchParams(window.location.search).get("guide") === "run" ? "?guide=results" : ""}`); }}>
             <Play className="size-4" />{start.isPending ? "Starting…" : "Run now"}
           </Button>
         </>

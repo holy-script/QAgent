@@ -300,3 +300,49 @@ test.describe("guided setup", () => {
     await expect(page.getByRole("link", { name: /Next: Describe your app/ })).toBeVisible();
   });
 });
+
+
+test.describe("fixes from first real use", () => {
+  test("runs can be deleted one at a time or in bulk from the list", async ({ page }) => {
+    await page.goto(APP);
+    await page.getByRole("navigation", { name: "Sections" }).getByRole("link", { name: "Runs" }).click();
+    await expect(page.getByRole("row")).toHaveCount(11); // header + 10 demo runs
+    await page.getByRole("button", { name: /Delete run run-h10/ }).click();
+    await page.getByRole("button", { name: "Delete run", exact: true }).click();
+    await expect(page.getByRole("row")).toHaveCount(10);
+    await page.getByRole("checkbox", { name: /Select run run-h9/ }).click();
+    await page.getByRole("checkbox", { name: /Select run run-b8/ }).click();
+    await expect(page.getByText("2 selected")).toBeVisible();
+    await page.getByRole("button", { name: "Delete selected" }).click();
+    await page.getByRole("button", { name: "Delete 2 runs" }).click();
+    await expect(page.getByRole("row")).toHaveCount(8);
+    await page.getByRole("checkbox", { name: "Select all runs" }).click();
+    await expect(page.getByText("7 selected")).toBeVisible();
+  });
+
+  test("the test plan dropdown can be clicked with the mouse while the setup guide is pointing at it", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`${APP}?guide=run`);
+    await expect(page.locator(".driver-popover").getByText("Run your first test")).toBeVisible();
+    await page.getByRole("combobox", { name: "Test plan" }).click();
+    await page.getByRole("option").first().click({ timeout: 5000 });
+    await expect(page.getByRole("combobox", { name: "Test plan" })).toBeVisible();
+  });
+
+  test("starting a run from the guide takes the pointer away and moves on to the results step", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`${APP}?guide=run`);
+    await expect(page.locator(".driver-popover").getByText("Run your first test")).toBeVisible();
+    await page.getByRole("button", { name: "Run now" }).click();
+    await expect(page).toHaveURL(/runs\/run-.*guide=results/);
+    await expect(page.locator(".driver-popover").getByText("Read what it found")).toBeVisible();
+    await expect(page.locator(".driver-popover")).toHaveCount(1);          // the old "run" pointer is gone, not stacked
+    await page.locator(".driver-popover").getByRole("button", { name: "Close" }).click();
+    await expect(page.locator(".driver-popover")).toHaveCount(0);
+  });
+
+  test("the test plan editor has one place to dictate, next to the rewrite button", async ({ page }) => {
+    await page.goto(`${APP}/playbooks/new`);
+    await expect(page.getByRole("button", { name: "Dictate", exact: true })).toHaveCount(1);
+  });
+});

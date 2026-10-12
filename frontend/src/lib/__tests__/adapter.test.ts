@@ -72,3 +72,17 @@ describe("cost breakdown", () => {
     expect(totalsOf({ total_cost_usd: 0.05, judge_cost_usd: 0.01, report_cost_usd: 0.02 })).toMatchObject({ cost_usd: 0.05, judge_cost_usd: 0.01, planner_cost_usd: 0, report_cost_usd: 0.02 });
   });
 });
+
+describe("screenshot addresses", () => {
+  it("never doubles /api when the web app proxies the API on its own address", () => {
+    const run = makeRun("run-x", "hybrid", 0);
+    const verified = (origin: string) => {
+      const t = new EventTranslator(run, origin);
+      const out = t.translate("step.verified", { seq: 1, type: "step.verified", ts: "2026-01-01T00:00:00Z", payload: { flow_key: "j", step_seq: 1, status: "passed", timings: {}, url: "u" } });
+      return (out[1] as { payload: { screenshot: string } }).payload.screenshot;
+    };
+    expect(verified("")).toMatch(/^\/api\/artifacts\/run-x\/flows\/j\/steps\/1\/screenshot\.jpg/);            // same-origin deployment
+    expect(verified("http://localhost:8000")).toMatch(/^http:\/\/localhost:8000\/api\/artifacts\//);              // separate API address
+    expect(verified("")).not.toContain("/api/api/");
+  });
+});

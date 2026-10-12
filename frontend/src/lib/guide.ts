@@ -29,7 +29,7 @@ export const GUIDE_STEPS: GuideStep[] = [
     spotlight: "Pick the test plan, keep Smart mode, and press Run now. You can watch it live." },
   { id: "results", title: "Read what it found", path: (s, r) => (r ? `/apps/${s}/runs/${r}` : `/apps/${s}/runs`), target: "run-tabs",
     why: "Each problem comes with screenshots, the server calls and steps to reproduce.",
-    spotlight: "Journeys shows every step. Problems lists what failed, and the report on the right summarises it. Open a bug to get the full write-up." },
+    spotlight: "Your test is running. Watch it here, and when it finishes: Journeys shows every step, Problems lists what failed, and View report summarises everything. Open a bug for the full write-up." },
   { id: "repeat", title: "Fix, then repeat", optional: true, path: (s, r) => (r ? `/apps/${s}/runs/${r}` : `/apps/${s}/runs`), target: "repeat",
     why: "After a fix, run the same test again from the recording to confirm it.",
     spotlight: "“Repeat exactly” runs the same test again with no AI calls and no cost. Bugs that no longer appear are marked Fixed." },

@@ -66,7 +66,7 @@ make test         # 55 backend tests
 - **Deleting**: app and run deletion cascade through the database and object storage; confirmation dialogs (type the app name for an app).
 - **Reliability**: orphaned runs are marked failed on restart; uploads retry with backoff and emit `artifact.uploaded`.
 - **Editor**: CodeMirror 6 with Markdown highlighting, item IDs and bindings coloured, problems underlined on their line, edit-in-place for existing items (unseen fields are preserved).
-- **Tests and demo data**: every page and feature has demo data (in-browser fixtures with a scripted live run). Backend 94 pytest tests, frontend 47 unit tests, 69 Playwright tests (all pages x both themes, accessibility, phone width, auth, key journeys). CI runs all of them.
+- **Tests and demo data**: every page and feature has demo data (in-browser fixtures with a scripted live run). Backend 95 pytest tests, frontend 48 unit tests, 73 Playwright tests (all pages x both themes, accessibility, phone width, auth, key journeys). CI runs all of them.
 - **Done**: credential rotation (not needed, closed), `qagent-artifacts` bucket created and configured.
 
 - **Tape and cost**: judge verdicts and report calls are recorded as `model_calls` (new table, migration `b7e2c4a91d30`), so "Repeat exactly" answers judgements and reports from the recording with no model calls. Judge, planner and report cost roll into the run total with a breakdown; `GET /runs/{id}/tape` lists every call and the run page has an **AI calls** tab.

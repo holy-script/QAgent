@@ -216,3 +216,11 @@
 .on-blue { --foreground: #fff; --muted-foreground: rgb(255 255 255 / 0.8); --card: rgb(255 255 255 / 0.12); --muted: rgb(255 255 255 / 0.14); --border: rgb(255 255 255 / 0.26); --accent: rgb(255 255 255 / 0.18); --accent-foreground: #fff; --ring: #f3d58a; color: #fff; }
 .card-lift { transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
 .card-lift:hover { transform: translateY(-2px); border-color: color-mix(in oklab, var(--brand) 45%, var(--border)); }
+
+/* While a tour or the setup guide is open, dropdowns (rendered in a portal) must sit above its dimmed backdrop, and the
+   guide's backdrop lets clicks through so the user can really do the step it points at. */
+body.driver-active div:has(> [data-slot="select-content"]), body.driver-active div:has(> [data-slot="dropdown-menu-content"]) { z-index: 1000000001 !important; }
+/* driver.js switches pointer events off for everything except the highlighted element; open dropdowns are the exception */
+body.driver-active div:has(> [data-slot="select-content"]), body.driver-active div:has(> [data-slot="select-content"]) *,
+body.driver-active div:has(> [data-slot="dropdown-menu-content"]), body.driver-active div:has(> [data-slot="dropdown-menu-content"]) * { pointer-events: auto !important; }
+body.guide-spotlight .driver-overlay { pointer-events: none !important; }
