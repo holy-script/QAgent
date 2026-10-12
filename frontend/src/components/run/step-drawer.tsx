@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Minus, Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { Badge, Card, SeverityBadge, StatusPill, cn, fmtBytes, fmtMs } from "@/components/ui";
@@ -26,6 +27,8 @@ export function StepDrawer({ step, view, onClose, runId }: { step: Step; view: R
   const live = !USE_MOCK;
   const { data: arts } = useStepArtifacts(runId, step.flow_key, step.seq, live && step.status !== "running");
   const [side, setSide] = useState<"after" | "before">("after");
+  const [zoom, setZoom] = useState(1);
+  const zoomTo = (z: number) => setZoom(Math.min(4, Math.max(1, Math.round(z * 4) / 4)));
   const candUrl = arts?.find((a) => a.kind === "candidates")?.url;
   const { data: liveCandidates } = useQuery({ queryKey: ["candidates", candUrl], enabled: !!candUrl, queryFn: () => loadCandidates(candUrl!) });
   const candidates = step.candidates.length ? step.candidates : (liveCandidates ?? []);
@@ -39,44 +42,59 @@ export function StepDrawer({ step, view, onClose, runId }: { step: Step; view: R
 
   return (
     <Sheet open onOpenChange={(o) => !o && onClose()}>
-      <SheetContent side="right" aria-label={`Step ${step.seq} details`} className="w-full gap-0 overflow-y-auto p-5 sm:max-w-2xl">
-        <div className="space-y-5">
-        <div className="flex items-start gap-3 pr-8">
+      <SheetContent side="bottom" aria-label={`Step ${step.seq} details`}
+        className="gap-0 overflow-hidden rounded-t-2xl p-0 duration-300 data-[side=bottom]:h-[94vh] data-[side=bottom]:data-ending-style:translate-y-full data-[side=bottom]:data-starting-style:translate-y-full">
+        <div className="flex items-start gap-3 border-b border-border px-6 py-4 pr-14">
           <div className="min-w-0 flex-1">
-            <SheetDescription className="text-xs">{step.flow_key} · step {step.seq} · <span className="font-mono">{step.url}</span></SheetDescription>
-            <SheetTitle className="text-lg font-medium">{step.intent}</SheetTitle>
+            <SheetDescription className="truncate text-xs">{step.flow_key} · step {step.seq} · <span className="font-mono">{step.url}</span></SheetDescription>
+            <SheetTitle className="text-xl font-medium">{step.intent}</SheetTitle>
           </div>
           <StatusPill status={step.status === "running" ? "running" : step.status} />
         </div>
 
-        {live && beforeUrl && (
-          <div className="flex gap-1" role="group" aria-label="Screenshot">
-            {(["before", "after"] as const).map((k) => (
-              <button key={k} onClick={() => setSide(k)} aria-pressed={side === k}
-                className={cn("rounded-md border px-2.5 py-1 text-xs capitalize", side === k ? "border-brand bg-brand/10 text-brand" : "border-border text-muted-foreground hover:bg-foreground/5")}>{k}</button>
-            ))}
+        <div className="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:overflow-hidden">
+        <div className="flex min-h-0 flex-col gap-3 border-border p-5 lg:border-r">
+          <div className="flex flex-wrap items-center gap-2">
+            {live && beforeUrl && (
+              <div className="flex gap-1" role="group" aria-label="Screenshot">
+                {(["before", "after"] as const).map((k) => (
+                  <button key={k} onClick={() => setSide(k)} aria-pressed={side === k}
+                    className={cn("rounded-md border px-2.5 py-1 text-xs capitalize", side === k ? "border-brand bg-brand/10 text-brand" : "border-border text-muted-foreground hover:bg-foreground/5")}>{k}</button>
+                ))}
+              </div>
+            )}
+            {shown && (
+              <div className="ml-auto flex items-center gap-1" role="group" aria-label="Zoom">
+                <button onClick={() => zoomTo(zoom - 0.5)} disabled={zoom <= 1} aria-label="Zoom out" className="rounded-md border border-border p-1.5 text-muted-foreground hover:bg-foreground/5 disabled:opacity-40"><Minus className="size-3.5" /></button>
+                <button onClick={() => setZoom(1)} aria-label="Fit to width" className="w-14 rounded-md border border-border py-1 text-xs tabular-nums hover:bg-foreground/5">{zoom === 1 ? "Fit" : `${Math.round(zoom * 100)}%`}</button>
+                <button onClick={() => zoomTo(zoom + 0.5)} disabled={zoom >= 4} aria-label="Zoom in" className="rounded-md border border-border p-1.5 text-muted-foreground hover:bg-foreground/5 disabled:opacity-40"><Plus className="size-3.5" /></button>
+              </div>
+            )}
           </div>
-        )}
-        {candidates.length > 0 && <p className="text-xs text-muted-foreground">Boxes mark the buttons and links the AI could choose from. The highlighted one was used.</p>}
-        {shown && (
-          <div className="relative overflow-hidden rounded-lg border border-border bg-muted">
-            <img src={shown} alt="Step screenshot" className="w-full" />
-            {candidates.map((c) => {
-              const [x, y, w, h] = c.rect;
-              const chosen = c.id === step.action_id;
-              return <div key={c.id} title={`#${c.id} ${c.role}: ${c.label}`} className={cn("absolute border", chosen ? "border-2 border-brand bg-brand/15" : "border-violet/60")}
-                style={{ left: `${(x / 1280) * 100}%`, top: `${(y / 800) * 100}%`, width: `${(w / 1280) * 100}%`, height: `${(h / 800) * 100}%` }}>
-                <span className={cn("absolute -top-2.5 left-1 rounded px-1 text-[10px] font-medium", chosen ? "bg-brand text-primary-foreground" : "bg-violet/80 text-white")}>{c.id}</span>
-              </div>;
-            })}
-          </div>
-        )}
-        {waitUrls.length > 0 && (
-          <Section title={`While waiting (${waitUrls.length} snapshots)`}>
-            <div className="flex gap-2 overflow-x-auto">{waitUrls.map((w, i) => <img key={i} src={w} alt={`Wait frame ${i + 1}`} className="h-24 rounded border border-border" />)}</div>
-          </Section>
-        )}
+          {candidates.length > 0 && <p className="text-xs text-muted-foreground">Boxes mark the buttons and links the AI could choose from. The highlighted one was used. Click the image to zoom, scroll to move around.</p>}
+          {shown && (
+            <div className="min-h-0 flex-1 overflow-auto rounded-lg border border-border bg-muted">
+              <div className="relative" style={{ width: `${zoom * 100}%` }}>
+                <img src={shown} alt="Step screenshot" className={cn("w-full", zoom < 4 ? "cursor-zoom-in" : "cursor-zoom-out")} onClick={() => zoomTo(zoom < 4 ? zoom + 1 : 1)} />
+                {candidates.map((c) => {
+                  const [x, y, w, h] = c.rect;
+                  const chosen = c.id === step.action_id;
+                  return <div key={c.id} title={`#${c.id} ${c.role}: ${c.label}`} className={cn("pointer-events-none absolute border", chosen ? "border-2 border-brand bg-brand/15" : "border-violet/60")}
+                    style={{ left: `${(x / 1280) * 100}%`, top: `${(y / 800) * 100}%`, width: `${(w / 1280) * 100}%`, height: `${(h / 800) * 100}%` }}>
+                    <span className={cn("absolute -top-2.5 left-1 rounded px-1 text-[10px] font-medium", chosen ? "bg-brand text-primary-foreground" : "bg-violet/80 text-white")}>{c.id}</span>
+                  </div>;
+                })}
+              </div>
+            </div>
+          )}
+          {waitUrls.length > 0 && (
+            <Section title={`While waiting (${waitUrls.length} snapshots)`}>
+              <div className="flex gap-2 overflow-x-auto">{waitUrls.map((w, i) => <img key={i} src={w} alt={`Wait frame ${i + 1}`} className="h-24 rounded border border-border" />)}</div>
+            </Section>
+          )}
+        </div>
 
+        <div className="min-h-0 space-y-5 p-5 lg:overflow-y-auto">
         <Section title="What the AI chose">
           {!step.decisions.length && <div className="text-sm text-muted-foreground">No AI choice was needed for this step (for example, opening a page).</div>}
           <div className="space-y-2">
@@ -151,6 +169,7 @@ export function StepDrawer({ step, view, onClose, runId }: { step: Step; view: R
             </ul>
           </Section>
         )}
+        </div>
         </div>
       </SheetContent>
     </Sheet>
