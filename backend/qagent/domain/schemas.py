@@ -48,6 +48,7 @@ class CandidateAction(BaseModel):
     label: str = Field(description="Visible text or accessible label")
     action_type: str = Field(default="click", description="click, fill, select, navigate")
     value: Optional[str] = Field(default=None, description="Input value if fill action")
+    options: List[str] = Field(default_factory=list, description="For a dropdown (action select): the options it offers")
     bounding_box: Optional[BoundingRect] = Field(default=None)
 
 

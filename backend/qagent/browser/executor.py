@@ -64,6 +64,11 @@ class BrowserExecutor:
                 await self._click(action)
             elif action.action_type == "fill":
                 await self._fill(action, value if value is not None else (action.value or "test"))
+            elif action.action_type == "select":
+                loc = await self._locate(action)
+                if loc is None:
+                    raise RuntimeError(f"could not find exactly one dropdown for '{action.label}'")
+                await loc.select_option(label=value, timeout=3000)
             elif action.action_type == "upload":
                 loc = await self._locate(action)
                 if loc is None:

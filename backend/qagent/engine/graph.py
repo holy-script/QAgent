@@ -20,6 +20,7 @@ from qagent.browser.extractor import EXTRACTOR_JS
 from qagent.browser.network_recorder import NetworkRecorder
 from qagent.browser.redact import redact_body
 from qagent.browser.sandbox import BrowserSandbox
+from qagent.browser.selecting import choose_option, parse_utility, run_utility
 from qagent.browser.wait_frames import WaitFramesWatcher, page_signature, wait_dom_stable
 from qagent.checks import a11y, expectations, formulas as formula_checks, timing, ux_rules
 from qagent.checks.base import CheckOutcome
@@ -692,10 +693,10 @@ class EngineRunner:
             await wait_dom_stable(page)
             raw = await page.evaluate(EXTRACTOR_JS)
             candidates = [CandidateAction.model_validate(c) for c in raw[:60]]
-            text = await page.evaluate("document.body ? document.body.innerText : ''")
+            text = (await page.evaluate("document.body ? document.body.innerText : ''"))[:6000]
             title = await page.title()
             try:
-                aria = (await page.locator("body").aria_snapshot(timeout=3000))[:1500]
+                aria = (await page.locator("body").aria_snapshot(timeout=3000))[:2500]
             except Exception:
                 aria = ""
         except Exception as exc:
@@ -755,7 +756,7 @@ class EngineRunner:
         ctx.steps[idx] = StepInfo(step_id=step_id)
         rt.recorder.mark_step_start()
         return {
-            "idx": idx, "step_id": step_id, "intent": intent, "nav_target": parse_navigation(intent),
+            "idx": idx, "step_id": step_id, "intent": intent, "nav_target": parse_navigation(intent) or parse_utility(intent),
             "candidates": [], "decision": None, "chosen_id": None, "label": "", "tier": ConfidenceTier.AUTO.value,
             "escalated": False, "acted": False, "settled": True, "step_status": "passed", "step_done": False,
             "target_bbox": None, "timings": {k: 0.0 for k in _TIMING_KEYS}, "steps_run": idx,
@@ -936,6 +937,20 @@ class EngineRunner:
 
         if state.get("nav_target"):
             target = state["nav_target"]
+            if target.startswith("@"):   # scroll, wait, go back, press a key: done by the engine, no element to choose
+                started = time.perf_counter()
+                update = {"acted": True, "label": target[1:].replace(":", " ")}
+                try:
+                    update["label"] = await run_utility(page, target)
+                except Exception as exc:
+                    update.update(self._fail(rt, f"step {state['idx']}: {target[1:]} failed: {str(exc).splitlines()[0][:120]}"))
+                timings["act_ms"] = (time.perf_counter() - started) * 1000.0
+                await self.sink.emit(QAgentEventType.ACTION_EXECUTED, {
+                    **base, "action_id": 0, "action_label": update["label"],
+                    "status": "failed" if update.get("step_status") == "failed" else "success",
+                    "duration_ms": timings["act_ms"], "target_bbox": None,
+                })
+                return {**update, "timings": timings}
             url = urljoin(page.url if page.url.startswith("http") else self.spec.base_url, target)
             label = f"Navigate to {target}"
             host = urlparse(url).hostname or ""
@@ -962,6 +977,10 @@ class EngineRunner:
         ctx.steps[state["idx"]].bbox = bbox
         try:
             value = resolve_fill_value(state["intent"], chosen, ctx.flow.test_data, self.spec.secrets) if chosen.action_type == "fill" else None
+            if chosen.action_type == "select":
+                value = choose_option(state["intent"], chosen.label, chosen.options, ctx.flow.test_data)
+                if value is None:
+                    raise MissingValue(f"no option of '{chosen.label}' matches '{state['intent']}' (options: {', '.join(chosen.options[:12])})")
         except MissingValue as exc:
             update = {"acted": True, **self._fail(rt, f"step {state['idx']}: {exc}")}
             await self.sink.emit(QAgentEventType.ACTION_EXECUTED, {**base, "action_id": chosen.id, "action_label": chosen.label,

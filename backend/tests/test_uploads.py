@@ -64,7 +64,9 @@ async def test_test_files_api(api: AsyncClient):  # noqa: F811
     assert not names["sample.png"]["builtin"] and names["invoice.pdf"]["size_bytes"] == 22
 
     assert (await api.post(f"/apps/{DEMO_APP_ID}/files", params={"name": ".."}, content=b"x")).status_code == 422
-    assert (await api.post(f"/apps/{DEMO_APP_ID}/files", params={"name": "e.txt"}, content=b"")).status_code == 422
+    empty = await api.post(f"/apps/{DEMO_APP_ID}/files", params={"name": "e.txt"}, content=b"")   # allowed: "upload an empty file" is an edge case
+    assert empty.status_code == 201 and empty.json()["size_bytes"] == 0
+    await api.delete(f"/apps/{DEMO_APP_ID}/files/{empty.json()['id']}")
     big = b"x" * (uploads.MAX_FILE_BYTES + 1)
     assert (await api.post(f"/apps/{DEMO_APP_ID}/files", params={"name": "big.bin"}, content=big)).status_code == 413
     assert (await api.post("/apps/nope/files", params={"name": "a.txt"}, content=b"x")).status_code == 404

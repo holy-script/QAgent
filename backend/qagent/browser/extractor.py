@@ -46,6 +46,21 @@ EXTRACTOR_JS = """
         // A text box's current value is what someone typed (possibly a password): never use it as the field's name.
         const isButtonLike = el.tagName.toLowerCase() !== 'input' || ['button', 'submit', 'reset'].includes((el.type || '').toLowerCase());
         let label = (el.innerText || el.getAttribute('aria-label') || el.getAttribute('placeholder') || (isButtonLike ? el.getAttribute('value') : '') || el.getAttribute('title') || '').trim();
+        const isSelect = el.tagName.toLowerCase() === 'select';
+        let options = [];
+        if (isSelect) {
+            // innerText of a <select> is all its options glued together: name it by its label or the text next to it instead.
+            options = Array.from(el.options).map(o => (o.textContent || o.value || '').trim()).filter(Boolean).slice(0, 60);
+            const own = el.id ? document.querySelector(`label[for="${el.id}"]`) : null;
+            let near = '';
+            for (let p = el.parentElement, i = 0; p && i < 3 && !near; p = p.parentElement, i++) {
+                const t = (p.innerText || '').replace(el.innerText || '', '').trim().split('\\n')[0].trim();
+                if (t && t.length <= 40) near = t;
+            }
+            const shown = (el.selectedOptions[0] && el.selectedOptions[0].textContent || '').trim();
+            label = ((own && own.innerText.trim()) || el.getAttribute('aria-label') || near || el.getAttribute('name') || 'Dropdown')
+                + (shown ? ` (shows: ${shown.substring(0, 24)})` : '');
+        }
         if (!label && !isFile && !['input', 'select', 'textarea'].includes(el.tagName.toLowerCase())) {
             // Icons and image buttons: fall back to their image alt text, title or an svg title, then to what kind of thing it is.
             const img = el.querySelector('img[alt], svg title');
@@ -82,7 +97,8 @@ EXTRACTOR_JS = """
             alt_selector: sel,
             input_type: el.tagName.toLowerCase() === 'input' ? (el.type || 'text').toLowerCase() : null,
             label: label.substring(0, 80),
-            action_type: isFile ? 'upload' : el.tagName.toLowerCase() === 'input' && (el.type === 'text' || el.type === 'password' || el.type === 'email') ? 'fill' : 'click',
+            action_type: isFile ? 'upload' : isSelect ? 'select' : el.tagName.toLowerCase() === 'input' && (el.type === 'text' || el.type === 'password' || el.type === 'email') ? 'fill' : 'click',
+            options: options,
             value: isFile ? null : (el.value || null),
             bounding_box: {
                 x: rect.x,

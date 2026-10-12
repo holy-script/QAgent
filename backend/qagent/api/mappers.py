@@ -40,11 +40,19 @@ def finding_out(f: m.FindingRecord) -> s.Finding:
     )
 
 
+def _tier(branch: str) -> s.ConfidenceTier:
+    """The stored branch of a decision. 'escalated' marks the stronger model's answer after a double-check."""
+    try:
+        return s.ConfidenceTier(branch)
+    except ValueError:
+        return s.ConfidenceTier.ESCALATE
+
+
 def decision_out(d: m.Decision) -> s.DecisionResult:
     resp: Dict[str, Any] = d.response or {}
     return s.DecisionResult(
         decider=d.decider, model_version=d.model_version, selected_action_id=d.choice, confidence=d.confidence,
-        tier=s.ConfidenceTier(d.branch), reasoning=resp.get("reasoning"),
+        tier=_tier(d.branch), reasoning=resp.get("reasoning"),
         probabilities={int(k): v for k, v in (d.probabilities or {}).items()},
         latency_ms=d.latency_ms, input_tokens=d.input_tokens, output_tokens=d.output_tokens,
         cost_usd=resp.get("cost_usd", 0.0),

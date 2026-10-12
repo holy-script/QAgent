@@ -31,7 +31,7 @@ SYSTEM = (
     "You direct an automated QA tester who is working towards a goal in a web app, one action at a time. You see the "
     "current page and what has been done so far. Choose the next single step, or say the goal is reached, or say you are blocked.\n"
     "Write the step the way a test step is written, in plain words, one action only: 'Click <visible label>', "
-    "'Enter the <field name>', 'Select <option> in <field name>', 'Open /path'. For typing, only say which field "
+    "'Enter the <field name>', 'Select <option> in <field name>', 'Open /path', 'Scroll down', 'Wait for <something>', 'Go back', 'Press Escape'. For typing, only say which field "
     "('Enter the username'); the value is filled in automatically from the test data, so never write or invent values. "
     "The interactive elements listed include things that are not real buttons (cards, rows, icons, text with a pointer cursor): "
     "name them by their visible text or by what they are ('Click the Upload card').\n"
@@ -57,8 +57,8 @@ def build_prompt(goal: str, expect: List[str], route: List[str], test_fields: Li
         + (f"Suggested route (optional, follow only if it fits what you see): {'; '.join(route)}\n" if route else "")
         + f"Test data fields available for typing: {', '.join(test_fields) or '(none)'}\n\n"
         + f"Steps so far:\n{past}\n\n"
-        + f"Current page: {url}\nTitle: {title}\nVisible text (excerpt):\n{page_text[:1800]}\n\n"
-        + (f"Page structure (accessibility tree, excerpt):\n{aria[:1500]}\n\n" if aria else "")
+        + f"Current page: {url}\nTitle: {title}\nVisible text (excerpt):\n{page_text[:3500]}\n\n"
+        + (f"Page structure (accessibility tree, excerpt):\n{aria[:2500]}\n\n" if aria else "")
         + f"Interactive elements:\n{elements}"
     )
 

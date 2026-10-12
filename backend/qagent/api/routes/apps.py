@@ -201,8 +201,7 @@ async def add_app_file(app_id: str, request: Request, name: str, session: AsyncS
     if not clean or clean.startswith("."):
         raise HTTPException(status_code=422, detail="Give the file a name, for example report.pdf")
     data = await request.body()
-    if not data:
-        raise HTTPException(status_code=422, detail="The file is empty")
+    # An empty file is allowed on purpose: "upload an empty file" is a classic edge case.
     if len(data) > uploads.MAX_FILE_BYTES:
         raise HTTPException(status_code=413, detail=f"Files can be at most {uploads.MAX_FILE_BYTES // (1024 * 1024)} MB")
     existing = (await session.execute(select(m.AppFile).where(m.AppFile.app_id == app.id))).scalars().all()
