@@ -43,6 +43,7 @@ class CandidateAction(BaseModel):
     id: int = Field(description="Compact 1-based index (1-40)")
     tag: str = Field(description="HTML tag, e.g. button, input, a")
     selector: str = Field(description="CSS selector that matches exactly this element (a data-qagent-id stamp)")
+    input_type: Optional[str] = Field(default=None, description="For <input>: its type (text, password, email, file...)")
     alt_selector: Optional[str] = Field(default=None, description="The page's own id/test-id/class selector, tried if the stamp was lost to a re-render and it matches exactly one element")
     label: str = Field(description="Visible text or accessible label")
     action_type: str = Field(default="click", description="click, fill, select, navigate")
@@ -412,6 +413,18 @@ class AppFileResponse(BaseModel):
     size_bytes: int
     created_at: str
     builtin: bool = False
+
+
+class CredentialResponse(BaseModel):
+    name: str
+    secret: bool = True
+    value: Optional[str] = Field(default=None, description="Only for details that are not secret (a username); null for secrets")
+    updated_at: str = ""
+
+
+class SetCredentialRequest(BaseModel):
+    value: str = Field(min_length=1, max_length=500)
+    secret: Optional[bool] = Field(default=None, description="Default: hidden unless the name looks like a username")
 
 
 class RetentionStatus(BaseModel):

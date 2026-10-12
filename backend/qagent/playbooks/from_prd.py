@@ -18,8 +18,12 @@ What to write:
     * `#### Goal`: ONE or TWO sentences on what the user is trying to accomplish, at the level of a person describing a task
       ("Sign in, then complete the forecast setup and reach the results"). Include preconditions in words (for example "sign in first").
     * `#### Expect`: 2 to 5 observable outcomes that prove the goal was achieved (what the page shows), not internal details.
-    * `#### Test data`: ONLY values the tester must type that the PRD cannot know (for example `username: <fill in>`,
-      `password: <fill in>`). Use exactly `<fill in>` as the value so the author sees what is missing. Omit the section if nothing is needed.
+    * `#### Test data`: ONLY values the tester must type that the PRD cannot know and that are NOT sign-in details (for example
+      `coupon: <fill in>`). Use exactly `<fill in>` as the value so the author sees what is missing. Omit the section if nothing is needed.
+    * NEVER write usernames, passwords or other secrets anywhere in the plan. Sign-in details are saved separately by the author (Settings >
+      Sign-in details) and typed in automatically when a step says "Enter the username" / "Enter the password".
+- Signing in: if the app requires signing in, write ONE flow with the field `- role: setup` and a Goal such as "Sign in with the saved
+  sign-in details and reach the home page". Every other flow must NOT sign in itself (they start already signed in).
     * NEVER write a `#### Steps` section, click-by-click instructions, selectors or URLs (unless the PRD names a URL).
 - Edge cases (about 3 to 6): important failure or boundary situations the PRD implies (invalid input, missing data, permissions),
   each tied to a flow with `applies_to`, an `expect` line, and test_data overrides only when needed.

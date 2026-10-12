@@ -130,6 +130,8 @@ def validate_playbook(parsed: Dict[str, Any], previous: Optional[Dict[str, Any]]
         if not r.get("acceptance"):
             warnings.append(f"{r['key']}: requirement has no acceptance criteria")
     for fl in parsed["flows"]:
+        if fl.get("role") and fl["role"] not in ("setup",):
+            errors.append(f"flow {fl['key']}: role '{fl['role']}' is not one of ['setup']")
         if not fl["steps"] and not fl.get("goal"):
             errors.append(f"flow {fl['key']}: needs a goal or steps")
     for ec in parsed["edge_cases"]:

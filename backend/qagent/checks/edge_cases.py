@@ -5,7 +5,7 @@ from qagent.domain.runspec import FlowSpec
 
 def flow_from_parsed(f: Dict[str, Any]) -> FlowSpec:
     return FlowSpec(
-        key=f["key"], severity=f.get("severity", "high"), goal=f.get("goal"), steps=list(f.get("steps", [])),
+        key=f["key"], severity=f.get("severity", "high"), role=f.get("role"), goal=f.get("goal"), steps=list(f.get("steps", [])),
         expect=list(f.get("expect", [])), test_data=dict(f.get("test_data", {})),
         covers=list(f.get("covers", [])), checks=list(f.get("checks", [])),
     )
@@ -32,6 +32,7 @@ def expand_flows(parsed: Dict[str, Any], flow_keys: Optional[List[str]] = None,
             flows.append(base.model_copy(update={
                 "key": f"{f['key']}#{ec['key']}",
                 "variant_of": f["key"],
+                "role": None,                      # a variant of a sign-in journey is an ordinary journey, not the shared session
                 "edge_case": ec["key"],
                 "test_data": {**base.test_data, **ec.get("test_data", {})},
                 "expect": [ec["expect"]] if ec.get("expect") else [],

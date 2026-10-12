@@ -78,5 +78,8 @@ export const useTape = (runId: string) =>
 export const useDashboard = (days: number) =>
   useQuery({ queryKey: ["dashboard", days], queryFn: () => pick(() => mockLive.dashboard(days), () => http<Dashboard>(`/dashboard?days=${days}`)), refetchInterval: 15_000 });
 
+/** Saved sign-in details (names; secret values are never returned). */
+export const useCredentials = (slug: string) => useQuery({ queryKey: ["credentials", slug], queryFn: () => api.listCredentials(slug) });
+
 /** The app's test files (built-in samples included). */
 export const useFiles = (slug: string) => useQuery({ queryKey: ["files", slug], queryFn: () => api.listFiles(slug) });

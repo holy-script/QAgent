@@ -75,13 +75,16 @@ class BrowserSandbox:
             self.blocked_requests.append(route.request.url)
             await route.abort("blockedbyclient")
 
-    async def start(self) -> Page:
+    async def start(self, storage_state: Optional[Dict[str, Any]] = None) -> Page:
+        """`storage_state`: cookies and local storage of an earlier signed-in session to start from."""
         self.playwright = await async_playwright().start()
         self.browser = await self._launch()
 
         context_args: Dict[str, Any] = {"viewport": {"width": 1280, "height": 800}}
         if settings.deterministic_browser:
             context_args.update(reduced_motion="reduce", locale="en-US", timezone_id="UTC")
+        if storage_state:
+            context_args["storage_state"] = storage_state
         if self.artifact_dir:
             self.artifact_dir.mkdir(parents=True, exist_ok=True)
             context_args["record_har_path"] = str(self.har_path)
@@ -105,6 +108,13 @@ class BrowserSandbox:
             lambda err: self.console_logs.append({"type": "pageerror", "text": str(err), "location": {}}),
         )
         return self.page
+
+    async def export_state(self) -> Optional[Dict[str, Any]]:
+        """The signed-in session (cookies and local storage), for other journeys to start from."""
+        try:
+            return await self.context.storage_state() if self.context else None
+        except Exception:
+            return None
 
     async def stop(self) -> None:
         """Closes the browser; trace.zip and har.json are flushed to artifact_dir."""

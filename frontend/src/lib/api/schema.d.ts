@@ -220,6 +220,47 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/apps/{app_id}/credentials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Credentials
+         * @description Saved sign-in details by name. Secret values are never returned.
+         */
+        get: operations["list_credentials_apps__app_id__credentials_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/apps/{app_id}/credentials/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set Credential
+         * @description Saves (or replaces) one sign-in detail, encrypted. Tests type it in by field name ("Enter the password").
+         */
+        put: operations["set_credential_apps__app_id__credentials__name__put"];
+        post?: never;
+        /** Delete Credential */
+        delete: operations["delete_credential_apps__app_id__credentials__name__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/apps/{app_id}/files": {
         parameters: {
             query?: never;
@@ -1245,6 +1286,26 @@ export interface components {
              */
             plan: boolean;
         };
+        /** CredentialResponse */
+        CredentialResponse: {
+            /** Name */
+            name: string;
+            /**
+             * Secret
+             * @default true
+             */
+            secret: boolean;
+            /**
+             * Value
+             * @description Only for details that are not secret (a username); null for secrets
+             */
+            value?: string | null;
+            /**
+             * Updated At
+             * @default
+             */
+            updated_at: string;
+        };
         /** DashboardApp */
         DashboardApp: {
             /** Slug */
@@ -2188,6 +2249,16 @@ export interface components {
             /** Email */
             email: string;
         };
+        /** SetCredentialRequest */
+        SetCredentialRequest: {
+            /** Value */
+            value: string;
+            /**
+             * Secret
+             * @description Default: hidden unless the name looks like a username
+             */
+            secret?: boolean | null;
+        };
         /** SpanResponse */
         SpanResponse: {
             /** Trace Id */
@@ -2798,6 +2869,105 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["NormalizeResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_credentials_apps__app_id__credentials_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                app_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CredentialResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_credential_apps__app_id__credentials__name__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                app_id: string;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetCredentialRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CredentialResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_credential_apps__app_id__credentials__name__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                app_id: string;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */

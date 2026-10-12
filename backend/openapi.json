@@ -526,6 +526,162 @@
         }
       }
     },
+    "/apps/{app_id}/credentials": {
+      "get": {
+        "tags": [
+          "Apps"
+        ],
+        "summary": "List Credentials",
+        "description": "Saved sign-in details by name. Secret values are never returned.",
+        "operationId": "list_credentials_apps__app_id__credentials_get",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "App Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CredentialResponse"
+                  },
+                  "title": "Response List Credentials Apps  App Id  Credentials Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/apps/{app_id}/credentials/{name}": {
+      "put": {
+        "tags": [
+          "Apps"
+        ],
+        "summary": "Set Credential",
+        "description": "Saves (or replaces) one sign-in detail, encrypted. Tests type it in by field name (\"Enter the password\").",
+        "operationId": "set_credential_apps__app_id__credentials__name__put",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "App Id"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetCredentialRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CredentialResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Apps"
+        ],
+        "summary": "Delete Credential",
+        "operationId": "delete_credential_apps__app_id__credentials__name__delete",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "App Id"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/apps/{app_id}/files": {
       "get": {
         "tags": [
@@ -3578,6 +3734,41 @@
         "type": "object",
         "title": "CreateRunRequest"
       },
+      "CredentialResponse": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "secret": {
+            "type": "boolean",
+            "title": "Secret",
+            "default": true
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value",
+            "description": "Only for details that are not secret (a username); null for secrets"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "CredentialResponse"
+      },
       "DashboardApp": {
         "properties": {
           "slug": {
@@ -5652,6 +5843,33 @@
           "email"
         ],
         "title": "SessionResponse"
+      },
+      "SetCredentialRequest": {
+        "properties": {
+          "value": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Value"
+          },
+          "secret": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Secret",
+            "description": "Default: hidden unless the name looks like a username"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "title": "SetCredentialRequest"
       },
       "SpanResponse": {
         "properties": {

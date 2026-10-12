@@ -1,5 +1,5 @@
 // The guided setup: the order we recommend for a new app, how to tell each step is done, and where it happens.
-import type { App, Playbook, Run, TestFile } from "@/lib/api/types";
+import type { Credential, Playbook, Run, TestFile } from "@/lib/api/types";
 
 export interface GuideStep {
   id: string;
@@ -18,6 +18,9 @@ export const GUIDE_STEPS: GuideStep[] = [
   { id: "describe", title: "Describe your app", path: (s) => `/apps/${s}/settings`, target: "settings-prd",
     why: "Paste, import or dictate what the app is meant to do. This is what the tests are based on.",
     spotlight: "Tell QAgent what your app should do. Paste your product document, import a .md or .txt file, or press Dictate and just talk. “Organise with AI” turns rough words into a clear document. Save settings when you are done." },
+  { id: "signin", title: "Add sign-in details", optional: true, path: (s) => `/apps/${s}/settings`, target: "signin-details",
+    why: "Only if your app needs a login. Save it here, not in the test plan: it is stored encrypted and hidden in reports.",
+    spotlight: "If your app needs a login, save the username and password here. Plans then say “Enter the username” and QAgent types the saved value in. Not needed? Skip this step." },
   { id: "files", title: "Add test files", optional: true, path: (s) => `/apps/${s}/settings`, target: "test-files",
     why: "Only if your app lets people upload files (a photo, a CSV, a PDF). Tests will attach these.",
     spotlight: "If your app has a file upload, add the files a test may attach here. QAgent already has small samples (png, pdf, txt, csv, json). Not needed? Skip this step." },
@@ -35,13 +38,14 @@ export const GUIDE_STEPS: GuideStep[] = [
     spotlight: "“Repeat exactly” runs the same test again with no AI calls and no cost. Bugs that no longer appear are marked Fixed." },
 ];
 
-export interface GuideInput { app?: App; plans?: Playbook[]; runs?: Run[]; files?: TestFile[]; visited: string[]; skipped: string[] }
+export interface GuideInput { prd?: string; plans?: Playbook[]; runs?: Run[]; files?: TestFile[]; credentials?: Credential[]; visited: string[]; skipped: string[] }
 export type StepState = "done" | "skipped" | "todo";
 
 export function guideStates(i: GuideInput): { step: GuideStep; state: StepState }[] {
   const finished = (i.runs ?? []).filter((r) => r.status !== "running" && r.status !== "queued");
   const done: Record<string, boolean> = {
-    describe: !!i.app?.prd_markdown?.trim(),
+    describe: !!i.prd?.trim(),
+    signin: (i.credentials?.length ?? 0) > 0,
     files: (i.files ?? []).some((f) => !f.builtin),
     plan: (i.plans?.length ?? 0) > 0,
     run: finished.length > 0,

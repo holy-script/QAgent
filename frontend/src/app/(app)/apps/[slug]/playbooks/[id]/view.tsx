@@ -84,7 +84,7 @@ export default function ReviewPlaybook() {
             {!v.parsed.flows.length && <Card className="p-4 text-sm text-muted-foreground">No journeys found yet. A journey starts with “### Flow: name” and lists numbered steps.</Card>}
             {v.parsed.flows.map((f) => (
               <Card key={f.key} className="space-y-3 p-4 text-sm">
-                <div className="flex items-center gap-2"><span className="font-medium">{f.key}</span><SeverityBadge severity={f.severity} /></div>
+                <div className="flex items-center gap-2"><span className="font-medium">{f.key}</span><SeverityBadge severity={f.severity} />{f.role === "setup" && <Badge tone="accent" title="Runs first. Every other journey starts already signed in.">Sign-in journey</Badge>}</div>
                 {f.goal && <div><div className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">Goal (the AI chooses the steps)</div><p>{f.goal}</p></div>}
                 {f.steps.length > 0 && <List title={f.goal ? "Suggested route" : "Steps"} items={f.steps} ordered />}
                 <List title="Should be true afterwards" items={f.expect} />

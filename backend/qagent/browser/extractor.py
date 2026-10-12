@@ -23,7 +23,9 @@ EXTRACTOR_JS = """
         if (!isFile && (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0')) continue;
         if (!isFile && rect.width === 0 && rect.height === 0) continue;
 
-        let label = (el.innerText || el.getAttribute('aria-label') || el.getAttribute('placeholder') || el.getAttribute('value') || el.getAttribute('title') || '').trim();
+        // A text box's current value is what someone typed (possibly a password): never use it as the field's name.
+        const isButtonLike = el.tagName.toLowerCase() !== 'input' || ['button', 'submit', 'reset'].includes((el.type || '').toLowerCase());
+        let label = (el.innerText || el.getAttribute('aria-label') || el.getAttribute('placeholder') || (isButtonLike ? el.getAttribute('value') : '') || el.getAttribute('title') || '').trim();
         if (!label && el.tagName.toLowerCase() === 'input') {
             const own = el.id ? document.querySelector(`label[for="${el.id}"]`) : null;
             label = (own && own.innerText.trim()) || el.getAttribute('name') || el.getAttribute('id') || 'Input field';
@@ -53,6 +55,7 @@ EXTRACTOR_JS = """
             tag: el.tagName.toLowerCase(),
             selector: `[data-qagent-id="${myId}"]`,
             alt_selector: sel,
+            input_type: el.tagName.toLowerCase() === 'input' ? (el.type || 'text').toLowerCase() : null,
             label: label.substring(0, 80),
             action_type: isFile ? 'upload' : el.tagName.toLowerCase() === 'input' && (el.type === 'text' || el.type === 'password' || el.type === 'email') ? 'fill' : 'click',
             value: isFile ? null : (el.value || null),

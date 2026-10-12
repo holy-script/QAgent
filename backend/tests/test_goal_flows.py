@@ -200,6 +200,7 @@ async def test_prd_becomes_a_high_level_plan_that_flags_missing_test_data(api, m
     assert body["flows"][0]["goal"].startswith("Sign in") and body["flows"][0]["steps"] == []
     assert any("fill in the test data for 'forecast-setup': username, password" in w for w in body["warnings"])
     assert "NEVER write a `#### Steps` section" in seen["system"] and "Users sign in and complete" in seen["user"]
+    assert "NEVER write usernames, passwords" in seen["system"] and "- role: setup" in seen["system"]
     assert "Application address:" in seen["user"] and seen["max_tokens"] >= 8000
 
     # with no PRD anywhere: a clear message; with the saved PRD: used when none is sent

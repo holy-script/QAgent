@@ -1,4 +1,4 @@
-import type { App, AppInput, FlowHistory, Mode, Playbook, PlaybookVersion, RetentionStatus, Run, TestFile, SseEnvelope } from "./types";
+import type { App, AppInput, FlowHistory, Mode, Playbook, Credential, PlaybookVersion, RetentionStatus, Run, TestFile, SseEnvelope } from "./types";
 import { buildRunEvents, makeRun, seedApps, seedPlaybooks, seedRuns, versionFrom } from "./fixtures";
 import { validateMarkdown } from "../playbook-validate";
 import { mockPlanFromPrd, mockRefine, type RefineKind } from "../refine-mock";
@@ -23,6 +23,8 @@ export async function http<T>(path: string, init?: RequestInit): Promise<T> {
 export const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const MOCK_BUILTIN: TestFile[] = [["sample.png", "image/png", 74], ["sample.pdf", "application/pdf", 214], ["sample.txt", "text/plain", 25], ["sample.csv", "text/csv", 24], ["sample.json", "application/json", 17]]
   .map(([name, content_type, size_bytes]) => ({ id: `builtin:${name}`, name: name as string, content_type: content_type as string, size_bytes: size_bytes as number, created_at: "", builtin: true }));
+const mockCredStore = new Map<string, Credential[]>();
+const mockCredentials = (slug: string): Credential[] => { if (!mockCredStore.has(slug)) mockCredStore.set(slug, []); return mockCredStore.get(slug)!; };
 const mockFileStore = new Map<string, TestFile[]>();
 const mockFiles = (slug: string): TestFile[] => { if (!mockFileStore.has(slug)) mockFileStore.set(slug, []); return mockFileStore.get(slug)!; };
 
@@ -242,6 +244,25 @@ export const api = {
     const a = db.apps.find((x) => x.slug === slug);
     if (!a?.prd_markdown?.trim()) throw new ApiError(422, "Add a product document in Settings first");
     return delay(mockPlanFromPrd(a.prd_markdown, a.base_url));
+  },
+  /** Saved sign-in details. Tests type them in by field name; secret values are never shown again. */
+  async listCredentials(slug: string): Promise<Credential[]> {
+    if (!USE_MOCK) return http<Credential[]>(`/apps/${slug}/credentials`);
+    return delay([...mockCredentials(slug)].sort((a, b) => a.name.localeCompare(b.name)));
+  },
+  async setCredential(slug: string, name: string, value: string, secret?: boolean): Promise<Credential> {
+    if (!USE_MOCK) return http<Credential>(`/apps/${slug}/credentials/${encodeURIComponent(name)}`, { method: "PUT", body: JSON.stringify({ value, secret }) });
+    const list = mockCredentials(slug);
+    const isSecret = secret ?? !["username", "user", "email", "login", "account"].includes(name.toLowerCase());
+    const rec: Credential = { name, secret: isSecret, value: isSecret ? null : value, updated_at: new Date().toISOString() };
+    const i = list.findIndex((c) => c.name.toLowerCase() === name.toLowerCase());
+    if (i >= 0) list[i] = rec; else list.push(rec);
+    return delay(rec);
+  },
+  async deleteCredential(slug: string, name: string): Promise<void> {
+    if (!USE_MOCK) { await http(`/apps/${slug}/credentials/${encodeURIComponent(name)}`, { method: "DELETE" }); return; }
+    const list = mockCredentials(slug);
+    list.splice(0, list.length, ...list.filter((c) => c.name.toLowerCase() !== name.toLowerCase()));
   },
   async listFiles(slug: string): Promise<TestFile[]> {
     if (!USE_MOCK) return http<TestFile[]>(`/apps/${slug}/files`);

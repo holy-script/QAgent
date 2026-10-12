@@ -36,6 +36,8 @@ export interface ParsedFlow {
   severity: Severity;
   /** A high-level journey: the AI works out the steps itself. */
   goal?: string;
+  /** "setup": the sign-in journey; it runs first and the others reuse its session. */
+  role?: string;
   steps: string[];
   expect: string[];
   test_data: Record<string, string>;
@@ -217,6 +219,9 @@ export interface SseEnvelope {
 }
 
 export interface RetentionStatus { retention_days: number | null; retention_keep_last: number; total_runs: number; would_delete: number; oldest_started_at: string | null }
+
+/** A saved sign-in detail. Secret values are never sent back; only the name and that it is set. */
+export interface Credential { name: string; secret: boolean; value: string | null; updated_at: string }
 
 /** A file a test can upload through a page's file field. Built-in samples exist for every app. */
 export interface TestFile { id: string; name: string; content_type: string; size_bytes: number; created_at: string; builtin: boolean }

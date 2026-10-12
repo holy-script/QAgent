@@ -59,10 +59,13 @@ class State:
         self.sessions: Dict[str, dict] = {}
 
     def reset_session(self) -> None:
-        self.sessions.pop(current_sid.get(), None)
+        """Clears the caller's cart and counters but keeps them signed in (resetting test data is not signing out)."""
+        user = self.sessions.pop(current_sid.get(), {}).get("user")
+        if user:
+            self._session()["user"] = user
 
     def _session(self) -> dict:
-        return self.sessions.setdefault(current_sid.get(), {"cart": {}, "coupon": "", "payments": 0, "avatar": None})
+        return self.sessions.setdefault(current_sid.get(), {"cart": {}, "coupon": "", "payments": 0, "avatar": None, "user": None})
 
     @property
     def cart(self) -> Dict[int, int]:
@@ -147,6 +150,30 @@ async def cart(request: Request):
 @app.get("/checkout")
 async def checkout(request: Request):
     return render(request, "checkout.html", cart=cart_snapshot())
+
+
+LOGIN = {"username": "admin", "password": "s3cret-pass"}   # the demo shop's sign-in: admin / s3cret-pass
+
+
+@app.get("/login")
+async def login_page(request: Request):
+    return render(request, "login.html")
+
+
+@app.post("/api/login")
+async def api_login(payload: dict):
+    if payload.get("username") == LOGIN["username"] and payload.get("password") == LOGIN["password"]:
+        state._session()["user"] = LOGIN["username"]
+        return {"ok": True}
+    return JSONResponse({"error": "Invalid username or password"}, status_code=401)
+
+
+@app.get("/account")
+async def account(request: Request):
+    user = state._session().get("user")
+    if not user:
+        return RedirectResponse("/login")
+    return render(request, "account.html", user=user)
 
 
 @app.get("/profile")

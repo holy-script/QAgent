@@ -15,13 +15,14 @@ from qagent.decision.stub import StubDecider
 from qagent.decision.claude import BedrockClient
 from qagent.decision.ledger import LedgerClient, TapedJudge
 from qagent.decision.tape import ReplayDecider
-from qagent.domain.models import App, AppFile, Decision, FlowRun, ModelCall, Playbook, PlaybookVersion, Run, Step
+from qagent.domain.models import App, AppCredential, AppFile, Decision, FlowRun, ModelCall, Playbook, PlaybookVersion, Run, Step
 from qagent.checks.edge_cases import expand_flows, spec_items
 from qagent.checks.ux_judged import Judge
 from qagent.domain.runspec import RunSpec
 from qagent.domain.schemas import CreateRunRequest, RunMode
 from qagent.engine.graph import EngineRunner
 from qagent.engine.tracing import logger
+from qagent.storage import vault
 from qagent.storage.checkpoint import open_checkpointer
 from qagent.storage.db import async_session_factory
 from qagent.storage.persistence_sink import PersistenceSink
@@ -188,6 +189,11 @@ class RunManager:
 
             test_files = {f.name: {"key": f.object_key, "content_type": f.content_type} for f in (
                 await session.execute(select(AppFile).where(AppFile.app_id == app.id))).scalars().all()}
+            secrets = {}
+            for c in (await session.execute(select(AppCredential).where(AppCredential.app_id == app.id))).scalars().all():
+                value = vault.decrypt(c.ciphertext)
+                if value is not None:
+                    secrets[c.name] = value
             run_id = str(uuid.uuid4())
             app_overrides = app.gate_overrides or {}
             spec = RunSpec(
@@ -206,6 +212,7 @@ class RunManager:
                 replay_of_run_id=replay_of,
                 plan=req.plan,
                 files=test_files,
+                secrets=secrets,
                 reset_path=app.reset_path,
                 redact_keys=app.redact_keys or [],
                 inject_traceparent=settings.qagent_inject_traceparent,

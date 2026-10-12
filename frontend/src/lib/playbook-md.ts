@@ -17,6 +17,8 @@ export interface FieldSpec {
   label: string;
   kind: "text" | "area" | "lines" | "select" | "scope";
   options?: string[];
+  /** Friendlier names for the options of a select. */
+  labels?: Record<string, string>;
   hint?: string;
   placeholder?: string;
   show?: (v: Record<string, string>) => boolean;
@@ -36,6 +38,7 @@ export const FORMS: Record<Category, FieldSpec[]> = {
     { name: "severity", label: "Severity", kind: "select", options: SEV },
     { name: "covers", label: "Requirements it proves", kind: "text", placeholder: "REQ-1, REQ-2" },
     { name: "checks", label: "Calculations and rules to check", kind: "text", placeholder: "F-1, UX-1" },
+    { name: "role", label: "Role", kind: "select", options: ["normal", "setup"], labels: { normal: "Normal journey", setup: "Sign-in: runs first, every other journey reuses its session" }, hint: "Use one sign-in journey so the others do not have to log in. Its details come from Settings > Sign-in details." },
     { name: "goal", label: "Goal (high-level)", kind: "area", hint: "What the user is trying to accomplish, in a sentence or two, e.g. “Sign in and complete the forecast setup.” The AI works out the clicks itself. Use this OR steps." },
     { name: "steps", label: "Steps (optional with a goal)", kind: "lines", hint: "One per line, in plain words, e.g. “Add 2 items to cart”. “Open /products” opens a page directly. With a goal, steps are only a suggested route." },
     { name: "expect", label: "What should be true afterwards", kind: "lines" },
@@ -93,7 +96,7 @@ function itemBlock(cat: Category, key: string, v: Record<string, string>): strin
     case "requirement":
       return `### ${key}: ${f("title")}\n${field("prd_ref")}${field("acceptance")}${field("priority")}`;
     case "flow": {
-      let md = `### Flow: ${f("title")}\n${field("covers")}${field("checks")}${field("severity")}\n`;
+      let md = `### Flow: ${f("title")}\n${field("covers")}${field("checks")}${field("severity")}${field("role", f("role") === "normal" ? "" : f("role"))}\n`;
       if (f("goal")) md += `#### Goal\n${f("goal")}\n\n`;
       if (f("steps")) md += `#### Steps\n${lines(v.steps ?? "").map((s, i) => `${i + 1}. ${s.replace(/^\d+[.)]\s*/, "")}`).join("\n")}\n`;
       if (f("expect")) md += `\n#### Expect\n${lines(v.expect).map((s) => `- ${s.replace(/^-\s*/, "")}`).join("\n")}\n`;
@@ -178,7 +181,7 @@ export function itemToValues(cat: Category, item: { key: string; title: string; 
   const str = (k: string) => (b[k] == null ? "" : String(b[k]));
   switch (cat) {
     case "requirement": return { title: item.title, prd_ref: str("prd_ref"), acceptance: str("acceptance"), priority: str("priority") || "high" };
-    case "flow": return { title: item.key, severity: str("severity") || "high", covers: join(b.covers), checks: join(b.checks), goal: str("goal"), steps: ((b.steps as string[]) ?? []).join("\n"), expect: ((b.expect as string[]) ?? []).join("\n"), test_data: pairs(b.test_data, ": ").join("\n") };
+    case "flow": return { title: item.key, severity: str("severity") || "high", covers: join(b.covers), checks: join(b.checks), role: str("role") || "normal", goal: str("goal"), steps: ((b.steps as string[]) ?? []).join("\n"), expect: ((b.expect as string[]) ?? []).join("\n"), test_data: pairs(b.test_data, ": ").join("\n") };
     case "formula": return { title: item.title, rule: str("rule"), bindings: pairs(b.bindings, "=").join("\n"), tolerance: str("tolerance"), verifies: join(b.verifies) };
     case "ux_rule": return { title: item.title, check: str("check"), targets: join(b.targets), pattern: str("pattern"), max_ms: str("max_ms"), question: str("question"), severity: str("severity") || "medium" };
     case "gotcha": return { title: item.title, note: str("note"), wait_for: str("wait_for"), ignore_console: str("ignore_console") };

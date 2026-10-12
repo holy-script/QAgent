@@ -1,6 +1,7 @@
 import asyncio
 import hashlib
 import re
+from datetime import datetime, timezone
 from typing import List, Optional
 from urllib.parse import urlparse
 
@@ -15,12 +16,13 @@ from qagent.api.mappers import app_out, iso, run_out
 from qagent.config import settings
 from qagent.runs.manager import RunManager, get_run_manager
 from qagent.storage.objects import object_store
+from qagent.storage import vault
 from qagent.storage.purge import purge_app
 from qagent.storage.retention import apply_retention, expired_runs
 from qagent.domain import models as m
 from qagent.domain.schemas import (
-    AppFileResponse, NormalizeResponse, PrdExtractResponse, PrdPlanRequest, AppResponse, AppSummaryResponse, CreateAppRequest, RetentionResult, RetentionStatus, RunResponse,
-    UpdateAppRequest,
+    AppFileResponse, CredentialResponse, NormalizeResponse, PrdExtractResponse, PrdPlanRequest, AppResponse, AppSummaryResponse, CreateAppRequest, RetentionResult, RetentionStatus, RunResponse,
+    SetCredentialRequest, UpdateAppRequest,
 )
 
 router = APIRouter(prefix="/apps", tags=["Apps"])
@@ -130,6 +132,54 @@ async def plan_from_product_document(app_id: str, payload: Optional[PrdPlanReque
         raise HTTPException(status_code=502, detail=f"could not write the test plan: {type(exc).__name__}")
     return NormalizeResponse(markdown=result["markdown"], flows=result["parsed"]["flows"],
                              warnings=result["warnings"], notes=result.get("notes"))
+
+
+PLAIN_NAMES = {"username", "user", "email", "login", "account"}
+
+
+def _credential_out(c: m.AppCredential) -> CredentialResponse:
+    value = None if c.secret else vault.decrypt(c.ciphertext)
+    return CredentialResponse(name=c.name, secret=c.secret, value=value, updated_at=iso(c.updated_at) or "")
+
+
+@router.get("/{app_id}/credentials", response_model=List[CredentialResponse])
+async def list_credentials(app_id: str, session: AsyncSession = Depends(get_session)):
+    """Saved sign-in details by name. Secret values are never returned."""
+    app = await _find(session, app_id)
+    rows = (await session.execute(select(m.AppCredential).where(m.AppCredential.app_id == app.id).order_by(m.AppCredential.name))).scalars().all()
+    return [_credential_out(c) for c in rows]
+
+
+@router.put("/{app_id}/credentials/{name}", response_model=CredentialResponse)
+async def set_credential(app_id: str, name: str, payload: SetCredentialRequest, session: AsyncSession = Depends(get_session)):
+    """Saves (or replaces) one sign-in detail, encrypted. Tests type it in by field name ("Enter the password")."""
+    app = await _find(session, app_id)
+    clean = name.strip()
+    if not re.fullmatch(r"[A-Za-z][\w .\-]{0,39}", clean):
+        raise HTTPException(status_code=422, detail="Use a short name such as username, email or password")
+    rows = (await session.execute(select(m.AppCredential).where(m.AppCredential.app_id == app.id))).scalars().all()
+    existing = next((c for c in rows if c.name.lower() == clean.lower()), None)
+    if existing is None and len(rows) >= 20:
+        raise HTTPException(status_code=409, detail="An app can keep 20 saved sign-in details; remove some first")
+    secret = payload.secret if payload.secret is not None else clean.lower() not in PLAIN_NAMES
+    record = existing or m.AppCredential(app_id=app.id, name=clean, ciphertext="")
+    record.ciphertext, record.secret = vault.encrypt(payload.value), secret
+    record.updated_at = datetime.now(timezone.utc)
+    session.add(record)
+    await session.commit()
+    return _credential_out(record)
+
+
+@router.delete("/{app_id}/credentials/{name}")
+async def delete_credential(app_id: str, name: str, session: AsyncSession = Depends(get_session)):
+    app = await _find(session, app_id)
+    rows = (await session.execute(select(m.AppCredential).where(m.AppCredential.app_id == app.id))).scalars().all()
+    record = next((c for c in rows if c.name.lower() == name.strip().lower()), None)
+    if record is None:
+        raise HTTPException(status_code=404, detail="Not found")
+    await session.delete(record)
+    await session.commit()
+    return {"deleted": record.name}
 
 
 @router.get("/{app_id}/files", response_model=List[AppFileResponse])

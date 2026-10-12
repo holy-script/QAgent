@@ -32,7 +32,7 @@ export function toParsedFlows(parsed: B): ParsedFlow[] {
   const formulas: B[] = parsed.formulas ?? [];
   const ecs: B[] = parsed.edge_cases ?? [];
   return (parsed.flows ?? []).map((f: B): ParsedFlow => ({
-    key: f.key, severity: sev(f.severity), goal: f.goal ?? undefined, steps: f.steps ?? [], expect: f.expect ?? [],
+    key: f.key, severity: sev(f.severity), goal: f.goal ?? undefined, role: f.role ?? undefined, steps: f.steps ?? [], expect: f.expect ?? [],
     test_data: Object.fromEntries(Object.entries(f.test_data ?? {}).map(([k, v]) => [k, String(v)])),
     formulas: (f.checks ?? []).flatMap((k: string) => formulas.filter((x) => x.key === k)).map((x: B) => ({
       name: `${x.key} ${x.title ?? ""}`.trim(), expr: x.rule, source: x.source ?? "both", bindings: x.bindings ?? {},

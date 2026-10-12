@@ -46,6 +46,18 @@ class AppFile(SQLModel, table=True):
     created_at: datetime = Field(default_factory=utc_now)
 
 
+class AppCredential(SQLModel, table=True):
+    """A saved sign-in detail (username, password, API key...) tests can type in. The value is stored encrypted."""
+    __tablename__ = "app_credentials"
+
+    id: str = Field(default_factory=gen_uuid, primary_key=True)
+    app_id: str = Field(index=True)
+    name: str
+    ciphertext: str
+    secret: bool = True        # secret values are never shown again, only replaced
+    updated_at: datetime = Field(default_factory=utc_now)
+
+
 class Playbook(SQLModel, table=True):
     __tablename__ = "playbooks"
 

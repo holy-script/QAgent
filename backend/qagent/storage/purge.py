@@ -98,6 +98,7 @@ async def purge_app(session: AsyncSession, app_id: str) -> Dict[str, int]:
     if pb_ids:
         await rm(m.Playbook, "playbooks", m.Playbook.id.in_(pb_ids))
     await rm(m.AppFile, "app_files", m.AppFile.app_id == app_id)
+    await rm(m.AppCredential, "app_credentials", m.AppCredential.app_id == app_id)
     await rm(m.Report, "reports", m.Report.app_id == app_id)
     await rm(m.Issue, "issues", m.Issue.app_id == app_id)
     await rm(m.App, "apps", m.App.id == app_id)

@@ -261,16 +261,16 @@ test.describe("guided setup", () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(APP);
     const guide = page.getByLabel("Setup guide");
-    await expect(guide.getByText(/\d of 6 steps done/)).toBeVisible();
+    await expect(guide.getByText(/\d of 7 steps done/)).toBeVisible();
     await expect(guide.getByText("1. Describe your app")).toBeVisible();
-    await expect(guide.getByText("3. Create a test plan")).toBeVisible();
+    await expect(guide.getByText("4. Create a test plan")).toBeVisible();
     await guide.getByRole("link", { name: "Take me there" }).first().click();
     await expect(page).toHaveURL(/settings\?guide=describe/);
     const pop = page.locator(".driver-popover");
     await expect(pop.getByText("Describe your app")).toBeVisible();
-    await expect(pop.getByRole("button", { name: /Next: Add test files/ })).toBeVisible();
-    await pop.getByRole("button", { name: /Next: Add test files/ }).click();
-    await expect(pop.getByText("Add test files")).toBeVisible();
+    await expect(pop.getByRole("button", { name: /Next: Add sign-in details/ })).toBeVisible();
+    await pop.getByRole("button", { name: /Next: Add sign-in details/ }).click();
+    await expect(pop.getByText("Add sign-in details").first()).toBeVisible();
     await pop.getByRole("button", { name: "Close" }).click();
     await expect(pop).toHaveCount(0);
     await expect(page).not.toHaveURL(/guide=/);
@@ -283,15 +283,15 @@ test.describe("guided setup", () => {
     await page.getByRole("navigation", { name: "Sections" }).getByRole("link", { name: "Settings" }).click();
     await page.getByRole("textbox", { name: "Product document" }).fill("Users can browse, add to cart and pay.");
     await page.getByRole("button", { name: "Save settings" }).click();
-    await expect(page.getByText("Saved")).toBeVisible();
+    await expect(page.getByText("Saved", { exact: true })).toBeVisible();
     await page.getByRole("navigation", { name: "Sections" }).getByRole("link", { name: "Overview" }).click();
     await expect(guide.getByText("1. Describe your app (done)")).toBeVisible();
-    await expect(page.getByRole("link", { name: /Next: Add test files/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Next: Add sign-in details/ })).toBeVisible();
     await guide.getByRole("button", { name: "Skip" }).first().click();
-    await expect(guide.getByText(/2\. Add test files.*\(skipped\)/)).toBeVisible();
-    await expect(page.getByRole("link", { name: /Next: Read what it found/ })).toBeVisible(); // the demo app already has a test plan and runs
+    await expect(guide.getByText(/2\. Add sign-in details.*\(skipped\)/)).toBeVisible();
+    await expect(page.getByRole("link", { name: /Next: Add test files/ })).toBeVisible();
     await guide.getByRole("button", { name: "Undo skip" }).click();
-    await expect(guide.getByText(/2\. Add test files.*\(to do\)/)).toBeVisible();
+    await expect(guide.getByText(/2\. Add sign-in details.*\(to do\)/)).toBeVisible();
   });
 
   test("on a phone the guide is a card under the tabs", async ({ page }) => {
@@ -386,7 +386,7 @@ test.describe("high-level test plans from the product document", () => {
     await sections.getByRole("link", { name: "Settings" }).click();
     await page.getByRole("textbox", { name: "Product document" }).fill("Users sign in and reach the dashboard. Users set up a forecast and see the results. Users export the forecast.");
     await page.getByRole("button", { name: "Save settings" }).click();
-    await expect(page.getByText("Saved")).toBeVisible();
+    await expect(page.getByText("Saved", { exact: true })).toBeVisible();
 
     await sections.getByRole("link", { name: "Test plans" }).click();
     await page.getByRole("link", { name: "Add a test plan" }).click();
@@ -403,5 +403,47 @@ test.describe("high-level test plans from the product document", () => {
     await page.goto(`${APP}/playbooks/new`);
     await page.getByRole("button", { name: "Create from product document" }).click();
     await expect(page.getByRole("alert").filter({ hasText: "Add a product document in Settings first" })).toBeVisible();
+  });
+});
+
+test.describe("sign-in details and the sign-in journey", () => {
+  test("details are saved masked, a username stays readable, and they can be replaced or removed", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(APP);
+    await page.getByRole("navigation", { name: "Sections" }).getByRole("link", { name: "Settings" }).click();
+    const card = page.locator("[data-tour=signin-details]");
+    await expect(card.getByText("Nothing saved yet.")).toBeVisible();
+    await card.getByLabel("Sign-in detail value").fill("admin");
+    await card.getByRole("button", { name: "Save" }).click();
+    await expect(card.getByRole("cell", { name: "admin", exact: true })).toBeVisible();      // a username is shown
+    await card.getByLabel("Sign-in detail name").fill("password");
+    await card.getByLabel("Sign-in detail value").fill("hunter2!!");
+    await expect(card.getByLabel("Sign-in detail value")).toHaveAttribute("type", "password");
+    await card.getByRole("button", { name: "Save" }).click();
+    await expect(card.getByLabel("Hidden value")).toBeVisible();
+    await expect(page.getByText("hunter2!!")).toHaveCount(0);                                  // never shown again
+    await card.getByRole("button", { name: "Remove password" }).click();
+    await expect(card.getByLabel("Hidden value")).toHaveCount(0);
+
+    // saving details ticks off the guide step
+    await page.getByRole("navigation", { name: "Sections" }).getByRole("link", { name: "Overview" }).click();
+    await expect(page.getByLabel("Setup guide").getByText(/2\. Add sign-in details.*\(done\)/)).toBeVisible();
+  });
+
+  test("a sign-in journey written as a goal (no steps) saves and is labelled on the plan", async ({ page }) => {
+    await page.goto(`${APP}/playbooks/new`);
+    const editor = page.getByRole("textbox", { name: "Test plan text" });
+    await editor.fill("## Flows\n### Flow: sign-in\n- role: setup\n- severity: high\n\n#### Goal\nSign in with the saved details.\n");   // fill, not type: the editor would auto-continue the list
+    await page.getByRole("button", { name: "Save and review" }).click();
+    await expect(page.getByText("Sign-in journey", { exact: true })).toBeVisible();
+    await expect(page.getByText("Sign in with the saved details.").first()).toBeVisible();
+  });
+
+  test("an unknown role is rejected with a clear message", async ({ page }) => {
+    await page.goto(`${APP}/playbooks/new`);
+    const editor = page.getByRole("textbox", { name: "Test plan text" });
+    await editor.fill("## Flows\n### Flow: odd\n- role: boss\n\n#### Goal\nx\n");
+    await page.getByRole("button", { name: "Save and review" }).click();
+    await expect(page.getByRole("alert").filter({ hasText: "role 'boss' is not one of ['setup']" })).toBeVisible();
   });
 });

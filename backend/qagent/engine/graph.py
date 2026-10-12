@@ -38,6 +38,7 @@ from qagent.domain.runspec import FlowSpec, RunSpec
 from qagent.domain.schemas import CandidateAction, ConfidenceTier, DecisionRequest, DecisionResult
 from qagent.engine.callbacks import SpanCallbackHandler
 from qagent.engine.gating import evaluate_gate
+from qagent.engine.secrets import SecretMasker
 from qagent.engine.state import FlowState
 from qagent.engine.tracing import Span, logger
 from qagent.reports.findings import final_severity, fingerprint
@@ -71,14 +72,60 @@ def repeat_count(intent: str) -> int:
     return 1
 
 
-def resolve_fill_value(intent: str, candidate: CandidateAction, test_data: Dict[str, Any]) -> str:
+# What the page shows right now that explains a failure: is a sign-in form on screen, and are there error messages?
+PAGE_STATE_JS = """() => {
+  const vis = (e) => { const r = e.getBoundingClientRect(), s = getComputedStyle(e); return r.width > 0 && r.height > 0 && s.visibility !== 'hidden' && s.display !== 'none'; };
+  const alerts = [...document.querySelectorAll('[role=alert], [aria-live=assertive], [class*=error], [class*=alert], [class*=invalid], [class*=toast], [class*=notification]')]
+    .filter(vis).map((e) => (e.innerText || '').trim()).filter((t) => t && t.length < 240);
+  return { password: [...document.querySelectorAll('input[type=password]')].some(vis), alerts: [...new Set(alerts)].slice(0, 3) };
+}"""
+_LOGIN = re.compile(r"\b(log ?in|sign ?in|sign-in|authenticate)\b", re.IGNORECASE)
+_SUBMITTING = re.compile(r"^\s*(click|press|tap|submit|select|choose|hit)\b", re.IGNORECASE)
+
+_PLACEHOLDER = re.compile(r"^\s*<[^>]*>\s*$")          # "<fill in>": the author has not given a value yet
+_SECRET_REF = re.compile(r"\{\{\s*([^}]+?)\s*\}\}")  # {{password}}: a saved sign-in detail
+
+
+class MissingValue(LookupError):
+    """A field needs a value that nobody has supplied yet."""
+
+
+def _expand(value: str, secrets: Dict[str, str]) -> str:
+    def sub(m: "re.Match[str]") -> str:
+        name = next((k for k in secrets if k.lower() == m.group(1).lower()), None)
+        if name is None:
+            raise MissingValue(f"'{m.group(1)}' is not saved under Settings > Sign-in details")
+        return secrets[name]
+    return _SECRET_REF.sub(sub, value)
+
+
+def resolve_fill_value(intent: str, candidate: CandidateAction, test_data: Dict[str, Any],
+                       secrets: Optional[Dict[str, str]] = None) -> str:
+    """
+    What to type into a field: a quoted value in the step, else the journey's test data matched by field name (its values
+    may say {{password}} to use a saved sign-in detail), else a saved sign-in detail matched by name. A password field uses
+    the saved "password" even when the step only says "Enter the password". Values are never invented.
+    """
+    secrets = secrets or {}
     quoted = _QUOTED.search(intent)
     if quoted:
-        return quoted.group(1)
-    haystack = f"{intent} {candidate.label} {candidate.selector}".lower()
+        return _expand(quoted.group(1), secrets)
+    words = f"{intent} {candidate.label}".lower()
     for key, value in test_data.items():
-        if key.lower() in haystack:
-            return "" if str(value) == EMPTY_VALUE else str(value)
+        if re.search(rf"(?<![a-z0-9]){re.escape(key.lower())}(?![a-z0-9])", words) or key.lower() in f"{words} {candidate.selector}".lower():
+            text = "" if str(value) == EMPTY_VALUE else str(value)
+            if _PLACEHOLDER.match(text):
+                if any(re.search(rf"(?<![a-z0-9]){re.escape(n.lower())}(?![a-z0-9])", words) for n in secrets):
+                    break                                   # a saved detail of that name fills it instead
+                raise MissingValue(f"the test data value for '{key}' is still {text.strip()}: fill it in, or save it under Settings > Sign-in details")
+            return _expand(text, secrets)
+    if candidate.input_type == "password":
+        for name, value in secrets.items():
+            if name.lower() == "password":
+                return value
+    for name, value in secrets.items():
+        if re.search(rf"(?<![a-z0-9]){re.escape(name.lower())}(?![a-z0-9])", words):
+            return value
     return candidate.value or "test"
 
 
@@ -89,6 +136,8 @@ class StepInfo:
     call_ids: List[str] = field(default_factory=list)
     console_errors: int = 0
     bbox: Optional[Dict[str, float]] = None
+    url_before: str = ""
+    had_password: bool = False       # a sign-in form was on the page before this step
 
 
 @dataclass
@@ -101,7 +150,8 @@ class FlowContext:
     steps_run: int = 0
     log_cursor: int = 0
     steps: Dict[int, StepInfo] = field(default_factory=dict)
-    plan_hints: Dict[int, str] = field(default_factory=dict)   # step number -> the planner's note
+    plan_hints: Dict[int, str] = field(default_factory=dict)
+    last_note: str = ""                # what the page showed after the previous step, for clearer failure messages   # step number -> the planner's note
     settles: List[Dict[str, Any]] = field(default_factory=list)
     before_bytes: Optional[bytes] = None
 
@@ -185,6 +235,12 @@ class EngineRunner:
         if director is not None:
             self.director = director if isinstance(director, LedgerClient) else LedgerClient(director, self._record_model_call)
             self.director.record = self._record_model_call
+        # Saved sign-in details are masked everywhere they could be recorded (events, files, trace) and never sent to an AI.
+        self.masker = SecretMasker(run_spec.secrets)
+        if self.masker:
+            sink.masker = self.masker
+        self.shared_state: Optional[Dict[str, Any]] = None   # the signed-in session of a `role: setup` journey
+        self.setup_failure: Optional[str] = None
         self.checkpointer = checkpointer or InMemorySaver()
         self.findings_count = 0
         self.total_steps = 0
@@ -280,7 +336,20 @@ class EngineRunner:
                 return await self._run_flow(flow)
 
         try:
-            flow_statuses = list(await asyncio.gather(*(guarded(f) for f in self.spec.flows)))
+            # A sign-in journey (`role: setup`) goes first and alone; every other journey then starts already signed in.
+            setup = [f for f in self.spec.flows if f.role == "setup"]
+            others = [f for f in self.spec.flows if f.role != "setup"]
+            statuses: Dict[str, str] = {}
+            for f in setup:
+                statuses[f.key] = await self._run_flow(f)
+            if others and setup:
+                # They share one signed-in session (and so one server-side cart, settings...): one at a time keeps them apart.
+                for f in others:
+                    statuses[f.key] = await self._run_flow(f)
+            elif others:
+                done = await asyncio.gather(*(guarded(f) for f in others))
+                statuses.update({f.key: s for f, s in zip(others, done)})
+            flow_statuses = [statuses[f.key] for f in self.spec.flows]
         except Exception as exc:
             logger.error("engine.run.error", run_id=self.spec.run_id, error=str(exc))
             await self.sink.emit(QAgentEventType.RUN_ERROR, {"run_id": self.spec.run_id, "message": str(exc)})
@@ -341,6 +410,8 @@ class EngineRunner:
     async def _upload(self, ctx: FlowContext, suffix: str, data: bytes, content_type: str,
                       kind: str, step_seq: Optional[int] = None) -> str:
         key = self._key(ctx.flow.key, suffix)
+        if self.masker and (content_type.startswith("text/") or "json" in content_type):
+            data = self.masker.data(data)
 
         async def announce(artifact) -> None:
             await self.sink.emit(QAgentEventType.ARTIFACT_UPLOADED, {
@@ -384,6 +455,8 @@ class EngineRunner:
         ):
             path = art_dir / name
             if path.exists():
+                if self.masker:
+                    (self.masker.scrub_zip if name.endswith(".zip") else self.masker.scrub_file)(path)
                 await self._upload(ctx, name, path.read_bytes(), content_type, kind)
         if sandbox.console_logs:
             lines = "\n".join(json.dumps(entry, default=str) for entry in sandbox.console_logs)
@@ -480,6 +553,12 @@ class EngineRunner:
             **base, "severity": flow.severity, "total_steps": len(flow.steps),
         })
 
+        if self.setup_failure and flow.role != "setup":
+            reason = f"not run: the sign-in journey failed first ({self.setup_failure})"
+            await self.sink.emit(QAgentEventType.FLOW_FINISHED, {**base, "status": "failed", "step_count": 0, "duration_ms": 0.0,
+                                                                 "findings_count": 0, "failure_reason": reason})
+            return "failed"
+
         art_dir = Path(tempfile.mkdtemp(prefix="qagent-"))
         sandbox = BrowserSandbox(
             headless=self.headless, allowed_hosts=self.spec.allowed_hosts, artifact_dir=art_dir
@@ -488,7 +567,7 @@ class EngineRunner:
             handler = SpanCallbackHandler(self.sink, ctx.trace_id, flow_span, flow.key)
             if self.spec.inject_traceparent:
                 sandbox.traceparent_provider = lambda: f"00-{ctx.trace_id}-{handler.current_span_id}-01"
-            page = await sandbox.start()
+            page = await sandbox.start(storage_state=None if flow.role == "setup" else self.shared_state)
             self.browser_version = self.browser_version or sandbox.browser.version
             recorder = NetworkRecorder(page, ctx.flow_run_id, sandbox=sandbox)
             await self._reset_for_flow(page)
@@ -512,8 +591,12 @@ class EngineRunner:
             logger.error("engine.flow.error", flow=flow.key, error=ctx.failure_reason)
             await self._log(ctx, None, "error", "engine", f"flow aborted: {ctx.failure_reason}")
         finally:
+            if flow.role == "setup" and not ctx.failure_reason:
+                self.shared_state = await sandbox.export_state()
             await sandbox.stop()
             await self._upload_flow_artifacts(ctx, sandbox, art_dir)
+        if flow.role == "setup" and ctx.failure_reason:
+            self.setup_failure = f"'{flow.key}': {ctx.failure_reason}"[:240]
 
         if ctx.failure_reason:
             status = "failed"
@@ -612,7 +695,8 @@ class EngineRunner:
         except Exception as exc:
             return {"status": "blocked", "intent": "", "why": f"could not read the page ({type(exc).__name__})"}
         examples = select_examples(self.spec.reasoning_examples, "plan", f"{flow.key} {flow.goal}")
-        return await direct_next_step(self.director, flow.goal or "", flow.expect, flow.steps, flow.test_data,
+        fields = {**flow.test_data, **{name: "" for name in self.spec.secrets}}   # names only: the AI never sees a value
+        return await direct_next_step(self.director, flow.goal or "", flow.expect, flow.steps, fields,
                                       state.get("history", []), page.url, title, text, candidates, examples)
 
     async def _begin_step(self, state: FlowState, config: RunnableConfig) -> FlowState:
@@ -696,6 +780,12 @@ class EngineRunner:
             title = await page.title()
         except Exception:
             pass
+        info = ctx.steps[seq]
+        info.url_before = page.url
+        try:
+            info.had_password = bool((await page.evaluate(PAGE_STATE_JS))["password"])
+        except Exception:
+            info.had_password = False
 
         shot_url = f"/api/artifacts/{self.spec.run_id}/flows/{quote(ctx.flow.key, safe='')}/steps/{seq}/screenshot.jpg"
         await self.sink.emit(QAgentEventType.STEP_OBSERVED, {
@@ -727,7 +817,8 @@ class EngineRunner:
         candidates = [CandidateAction.model_validate(c) for c in state["candidates"]]
         timings = dict(state["timings"])
         if not candidates:
-            return self._fail(rt, f"step {state['idx']}: no interactive elements on {state['url']}")
+            note = f" ({rt.ctx.last_note})" if rt.ctx.last_note else ""
+            return self._fail(rt, f"step {state['idx']}: no interactive elements on {state['url']}{note}")
 
         req = self._request(state, candidates, flow=rt.ctx.flow, note=rt.ctx.plan_hints.get(state["idx"]))
         input_hash = hash_request(req)
@@ -771,7 +862,8 @@ class EngineRunner:
             reason = f"Blocked: risk {decision.risky:.2f} > {RISK_BLOCK_ABOVE}"
             update.update(self._fail(rt, f"step {seq}: action judged risky (p={decision.risky:.2f})", "blocked"))
         elif decision.outcome == "stuck":
-            update.update(self._fail(rt, f"step {seq}: model reports no element performs this step"))
+            note = f" ({rt.ctx.last_note})" if rt.ctx.last_note else ""
+            update.update(self._fail(rt, f"step {seq}: model reports no element performs this step{note}"))
         elif decision.outcome == "done":
             update["step_done"] = True
         elif state.get("chosen_id") is None:
@@ -842,7 +934,13 @@ class EngineRunner:
                       if c.id == state["chosen_id"])
         bbox = chosen.bounding_box.model_dump() if chosen.bounding_box else None
         ctx.steps[state["idx"]].bbox = bbox
-        value = resolve_fill_value(state["intent"], chosen, ctx.flow.test_data) if chosen.action_type == "fill" else None
+        try:
+            value = resolve_fill_value(state["intent"], chosen, ctx.flow.test_data, self.spec.secrets) if chosen.action_type == "fill" else None
+        except MissingValue as exc:
+            update = {"acted": True, **self._fail(rt, f"step {state['idx']}: {exc}")}
+            await self.sink.emit(QAgentEventType.ACTION_EXECUTED, {**base, "action_id": chosen.id, "action_label": chosen.label,
+                                 "status": "failed", "duration_ms": 0.0, "error": str(exc), "target_bbox": bbox})
+            return update
         executor = BrowserExecutor(page)
         started = time.perf_counter()
         outcome: Dict[str, Any] = {"status": "success", "error": None}
@@ -951,13 +1049,46 @@ class EngineRunner:
                     only_failures=True)
         timings["verify_ms"] = (time.perf_counter() - t) * 1000.0
 
+        observed = await self._observe_result(rt, state, info)
         history = state["history"] + [{"seq": seq, "intent": state["intent"], "action": state.get("label", ""),
                                        "status": state["step_status"]}]
         await self.sink.emit(QAgentEventType.VERIFICATION_STEP, {
             **self._base(state), "status": state["step_status"], "url": page.url,
-            "settled": state.get("settled", True), "timings": timings,
+            "settled": state.get("settled", True), "timings": timings, "observed": observed,
         })
-        return {"history": history, "timings": timings}
+        update: Dict[str, Any] = {"history": history, "timings": timings}
+        if observed.get("signin_failed"):
+            update.update(self._fail(rt, observed["signin_failed"]))
+        return update
+
+    async def _observe_result(self, rt: FlowRuntime, state: FlowState, info: StepInfo) -> Dict[str, Any]:
+        """What the page shows after a step, so failures name their real cause (and a failed sign-in stops the journey)."""
+        ctx, seq = rt.ctx, state["idx"]
+        out: Dict[str, Any] = {}
+        try:
+            now = await rt.page.evaluate(PAGE_STATE_JS)
+        except Exception:
+            return out
+        url_changed = rt.page.url != info.url_before
+        out.update(url_changed=url_changed, signin_form_visible=bool(now["password"]), alerts=now["alerts"])
+        label = state.get("label", "") or ""
+        submit_like = bool(_LOGIN.search(label)) or bool(_LOGIN.search(state["intent"]) and _SUBMITTING.match(state["intent"]))
+        ctx.last_note = ""
+        if state.get("acted") and _SUBMITTING.match(state["intent"]) and not url_changed:
+            says = f"; it shows: {' | '.join(now['alerts'])}" if now["alerts"] else ""
+            ctx.last_note = f"after '{state['intent']}' the page did not change{says}"
+        if state.get("acted") and state["step_status"] == "passed" and info.had_password and now["password"] and submit_like:
+            says = f" and says: {' | '.join(now['alerts'])}" if now["alerts"] else ""
+            reason = f"sign-in failed: after '{state['intent']}' the page still shows the sign-in form{says}"
+            out["signin_failed"] = reason
+            await self._log(ctx, seq, "error", "signin", reason)
+            await self._emit_check(ctx, seq, CheckOutcome(
+                key=f"signin:{ctx.flow.base_key}", kind="signin", passed=False, severity="high", finding_kind="dom",
+                title="Sign-in did not succeed", expected="Signing in leads past the sign-in form",
+                actual=reason, locus="sign-in form", requirement_keys=list(ctx.flow.covers)))
+        elif now["alerts"] and state.get("acted") and _SUBMITTING.match(state["intent"]):
+            await self._log(ctx, seq, "warning", "page", f"the page shows a message after this step: {' | '.join(now['alerts'])}")
+        return out
 
     async def _network_checks(self, ctx: FlowContext, recorder: NetworkRecorder, seq: int) -> None:
         info = ctx.steps[seq]

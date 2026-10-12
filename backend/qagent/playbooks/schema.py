@@ -34,7 +34,7 @@ KNOWN_FIELDS: Dict[str, Set[str]] = {
     "ux_rule": {"check", "targets", "pattern", "max_ms", "question", "severity", "covers", "ignore", "impact"},
     "gotcha": {"note", "wait_for", "ignore_console", "applies_to"},
     "edge_case": {"applies_to", "expect", "covers", "checks", "test_data"},
-    "flow": {"covers", "checks", "severity"},
+    "flow": {"covers", "checks", "severity", "role"},
     "reasoning_example": {"scope", "context", "challenge", "strategy"},
 }
 

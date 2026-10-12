@@ -7,8 +7,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useRef, useState } from "react";
 import { Badge, Button, Card, ErrorState, Field, Loading, SimpleTable, fmtBytes, inputCls } from "@/components/ui";
+import { Checkbox } from "@/components/ui/checkbox";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { Upload } from "lucide-react";
+import { KeyRound, Upload } from "lucide-react";
 import { DictatableTextarea } from "@/components/dictation";
 import { MAX_FILE_BYTES, api } from "@/lib/api/client";
 import { useApp } from "@/lib/api/hooks";
@@ -19,7 +20,7 @@ export default function Settings() {
   const { data: app, error, isPending, refetch } = useApp(slug);
   if (isPending) return <Loading />;
   if (error) return <ErrorState error={error} retry={refetch} />;
-  return <div className="grid items-start gap-6 xl:grid-cols-2"><Form key={app.id} app={app} /><div className="space-y-6"><TestFiles key={`f${app.id}`} app={app} /><Retention key={`r${app.id}`} app={app} /></div></div>;
+  return <div className="grid items-start gap-6 xl:grid-cols-2"><Form key={app.id} app={app} /><div className="space-y-6"><SignInDetails key={`s${app.id}`} app={app} /><TestFiles key={`f${app.id}`} app={app} /><Retention key={`r${app.id}`} app={app} /></div></div>;
 }
 
 const list = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
@@ -177,6 +178,51 @@ function TestFiles({ app }: { app: App }) {
       {(add.error || remove.error) && <p role="alert" className="text-sm text-bad">{(add.error ?? remove.error)!.message}</p>}
       <input ref={input} type="file" multiple hidden aria-label="Choose test files" onChange={(e) => { const list = Array.from(e.target.files ?? []); e.target.value = ""; if (list.length) add.mutate(list); }} />
       <Button onClick={() => input.current?.click()} disabled={add.isPending}><Upload className="size-4" />{add.isPending ? "Adding…" : "Add files"}</Button>
+    </Card>
+  );
+}
+
+/** The app's sign-in details. Tests type them in by field name, and they are hidden in reports, logs and files. */
+function SignInDetails({ app }: { app: App }) {
+  const qc = useQueryClient();
+  const list = useQuery({ queryKey: ["credentials", app.slug], queryFn: () => api.listCredentials(app.slug) });
+  const [name, setName] = useState("username");
+  const [value, setValue] = useState("");
+  const [chosen, setChosen] = useState<boolean | null>(null);
+  const hide = chosen ?? !(["username", "user", "email", "login", "account"].includes(name.trim().toLowerCase()));   // a username is shown, anything else hidden, unless the user decides
+  const refresh = () => qc.invalidateQueries({ queryKey: ["credentials", app.slug] });
+  const save = useMutation({
+    mutationFn: () => api.setCredential(app.slug, name.trim(), value, hide),
+    onSuccess: () => { refresh(); setValue(""); setChosen(null); toast.success(`Saved “${name.trim()}”`); },
+  });
+  const remove = useMutation({ mutationFn: (n: string) => api.deleteCredential(app.slug, n), onSuccess: () => { refresh(); toast.success("Removed"); } });
+  const valid = /^[A-Za-z][\w .-]{0,39}$/.test(name.trim()) && value.length > 0;
+  return (
+    <Card className="space-y-4 p-6" data-tour="signin-details">
+      <div>
+        <h2 className="flex items-center gap-2 font-medium"><KeyRound className="size-4 text-brand" />Sign-in details</h2>
+        <p className="text-sm text-muted-foreground">If your app needs a login, save it here instead of writing it in the test plan. A plan then just says “Enter the username” and “Enter the password”, and QAgent types these in. They are stored encrypted, never sent to an AI, and hidden in reports, logs and saved files. Secret values cannot be viewed again, only replaced.</p>
+      </div>
+      {list.isPending ? <p className="text-sm text-muted-foreground">Loading…</p> : list.error ? <ErrorState error={list.error} retry={list.refetch} /> : list.data.length === 0 ? (
+        <p className="text-sm text-muted-foreground">Nothing saved yet.</p>
+      ) : (
+        <SimpleTable head={["Name", "Value", ""]}>
+          {list.data.map((c) => (
+            <TableRow key={c.name}>
+              <TableCell className="px-4 font-medium">{c.name}</TableCell>
+              <TableCell className="px-4 font-mono text-sm text-muted-foreground">{c.secret ? <span aria-label="Hidden value">••••••••</span> : c.value}</TableCell>
+              <TableCell className="px-4 text-right"><Button variant="danger" onClick={() => remove.mutate(c.name)} aria-label={`Remove ${c.name}`}>Remove</Button></TableCell>
+            </TableRow>
+          ))}
+        </SimpleTable>
+      )}
+      <form className="grid gap-3 sm:grid-cols-[10rem_1fr_auto] sm:items-end" onSubmit={(e) => { e.preventDefault(); if (valid) save.mutate(); }}>
+        <Field label="Name"><input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} list="signin-names" aria-label="Sign-in detail name" /><datalist id="signin-names"><option value="username" /><option value="email" /><option value="password" /><option value="api key" /></datalist></Field>
+        <Field label="Value"><input className={inputCls} type={hide ? "password" : "text"} value={value} onChange={(e) => setValue(e.target.value)} autoComplete="off" aria-label="Sign-in detail value" /></Field>
+        <Button type="submit" variant="primary" disabled={!valid || save.isPending}>{save.isPending ? "Saving…" : "Save"}</Button>
+        <label className="flex items-center gap-2 text-sm sm:col-span-3"><Checkbox checked={hide} onCheckedChange={(v) => setChosen(v === true)} />Hide this value (recommended for passwords and keys)</label>
+      </form>
+      {(save.error || remove.error) && <p role="alert" className="text-sm text-bad">{(save.error ?? remove.error)!.message}</p>}
     </Card>
   );
 }

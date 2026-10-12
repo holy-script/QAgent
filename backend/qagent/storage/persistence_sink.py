@@ -52,6 +52,7 @@ class PersistenceSink:
         self._pending: asyncio.Queue = asyncio.Queue()
         self._writer: Optional[asyncio.Task] = None
         self._batch_size = batch_size
+        self.masker = None  # set by the engine when the run holds saved sign-in details: every payload is masked before it leaves
 
     def subscribe(self) -> asyncio.Queue:
         q: asyncio.Queue = asyncio.Queue()
@@ -68,6 +69,8 @@ class PersistenceSink:
 
     async def emit(self, event_type: QAgentEventType, payload: Dict[str, Any]) -> EventEnvelope:
         """Assigns the next seq, broadcasts immediately, and queues the event for batched persistence."""
+        if self.masker:
+            payload = self.masker.obj(payload)
         self._seq += 1
         now = datetime.now(timezone.utc)
         envelope = EventEnvelope(

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useSyncExternalStore } from "react";
 import { Card, cn } from "@/components/ui";
 import { useApp, usePlaybooks, useRuns } from "@/lib/api/hooks";
-import { useFiles } from "@/lib/api/live";
+import { useCredentials, useFiles } from "@/lib/api/live";
 import { emptyMemory, guideStates, markVisited, nextStep, progress, readMemory, skipStep, subscribeMemory, unskipStep, type StepState } from "@/lib/guide";
 
 /** Everything the guide needs for one app: each step's state, what comes next, and how far along the user is. */
@@ -14,11 +14,12 @@ export function useGuide(slug: string) {
   const { data: plans } = usePlaybooks(slug);
   const { data: runs } = useRuns(slug);
   const { data: files } = useFiles(slug);
+  const { data: credentials } = useCredentials(slug);
   const memory = useSyncExternalStore(subscribeMemory, () => readMemory(slug), () => emptyMemory);
-  const states = useMemo(() => guideStates({ app, plans, runs, files, visited: memory.visited, skipped: memory.skipped }), [app, plans, runs, files, memory]);
+  const states = useMemo(() => guideStates({ prd: app?.prd_markdown, plans, runs, files, credentials, visited: memory.visited, skipped: memory.skipped }), [app?.prd_markdown, plans, runs, files, credentials, memory]);
   const latestRun = runs?.find((r) => r.status !== "queued")?.id;
   const next = nextStep(states);
-  return { states, next, latestRun, ...progress(states), ready: !!app && !!plans && !!runs && !!files };
+  return { states, next, latestRun, ...progress(states), ready: !!app && !!plans && !!runs && !!files && !!credentials };
 }
 
 /** Marks "read what it found" as done once the user has opened a run or the bug list. */

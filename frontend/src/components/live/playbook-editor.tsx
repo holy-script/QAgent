@@ -148,7 +148,7 @@ function AddCard({ cat, items, flowKeys, onAdd, initial, editKey, extra, onCance
             <Field label={f.label + (f.required ? " *" : "")} hint={f.hint}>
               {f.kind === "text" && <input className={inputCls} value={v[f.name]} placeholder={f.placeholder} onChange={(e) => set(f.name, e.target.value)} />}
               {(f.kind === "area" || f.kind === "lines") && <textarea className={cn(inputCls, "min-h-20", f.kind === "lines" && "font-mono text-xs")} value={v[f.name]} placeholder={f.placeholder} onChange={(e) => set(f.name, e.target.value)} />}
-              {f.kind === "select" && <SelectField label={f.label} value={v[f.name]} onChange={(x) => set(f.name, x)} options={(f.options ?? []).map((o) => ({ value: o, label: o }))} />}
+              {f.kind === "select" && <SelectField label={f.label} value={v[f.name]} onChange={(x) => set(f.name, x)} options={(f.options ?? []).map((o) => ({ value: o, label: f.labels?.[o] ?? o }))} />}
               {f.kind === "scope" && (
                 <div className="flex flex-wrap gap-3 pt-1">
                   {f.options!.map((o) => {

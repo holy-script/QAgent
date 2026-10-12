@@ -19,7 +19,7 @@ const KNOWN: Record<string, string[]> = {
   requirement: ["prd_ref", "acceptance", "priority"], formula: ["rule", "source", "bindings", "tolerance", "verifies"],
   ux_rule: ["check", "targets", "pattern", "max_ms", "question", "severity", "covers", "ignore", "impact"],
   gotcha: ["note", "wait_for", "ignore_console", "applies_to"], edge_case: ["applies_to", "expect", "covers", "checks", "test_data"],
-  flow: ["covers", "checks", "severity", "goal", "steps", "expect", "test_data"], reasoning_example: ["scope", "context", "challenge", "strategy"],
+  flow: ["covers", "checks", "severity", "role", "goal", "steps", "expect", "test_data"], reasoning_example: ["scope", "context", "challenge", "strategy"],
 };
 
 const split = (v: string) => v.split(",").map((s) => s.trim()).filter(Boolean);
@@ -121,6 +121,7 @@ export function validateMarkdown(md: string, previous?: { flows: Record<string, 
     if (check === "consistent_value" && arr(u, "targets").length < 2) errors.push(`${u.key}: consistent_value needs at least two targets`);
     if (check === "format" && str(u, "pattern")) { try { new RegExp(str(u, "pattern")); } catch { errors.push(`${u.key}: pattern does not compile`); } }
   });
+  of("flow").forEach((f) => { const role = str(f, "role"); if (role && role !== "setup") errors.push(`flow ${f.key}: role '${role}' is not one of ['setup']`); });
   of("flow").forEach((f) => { if (!arr(f, "steps").length && !str(f, "goal")) errors.push(`flow ${f.key}: needs a goal or steps`); });
   of("edge_case").forEach((e) => { if (!str(e, "expect")) errors.push(`${e.key}: edge case needs an 'expect' line`); });
   of("requirement").forEach((r) => { if (!str(r, "acceptance")) warnings.push(`${r.key}: requirement has no acceptance criteria`); });
@@ -160,7 +161,7 @@ export function toParsedFlows(v: Validation): ParsedFlow[] {
   return v.flows.map((f) => {
     const flow = f as Record<string, unknown> & { key: string };
     return {
-      key: flow.key, severity: (flow.severity as Severity) ?? "high", goal: (flow.goal as string) || undefined, steps: (flow.steps as string[]) ?? [], expect: (flow.expect as string[]) ?? [],
+      key: flow.key, severity: (flow.severity as Severity) ?? "high", goal: (flow.goal as string) || undefined, role: (flow.role as string) || undefined, steps: (flow.steps as string[]) ?? [], expect: (flow.expect as string[]) ?? [],
       test_data: Object.fromEntries(Object.entries((flow.test_data as Record<string, string>) ?? {})),
       formulas: ((flow.checks as string[]) ?? []).flatMap((k) => formulas.filter((x) => x.key === k)).map((x) => ({
         name: `${x.key} ${x.title}`.trim(), expr: String(x.body.rule ?? ""), source: "both" as const, bindings: (x.body.bindings as Record<string, string>) ?? {},

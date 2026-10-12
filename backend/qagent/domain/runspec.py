@@ -6,6 +6,7 @@ from qagent.domain.schemas import RunMode
 class FlowSpec(BaseModel):
     key: str                                  # "add-to-cart" or a variant such as "add-to-cart#EC-2"
     severity: str = "high"
+    role: Optional[str] = None                # "setup": runs first; its signed-in session is reused by every other journey
     goal: Optional[str] = None                # a goal-driven journey: the AI chooses each step on the live page
     steps: List[str] = Field(default_factory=list)   # (for a goal journey: an optional suggested route)
     expect: List[str] = Field(default_factory=list)
@@ -42,6 +43,8 @@ class RunSpec(BaseModel):
     reasoning_examples: List[Dict[str, Any]] = Field(default_factory=list)
     playbook_hash: str = ""
     files: Dict[str, Dict[str, Any]] = Field(default_factory=dict)  # test files: name -> {key, content_type}
+    # Saved sign-in details (name -> value). Only ever held in memory for the run: never serialised, stored or sent to an AI.
+    secrets: Dict[str, str] = Field(default_factory=dict, exclude=True, repr=False)
     plan: bool = False                        # Claude writes per-step notes before each journey
     reset_path: Optional[str] = None          # POST once before the run to reset the target app
     inject_traceparent: bool = False

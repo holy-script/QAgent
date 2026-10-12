@@ -39,6 +39,7 @@ base_url: <url>
 - covers: REQ-1
 - checks: F-1, UX-1
 - severity: high
+- role: setup           (optional: ONE sign-in journey that runs first; every other journey then starts signed in)
 
 #### Goal                 (use INSTEAD of Steps for a high-level journey: the tester works out the clicks itself)
 One or two sentences: what the user is trying to accomplish.
