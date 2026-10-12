@@ -65,3 +65,20 @@ def test_allowed_hosts_accept_a_domain_wildcard_and_web_fonts():
     assert sb._host_allowed("https://app.example.com/x") and sb._host_allowed("https://abc.1.2.3.4.sslip.io/api")
     assert sb._host_allowed("https://fonts.gstatic.com/f.woff2") and not sb._host_allowed("https://evil.example.org/")
     assert not sb._host_allowed("https://sslip.io/") and sb._host_allowed("data:text/plain,hi")
+
+
+@pytest.mark.asyncio
+async def test_charts_and_repeated_labels_do_not_break_reading_the_page():
+    """SVG chart parts have no innerText: reading a page with a clickable chart and two same-named buttons must still work."""
+    html = ("<svg width=200 height=100><g style='cursor:pointer'><rect width=50 height=50></rect></g></svg>"
+            "<div><button>Edit</button> first row</div><div><button>Edit</button> second row</div>")
+    sb = BrowserSandbox(headless=True)
+    page = await sb.start()
+    try:
+        await page.goto("data:text/html," + quote(html))
+        found = [CandidateAction.model_validate(c) for c in await page.evaluate(EXTRACTOR_JS)]
+        labels = [c.label for c in found]
+        assert any("first row" in lab for lab in labels) and any("second row" in lab for lab in labels)
+        assert all(c.tag != "g" and c.tag != "rect" for c in found)
+    finally:
+        await sb.stop()

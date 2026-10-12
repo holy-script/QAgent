@@ -691,18 +691,26 @@ class EngineRunner:
     async def _direct(self, rt: FlowRuntime, state: FlowState, idx: int) -> Dict[str, str]:
         """Asks the director for the next step of a goal journey, from what the page shows right now."""
         flow, page = rt.ctx.flow, rt.page
-        try:
-            await wait_dom_stable(page)
-            raw = await page.evaluate(EXTRACTOR_JS)
-            candidates = [CandidateAction.model_validate(c) for c in raw[:60]]
-            text = (await page.evaluate("document.body ? document.body.innerText : ''"))[:6000]
-            title = await page.title()
+        err = ""
+        for attempt in range(3):   # a page that is navigating or re-rendering can fail a read: look again before giving up
             try:
-                aria = (await page.locator("body").aria_snapshot(timeout=3000))[:2500]
-            except Exception:
-                aria = ""
-        except Exception as exc:
-            return {"status": "blocked", "intent": "", "why": f"could not read the page ({type(exc).__name__})"}
+                await wait_dom_stable(page)
+                raw = await page.evaluate(EXTRACTOR_JS)
+                candidates = [CandidateAction.model_validate(c) for c in raw[:60]]
+                text = (await page.evaluate("document.body ? document.body.innerText : ''"))[:6000]
+                title = await page.title()
+                try:
+                    aria = (await page.locator("body").aria_snapshot(timeout=3000))[:2500]
+                except Exception:
+                    aria = ""
+                err = ""
+                break
+            except Exception as exc:
+                err = f"{type(exc).__name__}: {str(exc).splitlines()[0][:140] if str(exc) else 'no details'}"
+                await self._log(rt.ctx, idx, "warning", "director", f"could not read the page ({err}); attempt {attempt + 1} of 3")
+                await asyncio.sleep(1.5)
+        if err:
+            return {"status": "blocked", "intent": "", "why": f"could not read the page ({err})"}
         examples = select_examples(self.spec.reasoning_examples, "plan", f"{flow.key} {flow.goal}")
         fields = {**flow.test_data, **{name: "" for name in self.spec.secrets}}   # names only: the AI never sees a value
         return await direct_next_step(self.director, flow.goal or "", flow.expect, flow.steps, fields,

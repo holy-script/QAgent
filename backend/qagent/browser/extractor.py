@@ -21,7 +21,7 @@ EXTRACTOR_JS = """
     const scan = document.body ? document.body.querySelectorAll('*') : [];
     for (let i = 0; i < scan.length && i < MAX_SCAN; i++) {
         const el = scan[i];
-        if (found.has(el) || ['HTML', 'BODY', 'SCRIPT', 'STYLE', 'OPTION', 'OPTGROUP'].includes(el.tagName)) continue;
+        if (!(el instanceof HTMLElement) || found.has(el) || ['HTML', 'BODY', 'SCRIPT', 'STYLE', 'OPTION', 'OPTGROUP'].includes(el.tagName)) continue;
         if (el.tagName === 'LABEL' && el.control && found.has(el.control)) continue;   // the control itself is already a candidate
         if (window.getComputedStyle(el).cursor !== 'pointer') continue;
         const parent = el.parentElement;
@@ -119,7 +119,8 @@ EXTRACTOR_JS = """
             const r = e.getBoundingClientRect();
             return r.x === c.bounding_box.x && r.y === c.bounding_box.y;
         });
-        const ctx = el && el.parentElement ? el.parentElement.innerText.replace(c.label, '').trim().split('\\n')[0] : '';
+        const ptext = el && el.parentElement ? (el.parentElement.innerText ?? el.parentElement.textContent ?? '') : '';
+        const ctx = ptext.replace(c.label, '').trim().split('\\n')[0];
         if (ctx) c.label = (c.label + ' - ' + ctx).substring(0, 80);
     });
     return candidates;
