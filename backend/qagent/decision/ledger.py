@@ -60,6 +60,37 @@ class TapedJudge:
             })
         return verdict
 
+    @property
+    def can_verify(self) -> bool:
+        return self.tape is not None or bool(getattr(self.inner, "can_verify", False))
+
+    async def verify(self, question: str, page_text: str, page: Any, journey: str = "", hints: Optional[List[str]] = None,
+                     examples: Optional[List[Dict[str, Any]]] = None, console_logs: Optional[List[Dict[str, Any]]] = None,
+                     state_js: Optional[str] = None) -> Optional[Verdict]:
+        """Live verification (see checks/verifier.py), on the tape like any judgement: a repeat serves the recorded verdict."""
+        key = judge_hash("verify: " + question, page_text, hints or [])
+        recorded = self.tape.get(key) if self.tape is not None else None
+        if recorded is not None:
+            verdict, replayed = (Verdict.from_dict(recorded) if recorded.get("inconclusive") is not True else None), True
+        elif getattr(self.inner, "can_verify", False):
+            verdict, replayed = await self.inner.verify(question, page_text, page, journey, hints, examples, console_logs, state_js), False
+            if self.tape is not None:
+                self.divergent += 1
+        else:
+            raise LookupError("this live check is not on the tape")
+        if self._emit:
+            body = verdict.to_dict() if verdict else {"inconclusive": True}
+            await self._emit({
+                "flow_run_id": current_flow_run.get(), "purpose": "judge", "decider": "claude",
+                "model_version": verdict.model_version if verdict else "", "label": ("verify: " + question)[:300],
+                "input_hash": key, "response": body,
+                "latency_ms": 0.0 if replayed or not verdict else verdict.latency_ms,
+                "input_tokens": 0 if replayed or not verdict else verdict.input_tokens,
+                "output_tokens": 0 if replayed or not verdict else verdict.output_tokens,
+                "cost_usd": 0.0 if replayed or not verdict else verdict.cost_usd, "replayed": replayed,
+            })
+        return verdict
+
 
 PURPOSE = {"bug_narrative": "bug_narrative", "plan_flow": "planner", "next_step": "director"}  # any other tool is a report call
 

@@ -26,7 +26,7 @@ async function loadCandidates(url: string): Promise<Candidate[]> {
 export function StepDrawer({ step, view, onClose, runId }: { step: Step; view: RunView; onClose: () => void; runId: string }) {
   const live = !USE_MOCK;
   const { data: arts } = useStepArtifacts(runId, step.flow_key, step.seq, live && step.status !== "running");
-  const [side, setSide] = useState<"after" | "before">("after");
+  const [picked, setSide] = useState<"after" | "before" | null>(null);
   const [zoom, setZoom] = useState(1);
   const zoomTo = (z: number) => setZoom(Math.min(4, Math.max(1, Math.round(z * 4) / 4)));
   const candUrl = arts?.find((a) => a.kind === "candidates")?.url;
@@ -34,7 +34,10 @@ export function StepDrawer({ step, view, onClose, runId }: { step: Step; view: R
   const candidates = step.candidates.length ? step.candidates : (liveCandidates ?? []);
   const beforeUrl = arts?.find((a) => a.kind === "screenshot_before")?.url;
   const waitUrls = step.wait_frames.length ? step.wait_frames : (arts?.filter((a) => a.kind === "wait_frame").map((a) => assetUrl(a.url)) ?? []);
+  // The boxes were measured on the page BEFORE the action, so they belong on the Before picture only; open on it when there are boxes.
+  const side = picked ?? (beforeUrl && candidates.length ? "before" : "after");
   const shown = side === "before" && beforeUrl ? assetUrl(beforeUrl) : step.screenshot;
+  const showBoxes = side === "before" || !beforeUrl;
 
   const calls = view.network.filter((n) => n.flow_key === step.flow_key && n.step_seq === step.seq);
   const findings = view.findings.filter((f) => f.flow_key === step.flow_key && f.step_seq === step.seq);
@@ -71,12 +74,12 @@ export function StepDrawer({ step, view, onClose, runId }: { step: Step; view: R
               </div>
             )}
           </div>
-          {candidates.length > 0 && <p className="text-xs text-muted-foreground">Boxes mark the buttons and links the AI could choose from. The highlighted one was used. Click the image to zoom, scroll to move around.</p>}
+          {showBoxes && candidates.length > 0 && <p className="text-xs text-muted-foreground">Boxes mark the buttons and links the AI could choose from. The highlighted one was used. Click the image to zoom, scroll to move around.</p>}
           {shown && (
             <div className="min-h-0 flex-1 overflow-auto rounded-lg border border-border bg-muted">
               <div className="relative" style={{ width: `${zoom * 100}%` }}>
                 <img src={shown} alt="Step screenshot" className={cn("w-full", zoom < 4 ? "cursor-zoom-in" : "cursor-zoom-out")} onClick={() => zoomTo(zoom < 4 ? zoom + 1 : 1)} />
-                {candidates.map((c) => {
+                {showBoxes && candidates.map((c) => {
                   const [x, y, w, h] = c.rect;
                   const chosen = c.id === step.action_id;
                   return <div key={c.id} title={`#${c.id} ${c.role}: ${c.label}`} className={cn("pointer-events-none absolute border", chosen ? "border-2 border-brand bg-brand/15" : "border-violet/60")}

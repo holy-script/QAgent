@@ -67,6 +67,7 @@ class Settings(BaseSettings):
     credentials_key: str = Field(default="", alias="CREDENTIALS_KEY")  # encrypts saved sign-in details; falls back to AUTH_SECRET
     goal_step_budget: int = 40          # goal-driven journeys may take more steps than hand-written ones
     goal_time_budget_s: int = 240
+    verify_max_actions: int = 6         # clicks/hovers the verifier may try on the live page for one expectation
     goal_max_recoveries: int = 4        # goal journeys carry on after this many failed steps in a row, trying another way
     goal_block_retries: int = 2         # times the director is told to try something new before a 'blocked' answer is accepted
     deterministic_browser: bool = True  # fixed clock, no animations, reset the target before each flow

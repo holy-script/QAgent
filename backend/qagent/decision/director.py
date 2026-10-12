@@ -45,7 +45,7 @@ SYSTEM = (
 
 
 def build_prompt(goal: str, expect: List[str], route: List[str], test_fields: List[str], history: List[Dict[str, Any]],
-                 url: str, title: str, page_text: str, candidates: List[CandidateAction]) -> str:
+                 url: str, title: str, page_text: str, candidates: List[CandidateAction], aria: str = "") -> str:
     past = "\n".join(
         f"{i}. {h.get('intent')} -> {h.get('action') or '?'} [{h.get('status', 'ok')}]"
         + (f" ({h['error']})" if h.get("error") else "") for i, h in enumerate(history[-10:], 1)
@@ -58,19 +58,21 @@ def build_prompt(goal: str, expect: List[str], route: List[str], test_fields: Li
         + f"Test data fields available for typing: {', '.join(test_fields) or '(none)'}\n\n"
         + f"Steps so far:\n{past}\n\n"
         + f"Current page: {url}\nTitle: {title}\nVisible text (excerpt):\n{page_text[:1800]}\n\n"
+        + (f"Page structure (accessibility tree, excerpt):\n{aria[:1500]}\n\n" if aria else "")
         + f"Interactive elements:\n{elements}"
     )
 
 
 async def next_step(client: Any, goal: str, expect: List[str], route: List[str], test_data: Dict[str, Any],
                     history: List[Dict[str, Any]], url: str, title: str, page_text: str,
-                    candidates: List[CandidateAction], examples: Optional[List[Dict[str, Any]]] = None) -> Dict[str, str]:
+                    candidates: List[CandidateAction], examples: Optional[List[Dict[str, Any]]] = None,
+                    aria: str = "") -> Dict[str, str]:
     """-> {"status": continue|done|blocked, "intent": str, "why": str}"""
     system = with_charter(SYSTEM)
     if examples:
         from qagent.decision.fewshot import render_examples
         system += "\n\nHow to reason about tricky situations:\n" + render_examples(examples)
-    prompt = build_prompt(goal, expect, route, sorted(test_data), history, url, title, page_text, candidates)
+    prompt = build_prompt(goal, expect, route, sorted(test_data), history, url, title, page_text, candidates, aria)
     out = await client.converse_tool(system, prompt, NEXT_STEP_TOOL, max_tokens=400)
     a = out["input"]
     status = a.get("status") if a.get("status") in ("continue", "done", "blocked") else "blocked"

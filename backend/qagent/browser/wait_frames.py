@@ -58,3 +58,35 @@ class WaitFramesWatcher:
                     return SettleResult(True, (time.perf_counter() - start) * 1000, frames)
                 await asyncio.sleep(0.05)
         return SettleResult(False, (time.perf_counter() - start) * 1000, frames)
+
+
+# Resolves once the page's DOM has not changed for `quiet` ms (or after `max` ms). Spinner checks miss pages that are simply
+# still rendering (hydration, client-side routing, lazy images), and a screenshot or element list taken mid-render shows a
+# page that is already gone.
+DOM_QUIET_JS = """
+([quiet, max]) => new Promise(resolve => {
+    let timer;
+    const done = () => { obs.disconnect(); resolve(true); };
+    const obs = new MutationObserver(() => { clearTimeout(timer); timer = setTimeout(done, quiet); });
+    obs.observe(document.documentElement, {subtree: true, childList: true, attributes: true, characterData: true});
+    timer = setTimeout(done, quiet);
+    setTimeout(() => { clearTimeout(timer); obs.disconnect(); resolve(false); }, max);
+})
+"""
+
+PAGE_SIGNATURE_JS = "() => (document.body ? document.body.innerText.length : 0) + '|' + document.querySelectorAll('*').length + '|' + location.href"
+
+
+async def wait_dom_stable(page: Page, quiet_ms: int = 350, max_ms: int = 3000) -> bool:
+    """True if the DOM went quiet; False if it kept changing until `max_ms` (or the page was navigating)."""
+    try:
+        return bool(await page.evaluate(DOM_QUIET_JS, [quiet_ms, max_ms]))
+    except Exception:
+        return False
+
+
+async def page_signature(page: Page) -> str:
+    try:
+        return str(await page.evaluate(PAGE_SIGNATURE_JS))
+    except Exception:
+        return ""

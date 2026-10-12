@@ -20,7 +20,7 @@ from qagent.browser.extractor import EXTRACTOR_JS
 from qagent.browser.network_recorder import NetworkRecorder
 from qagent.browser.redact import redact_body
 from qagent.browser.sandbox import BrowserSandbox
-from qagent.browser.wait_frames import WaitFramesWatcher
+from qagent.browser.wait_frames import WaitFramesWatcher, page_signature, wait_dom_stable
 from qagent.checks import a11y, expectations, formulas as formula_checks, timing, ux_rules
 from qagent.checks.base import CheckOutcome
 from qagent.checks.resolver import BindingResolver
@@ -689,16 +689,21 @@ class EngineRunner:
         """Asks the director for the next step of a goal journey, from what the page shows right now."""
         flow, page = rt.ctx.flow, rt.page
         try:
+            await wait_dom_stable(page)
             raw = await page.evaluate(EXTRACTOR_JS)
             candidates = [CandidateAction.model_validate(c) for c in raw[:60]]
             text = await page.evaluate("document.body ? document.body.innerText : ''")
             title = await page.title()
+            try:
+                aria = (await page.locator("body").aria_snapshot(timeout=3000))[:1500]
+            except Exception:
+                aria = ""
         except Exception as exc:
             return {"status": "blocked", "intent": "", "why": f"could not read the page ({type(exc).__name__})"}
         examples = select_examples(self.spec.reasoning_examples, "plan", f"{flow.key} {flow.goal}")
         fields = {**flow.test_data, **{name: "" for name in self.spec.secrets}}   # names only: the AI never sees a value
         return await direct_next_step(self.director, flow.goal or "", flow.expect, flow.steps, fields,
-                                      state.get("history", []), page.url, title, text, candidates, examples)
+                                      state.get("history", []), page.url, title, text, candidates, examples, aria)
 
     async def _begin_step(self, state: FlowState, config: RunnableConfig) -> FlowState:
         rt = _rt(config)
@@ -770,22 +775,32 @@ class EngineRunner:
         seq = state["idx"]
         timings = dict(state["timings"])
 
+        # What the AI is shown must be one moment of the page: wait for it to stop changing, read the elements, take the
+        # screenshot straight after, and read again if the page moved in between (so boxes always match the picture).
         t = time.perf_counter()
-        try:
-            ctx.before_bytes = await page.screenshot(type="jpeg", quality=70)
-            await self._upload(ctx, f"steps/{seq}/before.jpg", ctx.before_bytes, "image/jpeg",
-                               "screenshot_before", seq)
-        except Exception as exc:
-            ctx.before_bytes = None
-            await self._log(ctx, seq, "warning", "engine", f"before screenshot failed: {exc}")
-        timings["observe_ms"] = (time.perf_counter() - t) * 1000.0
-
         candidates: List[CandidateAction] = []
-        t = time.perf_counter()
-        if not state.get("nav_target"):
-            raw = await page.evaluate(EXTRACTOR_JS)
-            candidates = [CandidateAction.model_validate(c) for c in raw[:60]]
-        timings["extract_ms"] = (time.perf_counter() - t) * 1000.0
+        ctx.before_bytes = None
+        for attempt in range(3):
+            await wait_dom_stable(page)
+            before_sig = await page_signature(page)
+            if not state.get("nav_target"):
+                try:
+                    raw = await page.evaluate(EXTRACTOR_JS)
+                except Exception:
+                    raw = []   # the page navigated while being read: look again
+                    before_sig = ""
+                candidates = [CandidateAction.model_validate(c) for c in raw[:60]]
+            try:
+                ctx.before_bytes = await page.screenshot(type="jpeg", quality=70)
+            except Exception as exc:
+                ctx.before_bytes = None
+                await self._log(ctx, seq, "warning", "engine", f"before screenshot failed: {exc}")
+            if before_sig and before_sig == await page_signature(page):
+                break
+        if ctx.before_bytes:
+            await self._upload(ctx, f"steps/{seq}/before.jpg", ctx.before_bytes, "image/jpeg", "screenshot_before", seq)
+        timings["observe_ms"] = (time.perf_counter() - t) * 1000.0
+        timings["extract_ms"] = 0.0
         title = ""
         try:
             title = await page.title()
@@ -1219,10 +1234,15 @@ class EngineRunner:
                 for n, text in enumerate(flow.expect, start=1):
                     examples = select_examples(self.spec.reasoning_examples, "judge", f"{flow.key} {text}")
                     try:
-                        outcome = await expectations.run_expectation(
-                            self.judge, flow.key, n, text, severity, flow.covers, page_text, shots, hints, examples)
+                        outcome = await expectations.run_expectation_live(
+                            self.judge, flow.key, n, text, severity, flow.covers, page_text, shots, hints, examples, page,
+                            journey=flow.goal or "; ".join(flow.steps), console_logs=rt.sandbox.console_logs,
+                            state_js=PAGE_STATE_JS)
                     except Exception as exc:
                         await self._log(ctx, seq, "warning", "checks",
                                         f"expectation {n} could not be judged: {type(exc).__name__}")
+                        continue
+                    if outcome is None:
+                        await self._log(ctx, seq, "info", "checks", f"expectation {n} stayed inconclusive after trying it on the live page: {text}")
                         continue
                     await self._emit_check(ctx, seq, outcome)
