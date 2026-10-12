@@ -13,3 +13,6 @@ if [ -n "${CODESPACE_NAME:-}" ] && [ -n "${GH_PAT:-}" ] && command -v gh >/dev/n
 fi
 for i in $(seq 1 30); do curl -sf localhost:8000/health >/dev/null && { echo "QAgent API is up on port 8000"; exit 0; }; sleep 1; done
 echo "API did not start; see /tmp/qagent-api.log"; tail -5 /tmp/qagent-api.log
+# Leave a redacted status page on the port so a failed start can be diagnosed from outside the Codespace.
+mkdir -p /tmp/status && { echo "QAgent API failed to start"; for f in /tmp/qagent-migrate.log /tmp/qagent-api.log /tmp/qagent-shop.log; do echo "== $f"; tail -25 "$f" 2>/dev/null | sed -E 's#(://)[^/@ ]*@#\1***@#g; s#(KEY|SECRET|TOKEN|PASSWORD)[^ ]*#\1=***#gI'; done; } > /tmp/status/index.html
+setsid nohup python3 -m http.server 8000 --directory /tmp/status > /dev/null 2>&1 &
