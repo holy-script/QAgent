@@ -29,7 +29,7 @@ blob-report/
 playwright/.cache/
 
 # JevFlow Runs & Tapes
-runs/
+/runs/
 !frontend/src/**/runs/
 *.sqlite
 *.sqlite3
