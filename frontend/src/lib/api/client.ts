@@ -63,7 +63,7 @@ async function versionNames(appId: string): Promise<Map<string, string>> {
 async function realRuns(path: string): Promise<Run[]> {
   const runs = await http<any[]>(path);
   const names = runs.length ? await versionNames(runs[0].app_id) : new Map<string, string>();
-  return runs.map((r) => toRun(r, names.get(r.playbook_version_id)));
+  return runs.map((r) => toRun(r, names.get(r.playbook_version_id) ?? "Deleted test plan"));
 }
 
 // ---------- mock store (module-level so it survives client navigations) ----------
@@ -151,7 +151,7 @@ export const api = {
   },
 
   async getRun(id: string): Promise<Run> {
-    if (!USE_MOCK) { const r = await http<any>(`/runs/${id}`); return toRun(r, (await versionNames(r.app_id)).get(r.playbook_version_id)); }
+    if (!USE_MOCK) { const r = await http<any>(`/runs/${id}`); return toRun(r, (await versionNames(r.app_id)).get(r.playbook_version_id) ?? "Deleted test plan"); }
     const r = db.runs.find((x) => x.id === id);
     if (!r) throw new ApiError(404, "Run not found");
     return delay(r);
@@ -209,6 +209,20 @@ export const api = {
     db.apps = db.apps.filter((a) => a.id !== app.id);
     db.playbooks = db.playbooks.filter((p) => p.app_id !== app.id);
     db.runs = db.runs.filter((r) => r.app_id !== app.id);
+  },
+
+  /** Deletes a test plan. Its past runs are kept unless `deleteRuns` is set. */
+  async deletePlaybook(slug: string, id: string, deleteRuns = false): Promise<{ runs_deleted: number; runs_kept: number }> {
+    if (!USE_MOCK) return http(`/playbooks/${id}?delete_runs=${deleteRuns}`, { method: "DELETE" });
+    const pb = db.playbooks.find((p) => p.id === id);
+    if (!pb) throw new ApiError(404, "Test plan not found");
+    const versions = new Set(pb.versions.map((v) => v.id));
+    const mine = db.runs.filter((r) => versions.has(r.playbook_version_id));
+    if (mine.some((r) => r.status === "running" || r.status === "queued")) throw new ApiError(409, "A test run of this plan is still in progress. Stop it first.");
+    db.playbooks = db.playbooks.filter((p) => p.id !== id);
+    if (deleteRuns) { const gone = new Set(mine.map((r) => r.id)); db.runs = db.runs.filter((r) => !gone.has(r.id)); gone.forEach((g) => db.live.delete(g)); }
+    else mine.forEach((r) => { r.playbook_name = "Deleted test plan"; });
+    return delay({ runs_deleted: deleteRuns ? mine.length : 0, runs_kept: deleteRuns ? 0 : mine.length });
   },
 
   async deleteRun(id: string): Promise<void> {

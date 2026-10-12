@@ -164,3 +164,37 @@ async def test_runs_emit_artifact_uploaded_and_mark_steps_complete(api):
         steps = (await s.execute(select(m.Step))).scalars().all()
     assert len(uploaded) >= 9 and {"screenshot_after", "screenshot_before", "trace"} <= {e.payload["kind"] for e in uploaded}
     assert steps and all(st.artifacts_complete for st in steps)
+
+
+@pytest.mark.asyncio
+async def test_deleting_a_test_plan_keeps_or_removes_its_runs(api):
+    plan_id = (await api.get(f"/apps/{DEMO_APP_ID}/playbooks")).json()[0]["id"]
+    run_id = await run_and_wait(api, flow_keys=["add-to-cart"])
+    version_id = (await api.get(f"/runs/{run_id}")).json()["playbook_version_id"]
+
+    # keep the runs: the plan goes, the run (and the plan content it needs to be repeated) stays
+    r = await api.delete(f"/playbooks/{plan_id}")
+    assert r.status_code == 200 and r.json()["runs_kept"] == 1 and r.json()["runs_deleted"] == 0
+    assert (await api.get(f"/playbooks/{plan_id}")).status_code == 404
+    assert (await api.get(f"/runs/{run_id}")).status_code == 200
+    async with api.sessions() as s:
+        assert await s.get(m.PlaybookVersion, version_id) is not None
+        assert (await s.execute(select(m.PlaybookItem).where(m.PlaybookItem.version_id == version_id))).scalars().all() == []
+    assert (await api.delete(f"/playbooks/{plan_id}")).status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_deleting_a_test_plan_with_its_runs_and_refusing_while_running(api):
+    plan = (await api.get(f"/apps/{DEMO_APP_ID}/playbooks")).json()[0]
+    run_id = await run_and_wait(api, flow_keys=["add-to-cart"])
+    started = (await api.post(f"/apps/{DEMO_APP_ID}/runs", json={"mode": "stub", "include_edge_cases": False})).json()["id"]
+    assert (await api.delete(f"/playbooks/{plan['id']}")).status_code == 409          # a run is still in progress
+    for _ in range(480):
+        if started not in api.manager.active:
+            break
+        await asyncio.sleep(0.25)
+    r = await api.delete(f"/playbooks/{plan['id']}", params={"delete_runs": "true"})
+    assert r.status_code == 200 and r.json()["runs_deleted"] == 2
+    assert (await api.get(f"/runs/{run_id}")).status_code == 404 and (await api.get(f"/runs/{started}")).status_code == 404
+    async with api.sessions() as s:
+        assert (await s.execute(select(m.PlaybookVersion).where(m.PlaybookVersion.playbook_id == plan["id"]))).scalars().all() == []

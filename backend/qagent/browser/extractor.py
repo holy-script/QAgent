@@ -8,6 +8,9 @@ EXTRACTOR_JS = """
 () => {
     const candidates = [];
     let id = 1;
+    // Each element gets a stamp that is unique on the page. The page's own selectors are often shared (two inputs with the
+    // same class), and acting on "the first match" is how a password ends up in the username field.
+    document.querySelectorAll('[data-qagent-id]').forEach(e => e.removeAttribute('data-qagent-id'));
     const interactableSelectors = 'button, a, input, select, textarea, [role="button"], [role="link"], [role="tab"]';
     const elements = Array.from(document.querySelectorAll(interactableSelectors));
 
@@ -43,10 +46,13 @@ EXTRACTOR_JS = """
             if (firstClass) sel += `.${firstClass}`;
         }
 
+        const myId = id++;
+        el.setAttribute('data-qagent-id', String(myId));
         candidates.push({
-            id: id++,
+            id: myId,
             tag: el.tagName.toLowerCase(),
-            selector: sel,
+            selector: `[data-qagent-id="${myId}"]`,
+            alt_selector: sel,
             label: label.substring(0, 80),
             action_type: isFile ? 'upload' : el.tagName.toLowerCase() === 'input' && (el.type === 'text' || el.type === 'password' || el.type === 'email') ? 'fill' : 'click',
             value: isFile ? null : (el.value || null),

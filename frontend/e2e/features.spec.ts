@@ -346,3 +346,34 @@ test.describe("fixes from first real use", () => {
     await expect(page.getByRole("button", { name: "Dictate", exact: true })).toHaveCount(1);
   });
 });
+
+test.describe("deleting test plans", () => {
+  const sections = (page: import("@playwright/test").Page) => page.getByRole("navigation", { name: "Sections" });
+
+  test("a plan can be deleted from the list while its runs stay in the history", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(APP);
+    await sections(page).getByRole("link", { name: "Test plans" }).click();
+    await page.getByRole("button", { name: /Delete test plan Checkout flow/ }).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog.getByText(/It has 10 past runs/)).toBeVisible();
+    await expect(dialog.getByRole("checkbox")).not.toBeChecked();
+    await dialog.getByRole("button", { name: "Delete test plan" }).click();
+    await expect(page.getByText("No test plans yet")).toBeVisible();
+    await sections(page).getByRole("link", { name: "Runs" }).click();
+    await expect(page.getByRole("cell", { name: "Deleted test plan" }).first()).toBeVisible();
+    await expect(page.getByRole("row")).toHaveCount(11);                   // all ten runs are still there
+  });
+
+  test("a plan can be deleted from its own page together with its runs", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`${APP}/playbooks/pb-checkout`);
+    await page.getByRole("button", { name: "Delete test plan", exact: true }).click();
+    await page.getByRole("dialog").getByRole("checkbox").click();
+    await page.getByRole("dialog").getByRole("button", { name: "Delete test plan" }).click();
+    await expect(page).toHaveURL(/playbooks$/);
+    await expect(page.getByText("No test plans yet")).toBeVisible();
+    await sections(page).getByRole("link", { name: "Runs" }).click();
+    await expect(page.getByText("No test runs yet")).toBeVisible();
+  });
+});

@@ -657,7 +657,12 @@ export interface paths {
         get: operations["get_playbook_playbooks__playbook_id__get"];
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Delete Playbook
+         * @description Deletes a test plan with its items and links. Its past runs are kept (with the plan's content, so they can still be
+         *     repeated) unless `delete_runs=true`, which removes them too, with their screenshots, proof and reports.
+         */
+        delete: operations["delete_playbook_playbooks__playbook_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -3666,6 +3671,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PlaybookResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_playbook_playbooks__playbook_id__delete: {
+        parameters: {
+            query?: {
+                delete_runs?: boolean;
+            };
+            header?: never;
+            path: {
+                playbook_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */

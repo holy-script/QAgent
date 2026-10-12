@@ -3,6 +3,7 @@ import { FileText, Plus } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Card, Empty, ErrorState, LinkButton, Loading, StatusPill, ago } from "@/components/ui";
+import { DeletePlan } from "@/components/delete-plan";
 import { usePlaybooks } from "@/lib/api/hooks";
 
 export default function Playbooks() {
@@ -25,8 +26,9 @@ export default function Playbooks() {
             const v = p.versions[0];
             const errs = v.warnings.filter((w) => w.level === "error").length;
             return (
-              <Link key={p.id} href={`${base}/${p.id}`}>
-                <Card className="flex h-full gap-3 p-4 transition hover:border-brand/50">
+              <div key={p.id} className="group relative">
+              <Link href={`${base}/${p.id}`}>
+                <Card className="card-lift flex h-full gap-3 bg-gradient-to-br from-card to-secondary/50 p-4">
                   <FileText className="mt-0.5 size-5 shrink-0 text-brand" />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2"><span className="truncate font-medium">{p.name}</span><StatusPill status={p.status} /></div>
@@ -35,6 +37,8 @@ export default function Playbooks() {
                   </div>
                 </Card>
               </Link>
+              <DeletePlan slug={slug} plan={p} icon className="absolute right-2 top-2 opacity-0 transition focus-visible:opacity-100 group-hover:opacity-100 max-md:opacity-100" />
+              </div>
             );
           })}
         </div>

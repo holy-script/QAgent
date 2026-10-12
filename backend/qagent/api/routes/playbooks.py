@@ -1,13 +1,14 @@
+import asyncio
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import select
+from sqlmodel import delete, select
 
 from qagent.api.deps import get_session, resolve_app_id
 from qagent.api.mappers import iso
 from qagent.config import settings
-from qagent.domain.models import App, Playbook, PlaybookItem, PlaybookVersion
+from qagent.domain.models import App, ItemLink, Playbook, PlaybookItem, PlaybookVersion, Run
 from qagent.domain.schemas import (
     CreatePlaybookRequest, NormalizeRequest, NormalizeResponse, PlaybookItemResponse, PlaybookResponse,
     PlaybookUploadResponse, PlaybookValidationResponse, PlaybookVersionResponse,
@@ -15,6 +16,9 @@ from qagent.domain.schemas import (
 from qagent.playbooks.normalize import normalize_playbook
 from qagent.playbooks.parser import parse_playbook_markdown
 from qagent.playbooks.versioning import store_version
+from qagent.runs.manager import RunManager, get_run_manager
+from qagent.storage.objects import object_store
+from qagent.storage.purge import purge_runs, refresh_issues
 
 router = APIRouter(tags=["Playbooks"])
 
@@ -121,6 +125,45 @@ async def normalize(payload: NormalizeRequest):
         raise HTTPException(status_code=502, detail=f"normalization failed: {type(exc).__name__}")
     return NormalizeResponse(markdown=result["markdown"], flows=result["parsed"]["flows"],
                              warnings=result["warnings"], notes=result.get("notes"))
+
+
+@router.delete("/playbooks/{playbook_id}")
+async def delete_playbook(playbook_id: str, delete_runs: bool = False, session: AsyncSession = Depends(get_session),
+                          manager: RunManager = Depends(get_run_manager)):
+    """
+    Deletes a test plan with its items and links. Its past runs are kept (with the plan's content, so they can still be
+    repeated) unless `delete_runs=true`, which removes them too, with their screenshots, proof and reports.
+    """
+    pb = await session.get(Playbook, playbook_id)
+    if pb is None:
+        raise HTTPException(status_code=404, detail="Playbook not found")
+    version_ids = list((await session.execute(
+        select(PlaybookVersion.id).where(PlaybookVersion.playbook_id == playbook_id))).scalars().all())
+    runs = list((await session.execute(select(Run).where(Run.playbook_version_id.in_(version_ids)))).scalars().all()) if version_ids else []
+    if any(r.status in ("pending", "running") or r.id in manager.active for r in runs):
+        raise HTTPException(status_code=409, detail="A test run of this plan is still in progress. Stop it first.")
+
+    removed_runs = 0
+    if delete_runs and runs:
+        ids = [r.id for r in runs]
+        await purge_runs(session, ids)
+        await refresh_issues(session, pb.app_id)
+        removed_runs = len(ids)
+        keep_versions: set = set()
+    else:
+        keep_versions = {r.playbook_version_id for r in runs if r.playbook_version_id}   # runs still need their plan's content
+    if version_ids:
+        await session.execute(delete(ItemLink).where(ItemLink.version_id.in_(version_ids)))
+        await session.execute(delete(PlaybookItem).where(PlaybookItem.version_id.in_(version_ids)))
+        drop = [v for v in version_ids if v not in keep_versions]
+        if drop:
+            await session.execute(delete(PlaybookVersion).where(PlaybookVersion.id.in_(drop)))
+    await session.delete(pb)
+    await session.commit()
+    if removed_runs:
+        for r in runs:
+            await asyncio.to_thread(object_store.delete_prefix, f"apps/{pb.app_id}/runs/{r.id}/")
+    return {"deleted": pb.name, "runs_deleted": removed_runs, "runs_kept": 0 if delete_runs else len(runs)}
 
 
 @router.get("/playbooks/{playbook_id}", response_model=PlaybookResponse)

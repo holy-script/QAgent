@@ -1,6 +1,7 @@
 "use client";
 import { AlertCircle, AlertTriangle, CheckCircle2, History } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { DeletePlan } from "@/components/delete-plan";
 import { useState } from "react";
 import { Badge, Button, Card, ErrorState, Loading, SeverityBadge, StatusPill, ago, cn } from "@/components/ui";
 import { useConfirmPlaybook, usePlaybook, useSavePlaybook } from "@/lib/api/hooks";
@@ -13,6 +14,7 @@ import type { Validation } from "@/lib/api/live";
 export default function ReviewPlaybook() {
   const { slug, id } = useParams<{ slug: string; id: string }>();
   const { data: pb, error, isPending, refetch } = usePlaybook(id);
+  const router = useRouter();
   const save = useSavePlaybook(slug);
   const confirm = useConfirmPlaybook(slug);
   const [sel, setSel] = useState<string>();
@@ -32,7 +34,7 @@ export default function ReviewPlaybook() {
           <h2 className="text-lg font-medium">{pb.name}</h2>
           <StatusPill status={isCurrent ? pb.status : "draft"} />
           <Badge>Version {v.version_no}</Badge>
-          <div className="ml-auto flex gap-2">
+          <div className="ml-auto flex flex-wrap gap-2">
             {draft === null ? <Button onClick={() => setDraft(v.raw_markdown)}>Edit test plan</Button> : (
               <>
                 <Button onClick={() => setDraft(null)}>Discard</Button>
@@ -46,6 +48,7 @@ export default function ReviewPlaybook() {
               title={errors.length ? "Fix the problems listed above first" : undefined} onClick={() => confirm.mutate(pb.id)}>
               <CheckCircle2 className="size-4" />Mark ready
             </Button>
+            {draft === null && <DeletePlan slug={slug} plan={pb} onDeleted={() => router.replace(`/apps/${slug}/playbooks`)} />}
           </div>
         </div>
 

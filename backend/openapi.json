@@ -1981,6 +1981,55 @@
       }
     },
     "/playbooks/{playbook_id}": {
+      "delete": {
+        "tags": [
+          "Playbooks"
+        ],
+        "summary": "Delete Playbook",
+        "description": "Deletes a test plan with its items and links. Its past runs are kept (with the plan's content, so they can still be\nrepeated) unless `delete_runs=true`, which removes them too, with their screenshots, proof and reports.",
+        "operationId": "delete_playbook_playbooks__playbook_id__delete",
+        "parameters": [
+          {
+            "name": "playbook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Playbook Id"
+            }
+          },
+          {
+            "name": "delete_runs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Delete Runs"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
       "get": {
         "tags": [
           "Playbooks"
@@ -5089,7 +5138,7 @@
         "properties": {
           "text": {
             "type": "string",
-            "maxLength": 20000,
+            "maxLength": 200000,
             "minLength": 1,
             "title": "Text"
           },

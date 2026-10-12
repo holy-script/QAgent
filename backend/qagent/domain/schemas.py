@@ -42,7 +42,8 @@ class BoundingRect(BaseModel):
 class CandidateAction(BaseModel):
     id: int = Field(description="Compact 1-based index (1-40)")
     tag: str = Field(description="HTML tag, e.g. button, input, a")
-    selector: str = Field(description="CSS or text selector to resolve locator")
+    selector: str = Field(description="CSS selector that matches exactly this element (a data-qagent-id stamp)")
+    alt_selector: Optional[str] = Field(default=None, description="The page's own id/test-id/class selector, tried if the stamp was lost to a re-render and it matches exactly one element")
     label: str = Field(description="Visible text or accessible label")
     action_type: str = Field(default="click", description="click, fill, select, navigate")
     value: Optional[str] = Field(default=None, description="Input value if fill action")
