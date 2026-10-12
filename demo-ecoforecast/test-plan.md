@@ -98,7 +98,7 @@ base_url: https://ecosystem-forecast.vercel.app
 
 ### EC-3: Volume values that are not numbers
 - applies_to: upload-rejected-files
-- expect: Validation fails and the message names the volume column as having non-numeric values.
+- expect: Validation fails and the message says that the volume (trx) values include non-numeric entries.
 - covers: REQ-5
 - test_data: file=non_numeric_trx.csv
 

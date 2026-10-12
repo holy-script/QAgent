@@ -173,3 +173,14 @@ async def test_an_answer_about_behaviour_given_without_trying_anything_is_sent_b
         assert (await verify_live(client, page, "The page shows a total")).passed and len(client.prompts) == 1
     finally:
         await sb.stop()
+
+
+@pytest.mark.asyncio
+async def test_the_verdict_words_holds_and_does_not_hold():
+    sb, page = await on_page()
+    try:
+        yes = await verify_live(Script([{"action": "answer", "verdict": "holds", "confidence": 0.9, "reasoning": "ok"}]), page, "The page shows a link")
+        no = await verify_live(Script([{"action": "answer", "verdict": "does_not_hold", "confidence": 0.9, "reasoning": "contradicted"}]), page, "The page shows a chart")
+        assert yes.passed and not no.passed and no.probability < 0.5
+    finally:
+        await sb.stop()

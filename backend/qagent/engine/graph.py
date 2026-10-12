@@ -1120,7 +1120,7 @@ class EngineRunner:
         except Exception:
             pass
         failed_now = state["step_status"] in ("failed", "blocked")
-        ctx.done.append(f"{state['intent']} [{state['step_status']}]" + (f" -> {state.get('label')}" if state.get("label") else ""))
+        ctx.done.append(f"{state['intent']} [{'carried out' if state['step_status'] == 'passed' else state['step_status']}]" + (f" -> {state.get('label')}" if state.get("label") else ""))
         history = state["history"] + [{"seq": seq, "intent": state["intent"], "action": state.get("label", ""),
                                        "status": state["step_status"],
                                        **({"error": (ctx.failure_reason or "")[:160]} if failed_now else {})}]

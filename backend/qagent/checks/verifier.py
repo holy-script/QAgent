@@ -20,7 +20,7 @@ from qagent.decision.charter import with_charter
 from qagent.decision.claude import usage_cost
 from qagent.domain.schemas import CandidateAction
 
-BEHAVIOUR = re.compile(r"\b(chang\w*|updat\w*|respon\w*|react\w*|recalculat\w*|computed|click\w*|clickable|hover\w*|opens?|navigat\w+|toggle\w*|expand\w*|collaps\w*)\b", re.I)
+BEHAVIOUR = re.compile(r"\b(download\w*|export\w*|start\w*|saves?|submit\w*|generat\w*|loads?|chang\w*|updat\w*|respon\w*|react\w*|recalculat\w*|computed|click\w*|clickable|hover\w*|opens?|navigat\w+|toggle\w*|expand\w*|collaps\w*)\b", re.I)
 
 _STOP = {"the", "and", "that", "with", "for", "are", "was", "not", "any", "all", "this", "shows", "show", "page", "from", "has", "have"}
 
@@ -34,8 +34,9 @@ VERIFY_TOOL = {
                 "action": {"type": "string", "enum": ["click", "hover", "type", "back", "answer"]},
                 "target_id": {"type": "integer", "description": "id of the interactive element (for click, hover or type)"},
                 "text": {"type": "string", "description": "only with action=type: the text to type into the field (it replaces what is there)"},
-                "verdict": {"type": "string", "enum": ["true", "false", "inconclusive"],
-                            "description": "only with action=answer: is the statement true?"},
+                "verdict": {"type": "string", "enum": ["holds", "does_not_hold", "inconclusive"],
+                            "description": "only with action=answer. holds = the statement as written is true; does_not_hold = the statement as written "
+                                           "is NOT true (the evidence contradicts it); inconclusive = you tried and cannot tell. It must agree with your reasoning."},
                 "confidence": {"type": "number", "description": "0.0-1.0, only with action=answer"},
                 "reasoning": {"type": "string", "description": "one or two sentences citing what you saw or did"},
             },
@@ -46,13 +47,13 @@ VERIFY_TOOL = {
 
 SYSTEM = (
     "You verify a statement about a web app by using the live page, like a careful tester. You can click or hover an element, type "
-    "into a field, go back, or answer. Statements may contain negations (is not, does not, never): answer 'true' only when the whole statement as written is true, and check that your reasoning agrees with your answer. Gather real evidence: if the statement is about something working (clickable, responsive, navigates, "
+    "into a field, go back, or answer. Statements may contain negations (is not, does not, never): answer 'holds' only when the whole statement as written is true and 'does_not_hold' when it is not, and make sure your reasoning agrees with your verdict (if your reasoning says the statement is contradicted, the verdict is does_not_hold). Gather real evidence: if the statement is about something working (clickable, responsive, navigates, "
     "opens, updates), try it on a few representative elements and look at what happened; to check that something responds to input or is computed from data, change a value (type) and see what else changes. Do not answer 'inconclusive' just "
-    "because a screenshot is static: you can act. Answer 'false' only when what you saw contradicts the statement (nothing "
-    "happened, an error appeared, the wrong page opened); answer 'true' when your evidence supports it; use 'inconclusive' only "
+    "because a screenshot is static: you can act. Answer 'does_not_hold' only when what you saw contradicts the statement (nothing "
+    "happened, an error appeared, the wrong page opened); answer 'holds' when your evidence supports it; use 'inconclusive' only "
     "when you tried and still cannot tell. Avoid destructive actions (deleting, paying, submitting real data) and do not repeat "
-    "actions that change the journey's state (Fix, Upload, Commit, Generate): the steps already done are listed, so judge statements "
-    "about an earlier moment (such as before the fix) from that list and the page now, or answer inconclusive. When the statement is about an earlier screen (Upload, Explore, Method...), the text listed under 'Earlier screens' is the evidence for it: facts shown there count, and you must not call the statement false just because the page you are on now is a different screen. Words like 'about' or 'around' allow small differences, so do not fail a statement for being exact. If the statement is about changes or reactions (changes, updates, responds, is computed from), you must do it and compare before answering: never answer about what would happen. You have a "
+    "actions that change the journey's state (Fix, Upload, Commit): the steps already done are listed (a step listed only means the action was carried out, not that it had the intended effect: check effects yourself), so judge statements "
+    "about an earlier moment (such as before the fix) from that list and the page now, or answer inconclusive. When the statement is about an earlier screen (Upload, Explore, Method...), the text listed under 'Earlier screens' is the evidence for it: facts shown there count, and you must not call the statement false just because the page you are on now is a different screen. Words like 'about' or 'around' allow small differences, so do not fail a statement for being exact; names that mean the same thing (volume and trx) count as the same. If the statement is about changes or reactions (changes, updates, responds, is computed from), you must do it and compare before answering: never answer about what would happen. You have a "
     "limited number of actions, so be efficient and answer as soon as the evidence is clear."
 )
 
@@ -152,9 +153,10 @@ async def verify_live(client: Any, page: Page, statement: str, journey: str = ""
                 continue
             if action == "answer" or left <= 0:
                 v = a.get("verdict") if action == "answer" else "inconclusive"
-                if v in ("true", "false"):
+                if v in ("holds", "does_not_hold", "true", "false"):
+                    holds = v in ("holds", "true")
                     conf = max(0.0, min(1.0, float(a.get("confidence", 0.7))))
-                    verdict = Verdict(v == "true", conf if v == "true" else 1 - conf, "claude", conf,
+                    verdict = Verdict(holds, conf if holds else 1 - conf, "claude", conf,
                                       f"[checked on the live page] {why}", model_version=client.model_id)
                 break
             cursor, net_cursor = len(console_logs or []), len(network_calls or [])
