@@ -3,6 +3,7 @@
 # Secrets (DATABASE_URL, keys, AUTH_SECRET, ...) come from the Codespace's environment.
 set -u
 cd "$(dirname "$0")/../../backend"
+uv sync --frozen --no-dev -q 2>&1 | tail -2   # new dependencies arrive with `git pull`; this installs them
 pkill -f "uvicorn qagent.api.main" 2>/dev/null; pkill -f "uvicorn main:app" 2>/dev/null; sleep 1
 setsid nohup uv run uvicorn main:app --app-dir ../demo-shop --host 127.0.0.1 --port 8001 --log-level warning > /tmp/qagent-shop.log 2>&1 &
 uv run alembic upgrade head > /tmp/qagent-migrate.log 2>&1 || { echo "migration failed, see /tmp/qagent-migrate.log"; tail -5 /tmp/qagent-migrate.log; }
