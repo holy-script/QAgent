@@ -14,7 +14,7 @@ a real browser test run against the demo shop, and a clean restart. Not tested i
   down until you open or start it again (the start script then brings the API back by itself).
   Raise the limit: github.com/settings/codespaces > Default idle timeout (up to 4 hours). Keeping the Codespace open in a
   browser tab keeps it active.
-- Free personal accounts get about 120 core-hours a month: a 2-core machine = 60 hours of running time.
+- Free personal accounts get about 120 core-hours a month (a 2-core machine = 60 hours of running time); with the GitHub Student pack it is about 180 (90 hours on 2 cores).
 - A new Codespace gets a new address, so `BACKEND_URL` must be updated and the web app redeployed (the proxy address is
   read at build time).
 - The port has to be **Public** so Vercel can reach it. GitHub may show a one-time "continue" page to browsers on a public
@@ -46,3 +46,22 @@ a real browser test run against the demo shop, and a clean restart. Not tested i
 - Codespace stopped? Open it from github.com/codespaces; the API restarts on its own (check the Ports tab; set visibility to
   Public again if GitHub reset it).
 - Logs: `/tmp/qagent-api.log`, `/tmp/qagent-shop.log`. Restart: `bash deploy/codespaces/start.sh`.
+
+## Keeping it up on the same address (4-hour idle limit + a free cron job)
+The address (`https://<codespace-name>-8000.app.github.dev`) stays the same for as long as it is the same Codespace; only a
+*stopped* Codespace is down. So: set the idle timeout to 4 hours (github.com/settings/codespaces), and have a free cron
+service start it again whenever it has stopped.
+
+1. Create a **classic** personal access token with only the `codespace` scope (github.com/settings/tokens). Treat it as a
+   password; it can start and stop your Codespaces.
+2. Add it as a Codespaces secret named `GH_PAT`. On each start the script then sets port 8000 back to Public by itself.
+3. Find the Codespace name (the part before `-8000` in the port address, or github.com/codespaces).
+4. On cron-job.org (free) create a job, every 10 minutes:
+   - URL `https://api.github.com/user/codespaces/<codespace-name>/start`, method **POST**
+   - Headers: `Authorization: Bearer <the token>`, `Accept: application/vnd.github+json`, `X-GitHub-Api-Version: 2022-11-28`
+   Starting a Codespace that is already running does nothing, so it is safe to repeat. After a stop, downtime is at most
+   10 minutes, and the start script brings the API back up on its own.
+5. Optional second job: GET `<address>/api/health` every 5 minutes to see in the cron history whether it is up.
+
+Not tested here (it needs your account). If the start call returns an error, the cron history shows GitHub's message.
+Every hour a Codespace runs counts against the quota, so pause the job when you do not need the backend.
