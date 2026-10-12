@@ -1,0 +1,10 @@
+{
+  "name": "QAgent API",
+  "build": { "dockerfile": "Dockerfile" },
+  "forwardPorts": [8000],
+  "portsAttributes": { "8000": { "label": "QAgent API", "onAutoForward": "silent" } },
+  "postCreateCommand": "cd backend && uv sync --frozen --no-dev",
+  "postStartCommand": "bash deploy/codespaces/start.sh",
+  "remoteEnv": { "QAGENT_HEADLESS": "true", "AUTH_COOKIE_SECURE": "true", "UV_NO_SYNC": "1" },
+  "customizations": { "vscode": { "extensions": [] } }
+}

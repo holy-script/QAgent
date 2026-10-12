@@ -36,5 +36,7 @@ If something goes wrong live: refresh; `make doctor`; as a fallback `make dev-mo
 - **Vercel**: Root Directory `frontend`; `frontend/vercel.json` sets the install command (`--legacy-peer-deps`). Environment variable `NEXT_PUBLIC_API_URL=https://api.example.com` (set before building).
 - **Long runs and streaming**: the browser connects straight to the API for live events, so Vercel's function time limits do not apply to them.
 
-## Hugging Face Spaces (backend) + Vercel (web)
-See `deploy/HUGGINGFACE.md`.
+## Where to host
+- Backend on GitHub Codespaces + web on Vercel: `deploy/CODESPACES.md`.
+- Backend on a Hugging Face Space + web on Vercel (stays up on its own): `deploy/HUGGINGFACE.md`.
+- One VM with everything: `deploy/README.md`.

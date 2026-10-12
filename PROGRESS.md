@@ -79,6 +79,7 @@ make test         # 55 backend tests
 - **Guided tours** (driver.js): home, an app, a run, a test plan and a bug each have a tour; the Tour button in the header starts the one for the current page, first-time visitors get the home tour and a one-time offer on other pages, `?tour=home` starts one from a link. Steps for parts not on screen (phone) are skipped.
 - **Richer UI**: the blue secondary now carries the header, app side panel, card headers, hero banners and chart series (gold stays for actions). Dashboard has stat cards with sparklines, hover/keyboard charts (runs per day, AI cost area, clean-run gauge), severity bars and a "what to do next" card.
 - **Hugging Face Spaces**: single-container image and publish script in `deploy/hf/`, steps in `deploy/HUGGINGFACE.md` (not built here: no Docker daemon).
+- **Codespaces backend**: `.devcontainer/` + `deploy/codespaces/` run the API and demo shop in a Codespace (`deploy/CODESPACES.md`); verified locally with Docker, not in a real Codespace.
 - **Deploy**: `docker-compose.yml` + `deploy/` run Caddy, the web app and the backend (one worker) on one machine behind one address. See `deploy/README.md`. Not yet exercised on a real VM.
 
 ## Known gaps
