@@ -20,10 +20,11 @@ class Script:
     model_id = "fake"
 
     def __init__(self, answers):
-        self.answers, self.prompts = list(answers), []
+        self.answers, self.prompts, self.systems = list(answers), [], []
 
     async def converse_tool(self, system, user, tool, max_tokens=512, images=None, timeout=60.0):
         self.prompts.append(user)
+        self.systems.append(system)
         status, intent, why = self.answers.pop(0) if self.answers else ("done", "", "no more answers")
         return {"input": {"status": status, "intent": intent, "why": why}, "usage": {"inputTokens": 500, "outputTokens": 30}}
 
@@ -84,7 +85,7 @@ async def test_director_calls_are_on_the_tape_and_in_the_cost(shop, mem_sessions
 @pytest.mark.asyncio
 async def test_blocked_circling_and_budget_are_reported_as_failures(shop, mem_sessions, uploader):
     url, _ = shop
-    _, events, _ = await run(url, mem_sessions, uploader, Script([("continue", "Open /products", "x"), ("blocked", "", "the page shows a server error")]))
+    _, events, _ = await run(url, mem_sessions, uploader, Script([("continue", "Open /products", "x")] + [("blocked", "", "the page shows a server error")] * 3))
     assert "blocked before the goal was reached: the page shows a server error" in failure(events)
 
     same = ("continue", "Open /products", "again")
@@ -208,3 +209,52 @@ async def test_prd_becomes_a_high_level_plan_that_flags_missing_test_data(api, m
     assert (await api.post(f"/apps/{DEMO_APP_ID}/prd/plan", json={})).status_code == 422
     await api.patch(f"/apps/{DEMO_APP_ID}", json={"prd_markdown": "Saved PRD text."})
     assert (await api.post(f"/apps/{DEMO_APP_ID}/prd/plan")).status_code == 200 and "Saved PRD text." in seen["user"]
+
+
+@pytest.mark.asyncio
+async def test_the_director_is_told_to_try_again_before_a_blocked_answer_is_accepted(shop, mem_sessions, uploader):
+    url, _ = shop
+    director = Script([("continue", "Open /products", "x"), ("blocked", "", "I cannot find the cart"),
+                       ("continue", "Go to /cart", "try the cart route instead"), ("done", "", "the cart is open")])
+    result, events, _ = await run(url, mem_sessions, uploader, director)
+    assert intents(events) == ["Open /products", "Go to /cart"] and failure(events) is None
+    assert "you said blocked: I cannot find the cart" in director.prompts[2] and "not tried yet" in director.prompts[2]
+
+
+@pytest.mark.asyncio
+async def test_a_failed_step_does_not_end_a_goal_journey_and_the_director_sees_why(shop, mem_sessions, uploader):
+    url, _ = shop
+    director = Script([("continue", "Open /products", "x"), ("continue", "Open http://not-allowed.example/x", "wrong"),
+                       ("continue", "Go to /cart", "another way"), ("done", "", "ok")])
+    # a disallowed host is a step that fails for certain
+    result, events, _ = await run(url, mem_sessions, uploader, director)
+    assert failure(events) is None and result["flows"]["shop"] in ("passed", "passed_with_findings")
+    assert intents(events)[-1] == "Go to /cart"
+    assert "[failed]" in director.prompts[2] and "disallowed host" in director.prompts[2]
+
+
+def test_every_decision_prompt_carries_the_tester_charter():
+    from qagent.decision.charter import CHARTER, with_charter
+    assert "Discover, do not assume" in CHARTER and "Never stop for a small reason" in CHARTER
+    assert with_charter("base").startswith("base") and CHARTER in with_charter("base")
+
+
+@pytest.mark.asyncio
+async def test_clickable_things_that_are_not_buttons_are_found_and_clicked():
+    from qagent.browser.executor import BrowserExecutor
+    from qagent.browser.extractor import EXTRACTOR_JS
+    from qagent.browser.sandbox import BrowserSandbox
+    from qagent.domain.schemas import CandidateAction
+    html = ("<div id=card style='cursor:pointer' onclick=\"document.title='opened'\"><span>Upload data</span></div>"
+            "<ul><li style='cursor:pointer' onclick=\"document.title='row'\">Second row</li></ul>")
+    sb = BrowserSandbox(headless=True)
+    page = await sb.start()
+    try:
+        await page.goto("data:text/html," + html)
+        found = [CandidateAction.model_validate(c) for c in await page.evaluate(EXTRACTOR_JS)]
+        labels = [c.label for c in found]
+        assert "Upload data" in labels and "Second row" in labels
+        card = next(c for c in found if c.label == "Upload data")
+        assert (await BrowserExecutor(page).execute(card))["status"] == "success" and await page.title() == "opened"
+    finally:
+        await sb.stop()

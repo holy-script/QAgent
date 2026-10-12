@@ -34,6 +34,25 @@ class BrowserExecutor:
             if await loc.input_value() != value:
                 raise RuntimeError(f"the field '{action.label}' did not keep the text that was typed")
 
+    async def _click(self, action: CandidateAction) -> None:
+        """Clicks the chosen element, escalating when a rough page gets in the way: a normal click, a forced click (covered by an
+        overlay or animating), a click dispatched from script, then the visible text."""
+        loc = await self._locate(action)
+        attempts = []
+        if loc is not None:
+            attempts += [lambda: loc.click(timeout=3000), lambda: loc.click(timeout=2000, force=True),
+                         lambda: loc.evaluate("el => el.click()", timeout=2000)]
+        if action.label and not action.label.startswith("Clickable "):
+            attempts.append(lambda: self.page.get_by_text(action.label).first.click(timeout=3000))
+        last: Optional[Exception] = None
+        for attempt in attempts:
+            try:
+                await attempt()
+                return
+            except Exception as exc:
+                last = exc
+        raise last or RuntimeError("no single match")
+
     async def execute(self, action: CandidateAction, value: Optional[str] = None,
                       files: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
         start = time.perf_counter()
@@ -42,13 +61,7 @@ class BrowserExecutor:
 
         try:
             if action.action_type == "click":
-                loc = await self._locate(action)
-                try:
-                    if loc is None:
-                        raise RuntimeError("no single match")
-                    await loc.click(timeout=3000)
-                except Exception:
-                    await self.page.get_by_text(action.label).first.click(timeout=3000)
+                await self._click(action)
             elif action.action_type == "fill":
                 await self._fill(action, value if value is not None else (action.value or "test"))
             elif action.action_type == "upload":

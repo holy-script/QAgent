@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional
 import httpx
 
 from qagent.config import settings
+from qagent.decision.charter import with_charter
 from qagent.decision.fewshot import example_ids, render_examples
 from qagent.domain.schemas import ConfidenceTier, DecisionRequest, DecisionResult
 
@@ -83,7 +84,7 @@ class BedrockClient:
 class ClaudeDecider:
     """Claude on Bedrock as a Decider: used for baseline mode and for escalating low-confidence Jev steps."""
 
-    def __init__(self, client: Optional[BedrockClient] = None, max_candidates: int = 40):
+    def __init__(self, client: Optional[BedrockClient] = None, max_candidates: int = 60):
         self.client = client or BedrockClient()
         self.max_candidates = max_candidates
 
@@ -97,7 +98,10 @@ class ClaudeDecider:
             f"Previous steps: {history}\nCandidates:\n{listing}"
         )
         system = ("You drive a web browser for QA testing. Choose the one candidate that performs the test step. "
-                  "Be honest about confidence: lower it when several candidates fit or none does.")
+                  "The target may not be a real button (a card, row, icon, text with a pointer cursor). If no candidate matches the wording "
+                  "exactly, choose the most plausible one, or one that likely leads to the target (a menu, tab or section), and lower "
+                  "your confidence instead of giving up. Be honest about confidence: lower it when several candidates fit or none does.")
+        system = with_charter(system)
         if request.hints:
             system += "\n\nKnown traps in this app:\n" + "\n".join(f"- {h}" for h in request.hints)
         if request.examples:

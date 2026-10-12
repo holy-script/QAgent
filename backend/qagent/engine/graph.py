@@ -690,7 +690,7 @@ class EngineRunner:
         flow, page = rt.ctx.flow, rt.page
         try:
             raw = await page.evaluate(EXTRACTOR_JS)
-            candidates = [CandidateAction.model_validate(c) for c in raw[:40]]
+            candidates = [CandidateAction.model_validate(c) for c in raw[:60]]
             text = await page.evaluate("document.body ? document.body.innerText : ''")
             title = await page.title()
         except Exception as exc:
@@ -721,16 +721,26 @@ class EngineRunner:
             except Exception as exc:
                 ctx.failure_reason = f"could not decide the next step ({type(exc).__name__}: {str(exc).splitlines()[0][:120]})"
                 return {"done": True, "failure_reason": ctx.failure_reason}
-            await self._log(ctx, idx, "info", "director", f"{nxt['status']}: {nxt['intent'] or '-'} ({nxt['why']})")
-            if nxt["status"] == "done":
-                return {"done": True}
-            if nxt["status"] == "blocked":
-                ctx.failure_reason = f"blocked before the goal was reached: {nxt['why']}"
-                return {"done": True, "failure_reason": ctx.failure_reason}
-            recent = [h.get("intent") for h in state.get("history", [])[-2:]]
-            if len(recent) == 2 and recent[0] == recent[1] == nxt["intent"]:
-                ctx.failure_reason = f"going in circles: '{nxt['intent']}' was chosen three times in a row"
-                return {"done": True, "failure_reason": ctx.failure_reason}
+            hist = list(state.get("history", []))
+            for attempt in range(settings.goal_block_retries + 1):
+                await self._log(ctx, idx, "info", "director", f"{nxt['status']}: {nxt['intent'] or '-'} ({nxt['why']})")
+                if nxt["status"] == "done":
+                    return {"done": True}
+                recent = [h.get("intent") for h in hist[-2:]]
+                looping = nxt["status"] == "continue" and len(recent) == 2 and recent[0] == recent[1] == nxt["intent"]
+                if nxt["status"] == "continue" and not looping:
+                    break
+                problem = (f"going in circles: '{nxt['intent']}' was chosen three times in a row" if looping
+                           else f"blocked before the goal was reached: {nxt['why']}")
+                if attempt >= settings.goal_block_retries:
+                    ctx.failure_reason = problem
+                    return {"done": True, "failure_reason": ctx.failure_reason}
+                # Not accepted yet: the tester must try something it has not tried before giving up.
+                await self._log(ctx, idx, "info", "director", f"not giving up yet ({problem}); asking for a different approach")
+                hist = hist + [{"intent": nxt["intent"] or "(gave up)", "action": "", "status": "rejected",
+                                "error": f"{'you were looping' if looping else 'you said blocked: ' + nxt['why']}; "
+                                         "try an approach not tried yet: another element, open a menu or tab, close what is in the way, scroll"}]
+                nxt = await self._direct(rt, {**state, "history": hist}, idx)
             intent = nxt["intent"]
         else:
             intent = flow.steps[idx - 1]
@@ -774,7 +784,7 @@ class EngineRunner:
         t = time.perf_counter()
         if not state.get("nav_target"):
             raw = await page.evaluate(EXTRACTOR_JS)
-            candidates = [CandidateAction.model_validate(c) for c in raw[:40]]
+            candidates = [CandidateAction.model_validate(c) for c in raw[:60]]
         timings["extract_ms"] = (time.perf_counter() - t) * 1000.0
         title = ""
         try:
@@ -1051,8 +1061,10 @@ class EngineRunner:
         timings["verify_ms"] = (time.perf_counter() - t) * 1000.0
 
         observed = await self._observe_result(rt, state, info)
+        failed_now = state["step_status"] in ("failed", "blocked")
         history = state["history"] + [{"seq": seq, "intent": state["intent"], "action": state.get("label", ""),
-                                       "status": state["step_status"]}]
+                                       "status": state["step_status"],
+                                       **({"error": (ctx.failure_reason or "")[:160]} if failed_now else {})}]
         await self.sink.emit(QAgentEventType.VERIFICATION_STEP, {
             **self._base(state), "status": state["step_status"], "url": page.url,
             "settled": state.get("settled", True), "timings": timings, "observed": observed,
@@ -1060,6 +1072,19 @@ class EngineRunner:
         update: Dict[str, Any] = {"history": history, "timings": timings}
         if observed.get("signin_failed"):
             update.update(self._fail(rt, observed["signin_failed"]))
+        elif failed_now and ctx.flow.goal:
+            streak = 0
+            for h in reversed(history):
+                if h.get("status") not in ("failed", "blocked"):
+                    break
+                streak += 1
+            if streak <= settings.goal_max_recoveries:
+                # A goal journey does not end on one failed step: the director sees what failed and tries another way.
+                await self._log(ctx, seq, "info", "engine", f"step failed ({ctx.failure_reason}); trying another way "
+                                                           f"({streak}/{settings.goal_max_recoveries})")
+                ctx.failure_reason = None
+                update["step_status"] = "passed"   # routes on to the next decision; the step itself stays recorded as failed
+                update["failure_reason"] = None
         return update
 
     async def _observe_result(self, rt: FlowRuntime, state: FlowState, info: StepInfo) -> Dict[str, Any]:

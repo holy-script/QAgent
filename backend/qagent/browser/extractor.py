@@ -11,11 +11,31 @@ EXTRACTOR_JS = """
     // Each element gets a stamp that is unique on the page. The page's own selectors are often shared (two inputs with the
     // same class), and acting on "the first match" is how a password ends up in the username field.
     document.querySelectorAll('[data-qagent-id]').forEach(e => e.removeAttribute('data-qagent-id'));
-    const interactableSelectors = 'button, a, input, select, textarea, [role="button"], [role="link"], [role="tab"]';
-    const elements = Array.from(document.querySelectorAll(interactableSelectors));
+    const interactableSelectors = 'button, a, input, select, textarea, summary, [role="button"], [role="link"], [role="tab"], '
+        + '[role="menuitem"], [role="option"], [role="checkbox"], [role="radio"], [role="switch"], [role="treeitem"], [role="combobox"], '
+        + '[onclick], [tabindex]:not([tabindex="-1"]), [contenteditable="true"]';
+    const found = new Set(document.querySelectorAll(interactableSelectors));
+    // Rough apps make clickable things out of div/span/li/img/svg. Find those by their pointer cursor, taking the outermost
+    // element of each pointer area (children inherit the cursor) and skipping anything that already holds a real control.
+    const MAX_SCAN = 1500;
+    const scan = document.body ? document.body.querySelectorAll('*') : [];
+    for (let i = 0; i < scan.length && i < MAX_SCAN; i++) {
+        const el = scan[i];
+        if (found.has(el) || ['HTML', 'BODY', 'SCRIPT', 'STYLE', 'OPTION', 'OPTGROUP'].includes(el.tagName)) continue;
+        if (el.tagName === 'LABEL' && el.control && found.has(el.control)) continue;   // the control itself is already a candidate
+        if (window.getComputedStyle(el).cursor !== 'pointer') continue;
+        const parent = el.parentElement;
+        if (parent && window.getComputedStyle(parent).cursor === 'pointer') continue;
+        if (el.querySelector('button, a[href], input, select, textarea, [role="button"]')) continue;
+        found.add(el);
+    }
+    const vh = window.innerHeight;
+    const inView = (e) => { const r = e.getBoundingClientRect(); return r.bottom > 0 && r.top < vh ? 1 : 0; };
+    // What is on screen comes first (stable order otherwise), so the cap never hides the visible controls.
+    const elements = Array.from(found).sort((a, b) => inView(b) - inView(a));
 
     for (const el of elements) {
-        if (id > 40) break;
+        if (id > 60) break;
         const rect = el.getBoundingClientRect();
         const style = window.getComputedStyle(el);
         const isFile = el.tagName.toLowerCase() === 'input' && el.type === 'file';
@@ -26,6 +46,11 @@ EXTRACTOR_JS = """
         // A text box's current value is what someone typed (possibly a password): never use it as the field's name.
         const isButtonLike = el.tagName.toLowerCase() !== 'input' || ['button', 'submit', 'reset'].includes((el.type || '').toLowerCase());
         let label = (el.innerText || el.getAttribute('aria-label') || el.getAttribute('placeholder') || (isButtonLike ? el.getAttribute('value') : '') || el.getAttribute('title') || '').trim();
+        if (!label && !isFile && !['input', 'select', 'textarea'].includes(el.tagName.toLowerCase())) {
+            // Icons and image buttons: fall back to their image alt text, title or an svg title, then to what kind of thing it is.
+            const img = el.querySelector('img[alt], svg title');
+            label = ((img && (img.getAttribute('alt') || img.textContent)) || '').trim() || ('Clickable ' + (el.getAttribute('role') || el.tagName.toLowerCase()));
+        }
         if (!label && el.tagName.toLowerCase() === 'input') {
             const own = el.id ? document.querySelector(`label[for="${el.id}"]`) : null;
             label = (own && own.innerText.trim()) || el.getAttribute('name') || el.getAttribute('id') || 'Input field';
@@ -71,7 +96,7 @@ EXTRACTOR_JS = """
     // surrounding row's text so each candidate is distinguishable.
     const counts = {};
     candidates.forEach(c => counts[c.label] = (counts[c.label] || 0) + 1);
-    const els = Array.from(document.querySelectorAll(interactableSelectors));
+    const els = elements;
     candidates.forEach(c => {
         if (!c.label || counts[c.label] < 2) return;
         const el = els.find(e => {

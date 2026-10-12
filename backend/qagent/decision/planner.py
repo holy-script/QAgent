@@ -4,6 +4,7 @@ are never rewritten, so the test stays exactly what the author wrote. The call i
 import json
 from typing import Any, Dict, List, Optional
 
+from qagent.decision.charter import with_charter
 from qagent.decision.fewshot import example_ids, render_examples
 
 PLAN_TOOL = {
@@ -31,7 +32,8 @@ PLAN_TOOL = {
 
 SYSTEM = ("You help an automated browser tester prepare a journey through a web app. For each step, say in one short "
           "phrase what the target element probably looks like and anything that could be ambiguous. Do not change, add "
-          "or remove steps. Use only what the steps and test data say.")
+          "or remove steps. Use only what the steps and test data say. If the target may not be a real button (a card, row, icon "
+          "or plain text), say so in the note.")
 
 
 def step_hints(plan: Dict[str, Any], steps: int) -> Dict[int, str]:
@@ -52,7 +54,7 @@ def step_hints(plan: Dict[str, Any], steps: int) -> Dict[int, str]:
 
 async def plan_flow(client: Any, flow_key: str, steps: List[str], base_url: str, test_data: Dict[str, Any],
                     examples: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
-    system = SYSTEM + ("\n\nHow to reason about tricky situations:\n" + render_examples(examples) if examples else "")
+    system = with_charter(SYSTEM) + ("\n\nHow to reason about tricky situations:\n" + render_examples(examples) if examples else "")
     listing = "\n".join(f"{i}. {s}" for i, s in enumerate(steps, 1))
     user = (f"App: {base_url}\nJourney: {flow_key}\nTest data: {json.dumps(test_data, sort_keys=True, default=str)[:1500]}\n"
             f"Steps:\n{listing}")
