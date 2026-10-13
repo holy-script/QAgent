@@ -37,7 +37,7 @@ async def run_judged_rule(judge: Judge, item: Dict[str, Any], page_text: str, sc
 # Statements that can only be established by using the page (not by reading one screenshot of it).
 NEEDS_INTERACTION = re.compile(
     r"\b(click\w*|tap\w*|hover\w*|respon\w+|interactive|navigat\w+|opens?|leads?|redirect\w*|submits?|toggle\w*|expand\w*|collaps\w*|"
-    r"works?|working|functions?|functional|reachable|link\w*|buttons?|menus?|tabs?|dropdowns?|can be (used|selected|opened))\b", re.I)
+    r"disabled|enabled|works?|working|functions?|functional|reachable|link\w*|buttons?|menus?|tabs?|dropdowns?|can be (used|selected|opened))\b", re.I)
 
 
 async def run_expectation_live(judge: Any, flow_key: str, n: int, text: str, severity: str, requirement_keys: List[str],

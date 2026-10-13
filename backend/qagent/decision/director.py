@@ -50,7 +50,7 @@ def build_prompt(goal: str, expect: List[str], route: List[str], test_fields: Li
         f"{i}. {h.get('intent')} -> {h.get('action') or '?'} [{h.get('status', 'ok')}]"
         + (f" ({h['error']})" if h.get("error") else "") for i, h in enumerate(history[-10:], 1)
     ) or "(nothing yet: this is the first step)"
-    elements = "\n".join(f"[{c.id}] <{c.tag}> {c.label!r} ({c.action_type})" for c in candidates[:60]) or "(no interactive elements)"
+    elements = "\n".join(f"[{c.id}] <{c.tag}> {c.label!r} ({c.action_type})" + (" [DISABLED: cannot be used yet]" if c.disabled else "") for c in candidates[:60]) or "(no interactive elements)"
     return (
         f"Goal: {goal}\n"
         + (f"Expected outcomes when finished: {'; '.join(expect)}\n" if expect else "")

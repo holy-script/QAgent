@@ -99,6 +99,7 @@ EXTRACTOR_JS = """
             label: label.substring(0, 80),
             action_type: isFile ? 'upload' : isSelect ? 'select' : el.tagName.toLowerCase() === 'input' && (el.type === 'text' || el.type === 'password' || el.type === 'email') ? 'fill' : 'click',
             options: options,
+            disabled: !!(el.disabled || el.getAttribute('aria-disabled') === 'true'),
             value: isFile ? null : (el.value || null),
             bounding_box: {
                 x: rect.x,

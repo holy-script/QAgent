@@ -37,6 +37,8 @@ class BrowserExecutor:
     async def _click(self, action: CandidateAction) -> None:
         """Clicks the chosen element, escalating when a rough page gets in the way: a normal click, a forced click (covered by an
         overlay or animating), a click dispatched from script, then the visible text."""
+        if action.disabled:
+            raise RuntimeError(f"'{action.label}' is disabled, so it cannot be clicked")
         loc = await self._locate(action)
         attempts = []
         if loc is not None:

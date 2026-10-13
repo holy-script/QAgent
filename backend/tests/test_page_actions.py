@@ -82,3 +82,19 @@ async def test_charts_and_repeated_labels_do_not_break_reading_the_page():
         assert all(c.tag != "g" and c.tag != "rect" for c in found)
     finally:
         await sb.stop()
+
+
+@pytest.mark.asyncio
+async def test_disabled_controls_are_marked_and_cannot_be_clicked():
+    html = "<button id=a disabled onclick=\"document.title='a'\">Proceed</button><button id=b onclick=\"document.title='b'\">Back</button>"
+    sb = BrowserSandbox(headless=True)
+    page = await sb.start()
+    try:
+        await page.goto("data:text/html," + quote(html))
+        found = {c.label: c for c in (CandidateAction.model_validate(x) for x in await page.evaluate(EXTRACTOR_JS))}
+        assert found["Proceed"].disabled and not found["Back"].disabled
+        res = await BrowserExecutor(page).execute(found["Proceed"])
+        assert res["status"] == "failed" and "disabled" in res["error"] and await page.title() == ""
+        assert (await BrowserExecutor(page).execute(found["Back"]))["status"] == "success"
+    finally:
+        await sb.stop()

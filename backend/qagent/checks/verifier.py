@@ -47,7 +47,7 @@ VERIFY_TOOL = {
 
 SYSTEM = (
     "You verify a statement about a web app by using the live page, like a careful tester. You can click or hover an element, type "
-    "into a field, go back, or answer. Statements may contain negations (is not, does not, never): answer 'holds' only when the whole statement as written is true and 'does_not_hold' when it is not, and make sure your reasoning agrees with your verdict (if your reasoning says the statement is contradicted, the verdict is does_not_hold). Gather real evidence: if the statement is about something working (clickable, responsive, navigates, "
+    "into a field, go back, or answer. Statements may contain negations (is not, does not, never): answer 'holds' only when the whole statement as written is true and 'does_not_hold' when it is not, and make sure your reasoning agrees with your verdict (if your reasoning says the statement is contradicted, the verdict is does_not_hold). Elements marked [DISABLED] cannot be used right now: use that mark, not how a button looks, to judge enabled or disabled. Gather real evidence: if the statement is about something working (clickable, responsive, navigates, "
     "opens, updates), try it on a few representative elements and look at what happened; to check that something responds to input or is computed from data, change a value (type) and see what else changes. Do not answer 'inconclusive' just "
     "because a screenshot is static: you can act. Answer 'does_not_hold' only when what you saw contradicts the statement (nothing "
     "happened, an error appeared, the wrong page opened); answer 'holds' when your evidence supports it; use 'inconclusive' only "
@@ -99,7 +99,7 @@ def _earlier(statement: str, snapshots: List[Dict[str, Any]]) -> str:
 
 
 def _prompt(statement: str, journey: str, hints: List[str], seen: Dict[str, Any], trail: List[str], left: int, earlier: str = "") -> str:
-    elements = "\n".join(f"[{c.id}] <{c.tag}> {c.label!r}" for c in seen["candidates"]) or "(no interactive elements)"
+    elements = "\n".join(f"[{c.id}] <{c.tag}> {c.label!r}" + (" [DISABLED]" if c.disabled else "") for c in seen["candidates"]) or "(no interactive elements)"
     return (
         f"Statement to verify: {statement}\n"
         + (f"What the journey was doing: {journey}\n" if journey else "")
