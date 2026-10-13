@@ -213,7 +213,7 @@
 
 /* Rich surfaces: the blue hero/header band, and a token override so controls inside it read white-on-blue */
 .bg-hero { background: radial-gradient(520px 240px at 92% -10%, var(--glow), transparent 70%), linear-gradient(135deg, var(--hero-from), var(--hero-via) 52%, var(--hero-to)); color: #fff; }
-.on-blue { --foreground: #fff; --muted-foreground: rgb(255 255 255 / 0.8); --card: rgb(255 255 255 / 0.12); --muted: rgb(255 255 255 / 0.14); --border: rgb(255 255 255 / 0.26); --accent: rgb(255 255 255 / 0.18); --accent-foreground: #fff; --ring: #f3d58a; color: #fff; }
+.on-blue { --foreground: #fff; --muted-foreground: rgb(255 255 255 / 0.8); --card: rgb(255 255 255 / 0.12); --muted: rgb(255 255 255 / 0.14); --border: rgb(255 255 255 / 0.26); --accent: rgb(255 255 255 / 0.18); --accent-foreground: #fff; --secondary: rgb(255 255 255 / 0.24); --secondary-foreground: #fff; --ring: #f3d58a; color: #fff; }
 .card-lift { transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
 .card-lift:hover { transform: translateY(-2px); border-color: color-mix(in oklab, var(--brand) 45%, var(--border)); }
 
