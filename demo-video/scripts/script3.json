@@ -1,0 +1,48 @@
+[
+ {"id":"hook","lines":[
+  ["Every forecast a commercial team relies on, passes through software.", 0.6, 0.35],
+  ["And that software is rarely tested, the way the business actually uses it.", 0.65, 0.55],
+  ["Manual regression is slow. Scripted tests break whenever a page changes. And when a bug does turn up... nobody has proof.", 0.7, 0.6],
+  ["One silent error, and a launch plan is built on numbers that are simply wrong.", 0.8, 0.3]]},
+ {"id":"meet","lines":[
+  ["So we built QAgent.", 0.7, 0.45],
+  ["You describe what a product should do, in plain English. An AI then drives a real browser, the way a careful person would, and reports every bug, with proof.", 0.65, 0.5],
+  ["To show it, we pointed it at our own product. ForecastIQ, our agentic short term forecasting tool.", 0.65, 0.3]]},
+ {"id":"setup","lines":[
+  ["Setting up takes about a minute.", 0.65, 0.4],
+  ["You give QAgent the web address. You save the sign in once, and it's encrypted. The AI only ever sees the field names... never the password.", 0.65, 0.45],
+  ["And you add the data files it should upload. The clean ones, and some deliberately broken ones.", 0.65, 0.3]]},
+ {"id":"plan","lines":[
+  ["Next, the test plan.", 0.7, 0.4],
+  ["Most teams already have a product requirements document. QAgent reads it, and in about thirty seconds, drafts the plan.", 0.65, 0.45],
+  ["Requirements, and journeys written as goals. Upload the clean file, choose a method, reach the forecast. Nothing says click the third button... so when a page changes, the plan doesn't break.", 0.65, 0.45],
+  ["And every journey says what must be true afterwards. Including the numbers.", 0.7, 0.3]]},
+ {"id":"quick","lines":[
+  ["But you don't have to test everything.", 0.75, 0.45],
+  ["Say a sales team has a prototype going in front of a client tomorrow. Write three lines about the one story you're going to show.", 0.65, 0.45],
+  ["QAgent turns those notes into a small, focused plan, and you review every change before it's saved.", 0.65, 0.45],
+  ["Then it tests just that flow. A few minutes, instead of a full test cycle.", 0.75, 0.3]]},
+ {"id":"run","lines":[
+  ["You choose how it thinks. Smart mode uses a fast AI for every click, and calls in a stronger one only when it's unsure. Practice mode uses no AI at all, so it's free.", 0.62, 0.5],
+  ["Now, watch it work.", 0.75, 0.4],
+  ["QAgent opens a real browser, reads what's on the screen, picks the control, and records what it chose, and how sure it was.", 0.65, 0.3]]},
+ {"id":"find","lines":[
+  ["And this is where it earns its keep.", 0.75, 0.5],
+  ["In the full run, ten journeys and sixty five steps, QAgent found twelve problems. Every one comes with proof.", 0.65, 0.5],
+  ["Upload a blank file, and the server rejects it. But the screen still shows a forecast, built on rows that never existed.", 0.78, 0.5],
+  ["The export button silently does nothing.", 0.78, 0.45],
+  ["And a flat growth curve is still ranked best fit.", 0.78, 0.5],
+  ["The numbers that matter are checked by code... not by the AI's opinion.", 0.7, 0.3]]},
+ {"id":"bugs","lines":[
+  ["Every problem becomes a bug. The same problem across runs is one bug, marked fixed, once a later run stops finding it.", 0.65, 0.5],
+  ["After a fix, Repeat Exactly replays the recorded decisions. No model calls, so it costs nothing.", 0.68, 0.45],
+  ["And one view shows which requirements are tested, and which are failing.", 0.65, 0.3]]},
+ {"id":"value","lines":[
+  ["The full run took about ten minutes, and cost about a dollar fifty.", 0.68, 0.5],
+  ["We estimate that's around sixty percent less manual regression effort, on every release.", 0.7, 0.45],
+  ["And it's reusable. Any web app is just an address, a sign in, and a plan.", 0.7, 0.3]]},
+ {"id":"next","lines":[
+  ["Next, we'd like to pilot it on one or two Chryselys client apps, and hook it into the release pipeline.", 0.65, 0.45],
+  ["And make a quick prototype check, a standard step, before every pre sales demo.", 0.68, 0.55],
+  ["QAgent. Test it, the way your customers will use it.", 0.8, 0.0]]}
+]

@@ -1,0 +1,8 @@
+[
+ {"id":"hook","speed":0.95,"pause":0.5,"text":"Every forecast a commercial team relies on passes through software. And that software is rarely tested the way the business actually uses it. One silent error, and a launch plan is built on numbers that are simply wrong."},
+ {"id":"solve","speed":1.0,"pause":0.4,"text":"QAgent changes that. Give it the product requirements, and in about thirty seconds it writes a test plan, in plain business language. No scripts. No engineers clicking through screens."},
+ {"id":"run","speed":1.0,"pause":0.4,"text":"Then it tests the real application, the way a person would. Here it is working through ForecastIQ, a pharma forecasting tool. Signing in, uploading brand data, and checking every number against the requirements."},
+ {"id":"find","speed":0.93,"pause":0.5,"text":"And it finds what matters. A blank file is rejected by the server, yet the screen still shows a forecast, built on a hundred and forty four rows that never existed. An export button that silently does nothing. A flat growth curve, still ranked best fit."},
+ {"id":"value","speed":1.0,"pause":0.4,"text":"Ten journeys. Sixty five steps. Ten minutes, for about a dollar fifty. And every run can be replayed exactly, at no model cost."},
+ {"id":"close","speed":0.92,"pause":0.0,"text":"Reusable across every product team at Chryselys. QAgent. Test it the way your customers will use it."}
+]

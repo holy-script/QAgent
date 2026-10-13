@@ -1,0 +1,11 @@
+node_modules
+out
+.venv-*
+.*.log
+*.log
+footage
+public/footage
+audio/or_*
+audio/_tmp_*
+__pycache__
+public/audio/bed.wav

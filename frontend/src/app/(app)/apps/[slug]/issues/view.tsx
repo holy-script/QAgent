@@ -34,7 +34,7 @@ export default function Issues() {
         <SimpleTable head={["Bug", "Status", "How serious", "Journey", "Check", "Found in", "Updated"]}>
               {data.map((i) => (
                 <TableRow key={i.id} className="hover:bg-secondary/60">
-                  <TableCell className="max-w-md px-4 py-2.5"><Link href={`/apps/${slug}/issues/${i.id}`} className="font-medium hover:text-brand">{i.title}</Link></TableCell>
+                  <TableCell className="w-[28rem] min-w-[18rem] max-w-md whitespace-normal px-4 py-2.5"><Link href={`/apps/${slug}/issues/${i.id}`} title={i.title} className="line-clamp-2 font-medium hover:text-brand">{i.title}</Link></TableCell>
                   <TableCell className="px-4 py-2.5"><Badge tone={TONE[i.status]} title={ISSUE_STATUS[i.status]?.hint}>{ISSUE_STATUS[i.status]?.label ?? i.status}</Badge></TableCell>
                   <TableCell className="px-4 py-2.5"><SeverityBadge severity={i.severity} /></TableCell>
                   <TableCell className="px-4 py-2.5 font-mono text-xs">{i.flow_key}</TableCell>

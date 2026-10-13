@@ -1,0 +1,25 @@
+import os, re
+from rec import Session
+F = os.path.abspath("../demo-ecoforecast/test-files/ocrevus_trx_data.csv")
+with Session("eco_app") as s:
+    pg = s.page
+    pg.goto("https://ecosystem-forecast.vercel.app/login"); s.wait(2500); s.start(); s.wait(1200)
+    s.type(pg.locator("input").first, "admin"); s.type(pg.locator("input[type=password]"), os.environ["ECO_PASSWORD"])
+    s.click(pg.get_by_role("button", name="Sign in")); s.wait(3500)
+    s.click(pg.get_by_text("12 months").first); s.wait(600)
+    s.click(pg.get_by_text("Upload Historical Data").first); s.wait(1200)
+    pg.set_input_files("input[type=file]", F); s.wait(2500)
+    s.scroll(500, 1.2); s.wait(600)
+    s.click(pg.get_by_role("button", name="Confirm Mapping")); s.wait(3500)
+    s.click(pg.get_by_role("button", name="Proceed to Analysis")); s.wait(3500)
+    s.move(700, 330, 0.8); s.wait(900)
+    s.click(pg.get_by_role("button", name="Proceed to Method")); s.wait(3000)
+    s.wait(7000)
+    pg.get_by_text("trend · seasonal (auto-selected)").first.scroll_into_view_if_needed(); s.wait(1500)
+    s.move(1000, 760, 0.6); s.wait(700)
+    s.click(pg.get_by_text("trend · seasonal (auto-selected)").first); s.wait(900)
+    s.click(pg.get_by_role("button", name="Use selected method")); s.wait(1200)
+    pg.screenshot(path="footage/_m4.png")
+    s.wait(2500); s.move(1250, 300, 0.9); s.wait(3500)
+    s.move(700, 560, 0.9); s.wait(1500)
+    s.scroll(500, 1.4); s.wait(2500)

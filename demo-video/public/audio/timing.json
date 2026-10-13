@@ -1,0 +1,242 @@
+[
+ {
+  "id": "hook",
+  "seconds": 25.46,
+  "lines": [
+   {
+    "text": "Every forecast a commercial team relies on, passes through software.",
+    "start": 0.08,
+    "end": 4.33
+   },
+   {
+    "text": "And that software is rarely tested, the way the business actually uses it.",
+    "start": 4.78,
+    "end": 9.09
+   },
+   {
+    "text": "Manual regression is slow. Scripted tests break whenever a page changes. And when a bug does turn up... nobody has proof.",
+    "start": 9.74,
+    "end": 19.01
+   },
+   {
+    "text": "One silent error, and a launch plan is built on numbers that are simply wrong.",
+    "start": 19.71,
+    "end": 25.06
+   }
+  ]
+ },
+ {
+  "id": "meet",
+  "seconds": 22.6,
+  "lines": [
+   {
+    "text": "So we built QAgent.",
+    "start": 0.08,
+    "end": 1.94
+   },
+   {
+    "text": "You describe what a product should do, in plain English. An AI then drives a real browser, the way a careful person would, and reports every bug, with proof.",
+    "start": 2.49,
+    "end": 14.23
+   },
+   {
+    "text": "To show it, we pointed it at our own product. ForecastIQ, our agentic short term forecasting tool.",
+    "start": 14.83,
+    "end": 22.2
+   }
+  ]
+ },
+ {
+  "id": "setup",
+  "seconds": 20.21,
+  "lines": [
+   {
+    "text": "Setting up takes about a minute.",
+    "start": 0.08,
+    "end": 2.44
+   },
+   {
+    "text": "You give QAgent the web address. You save the sign in once, and it's encrypted. The AI only ever sees the field names... never the password.",
+    "start": 2.94,
+    "end": 12.13
+   },
+   {
+    "text": "And you add the data files it should upload. The clean ones, and some deliberately broken ones.",
+    "start": 12.68,
+    "end": 19.81
+   }
+  ]
+ },
+ {
+  "id": "plan",
+  "seconds": 33.58,
+  "lines": [
+   {
+    "text": "Next, the test plan.",
+    "start": 0.08,
+    "end": 1.84
+   },
+   {
+    "text": "Most teams already have a product requirements document. QAgent reads it, and in about thirty seconds, drafts the plan.",
+    "start": 2.34,
+    "end": 9.8
+   },
+   {
+    "text": "Requirements, and journeys written as goals. Upload the clean file, choose a method, reach the forecast. Nothing says click the third button... so when a page changes, the plan doesn't break.",
+    "start": 10.35,
+    "end": 24.47
+   },
+   {
+    "text": "And every journey says what must be true afterwards. Including the numbers.",
+    "start": 25.02,
+    "end": 33.18
+   }
+  ]
+ },
+ {
+  "id": "quick",
+  "seconds": 22.84,
+  "lines": [
+   {
+    "text": "But you don't have to test everything.",
+    "start": 0.08,
+    "end": 2.64
+   },
+   {
+    "text": "Say a sales team has a prototype going in front of a client tomorrow. Write three lines about the one story you're going to show.",
+    "start": 3.19,
+    "end": 10.23
+   },
+   {
+    "text": "QAgent turns those notes into a small, focused plan, and you review every change before it's saved.",
+    "start": 10.78,
+    "end": 17.08
+   },
+   {
+    "text": "Then it tests just that flow. A few minutes, instead of a full test cycle.",
+    "start": 17.63,
+    "end": 22.44
+   }
+  ]
+ },
+ {
+  "id": "run",
+  "seconds": 25.26,
+  "lines": [
+   {
+    "text": "You choose how it thinks. Smart mode uses a fast AI for every click, and calls in a stronger one only when it's unsure. Practice mode uses no AI at all, so it's free.",
+    "start": 0.08,
+    "end": 10.69
+   },
+   {
+    "text": "Now, watch it work.",
+    "start": 11.29,
+    "end": 14.26
+   },
+   {
+    "text": "QAgent opens a real browser, reads what's on the screen, picks the control, and records what it chose, and how sure it was.",
+    "start": 14.76,
+    "end": 24.86
+   }
+  ]
+ },
+ {
+  "id": "find",
+  "seconds": 34.92,
+  "lines": [
+   {
+    "text": "And this is where it earns its keep.",
+    "start": 0.08,
+    "end": 3.07
+   },
+   {
+    "text": "In the full run, ten journeys and sixty five steps, QAgent found twelve problems. Every one comes with proof.",
+    "start": 3.67,
+    "end": 14.2
+   },
+   {
+    "text": "Upload a blank file, and the server rejects it. But the screen still shows a forecast, built on rows that never existed.",
+    "start": 14.8,
+    "end": 21.28
+   },
+   {
+    "text": "The export button silently does nothing.",
+    "start": 21.88,
+    "end": 24.39
+   },
+   {
+    "text": "And a flat growth curve is still ranked best fit.",
+    "start": 24.94,
+    "end": 28.62
+   },
+   {
+    "text": "The numbers that matter are checked by code... not by the AI's opinion.",
+    "start": 29.22,
+    "end": 34.52
+   }
+  ]
+ },
+ {
+  "id": "bugs",
+  "seconds": 21.51,
+  "lines": [
+   {
+    "text": "Every problem becomes a bug. The same problem across runs is one bug, marked fixed, once a later run stops finding it.",
+    "start": 0.08,
+    "end": 8.84
+   },
+   {
+    "text": "After a fix, Repeat Exactly replays the recorded decisions. No model calls, so it costs nothing.",
+    "start": 9.44,
+    "end": 16.2
+   },
+   {
+    "text": "And one view shows which requirements are tested, and which are failing.",
+    "start": 16.75,
+    "end": 21.11
+   }
+  ]
+ },
+ {
+  "id": "value",
+  "seconds": 19.26,
+  "lines": [
+   {
+    "text": "The full run took about ten minutes, and cost about a dollar fifty.",
+    "start": 0.08,
+    "end": 4.78
+   },
+   {
+    "text": "We estimate that's around sixty percent less manual regression effort, on every release.",
+    "start": 5.38,
+    "end": 11.3
+   },
+   {
+    "text": "And it's reusable. Any web app is just an address, a sign in, and a plan.",
+    "start": 11.85,
+    "end": 18.86
+   }
+  ]
+ },
+ {
+  "id": "next",
+  "seconds": 18.04,
+  "lines": [
+   {
+    "text": "Next, we'd like to pilot it on one or two Chryselys client apps, and hook it into the release pipeline.",
+    "start": 0.08,
+    "end": 6.96
+   },
+   {
+    "text": "And make a quick prototype check, a standard step, before every pre sales demo.",
+    "start": 7.51,
+    "end": 13.19
+   },
+   {
+    "text": "QAgent. Test it, the way your customers will use it.",
+    "start": 13.84,
+    "end": 17.94
+   }
+  ]
+ }
+]
