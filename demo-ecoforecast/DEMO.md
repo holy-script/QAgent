@@ -16,15 +16,15 @@ The demo runs against the deployed EcoForecast, https://ecosystem-forecast.verce
 4. **Results.** Open the run: each step with the elements the AI could choose (Before picture), what it chose and how sure it was, the server calls, and the problems with screenshots. Open a step (bottom panel) and zoom the screenshot.
 5. **Repeat exactly** on the finished run (replays from the recording, no model cost).
 
-## 2. What a full run produces (last verified run: 10 journeys, 65 steps, 10 minutes, about $1.50)
+## 2. What a full run produces (last full run: 10 journeys, 65 steps, 10 minutes, about $1.50)
 Real problems QAgent reports on the deployed app:
 | Journey | Result | Why |
 |---|---|---|
 | clean-forecast-end-to-end | passes | 6/6 checks, Explore percentages, ETS forecast 6,786 to about 6,889 (+1.5%) all match the PRD |
 | fix-with-ai-sample | passes | 939 to 931 rows and 6/6 re-validation |
-| short-history-blocked | passes | the 24-month check fails and Proceed is not usable |
+| short-history-blocked | **problem** | after Fix with AI the 24-month check still fails (5/6) yet Proceed to Analysis is enabled |
 | upload-rejected-files (empty.csv) and EC-1 (header only) | **problems** | the server answers 422 (reported as a high server error) but the page shows "parsed" with 144 invented rows |
-| EC-2 (no product column) / EC-3 (non-numeric trx) | reported | the user is not told which column is missing; non-numeric values are explained |
+| EC-2 (no product column) / EC-3 (non-numeric trx) | pass | not caught as problems yet: the silent missing-column case is judged acceptable, non-numeric values are explained |
 | export-forecast | **problem** | "Export Forecast (.csv)" does nothing: no download and no server request. Generating the deck works (about 7 s, flagged as a slow call) |
 | custom-curve-honesty | **problems** | with a flat 0% curve the Custom Trend Curve is still ranked first and labelled Best Fit, and Auto-select best picks it |
 Also reported every run (noise you can explain): "Step N exceeded 2000 ms" and "Page never settled" (the benchmark and the deck take several seconds).
@@ -57,3 +57,6 @@ ADMIN_USERNAME=admin ADMIN_PASSWORD='<choose one>' ./run.sh start    # backend :
 
 
 Then in QAgent add a second app with base URL `http://localhost:3010` and allowed hosts `localhost,127.0.0.1` (and run QAgent locally: the deployed one cannot reach your laptop).
+
+## Appendix B. Planted problems not (yet) covered by the plan
+Method screen hanging after the bypass, wrong ecosystem counts in the footer after the fix, the dirty file's nonsense forecast (merged spellings, 2028 dates), silent missing-column case, negatives clipped without warning. Add a journey per item if you want them in the demo.
